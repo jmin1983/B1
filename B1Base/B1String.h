@@ -60,12 +60,8 @@ namespace BnD {
         void appendf(const B1String* format, ...);
         void appendvf(const char* format, va_list args);
         uint32 find(const B1String& s, uint32 index = 0) const;
-        uint32 findFirstOf(const B1String& s, uint32 index = 0) const;
-        uint32 findFirstNotOf(const B1String& s, uint32 index = 0) const;
         uint32 findLastOf(const B1String& s, uint32 index = NPOS) const;
-        uint32 findLastNotOf(const B1String& s, uint32 index = NPOS) const;
         uint32 caseInsensitiveFind(const B1String& s) const;
-        uint32 reverseFind(const B1String& s, uint32 index = NPOS) const;
         B1String substring(uint32 index, uint32 length = NPOS) const;
         B1String copy() const;
         void resize(uint32 size);

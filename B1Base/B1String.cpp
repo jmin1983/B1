@@ -231,19 +231,7 @@ void B1String::appendvf(const char* format, va_list args)
 uint32 B1String::find(const B1String& s, uint32 index) const
 {
     std::string::size_type i = _string.find(s._string, index);
-    return (i == std::string::npos) ? B1String::NPOS : static_cast<uint32>(i);
-}
-
-uint32 B1String::findFirstOf(const B1String& s, uint32 index) const
-{
-    std::string::size_type i = _string.find_first_of(s._string, index);
-    return (i == std::string::npos) ? B1String::NPOS : static_cast<uint32>(i);
-}
-
-uint32 B1String::findFirstNotOf(const B1String& s, uint32 index) const
-{
-    std::string::size_type i = _string.find_first_not_of(s._string, index);
-    return (i == std::string::npos) ? B1String::NPOS : static_cast<uint32>(i);
+    return (std::string::npos == i) ? B1String::NPOS : static_cast<uint32>(i);
 }
 
 uint32 B1String::findLastOf(const B1String& s, uint32 index) const
@@ -252,24 +240,10 @@ uint32 B1String::findLastOf(const B1String& s, uint32 index) const
     return (i == std::string::npos) ? B1String::NPOS : static_cast<uint32>(i);
 }
 
-uint32 B1String::findLastNotOf(const B1String& s, uint32 index) const
-{
-    std::string::size_type i = _string.find_last_not_of(s._string, index);
-    return (i == std::string::npos) ? B1String::NPOS : static_cast<uint32>(i);
-}
-
 uint32 B1String::caseInsensitiveFind(const B1String& s) const
 {
     auto r = boost::ifind_first(_string, s._string);
     return (r) ? static_cast<uint32>(distance(_string.begin(), r.begin())) : NPOS;
-}
-
-uint32 B1String::reverseFind(const B1String& s, uint32 index) const
-{
-    std::string::size_type pos = (index == B1String::NPOS) ?
-        std::string::npos : static_cast<std::string::size_type>(index);
-    std::string::size_type i = _string.rfind(s._string, pos);
-    return (i == std::string::npos) ? B1String::NPOS : static_cast<uint32>(i);
 }
 
 B1String B1String::substring(uint32 index, uint32 length) const

@@ -1,0 +1,47 @@
+//
+// B1SECS2MessageS2F31Readable.cpp
+//
+// Library: B1SECS2
+// Package: S2
+// Module:  B1SECS2
+//
+// Written by jmin1983@gmail.com
+// Feel free to use, for any purpose.
+//
+
+#include "B1SECS2.h"
+#include "B1SECS2MessageS2F31Readable.h"
+
+using namespace BnD;
+
+B1SECS2MessageS2F31Readable::B1SECS2MessageS2F31Readable(bool wait, const uint8* data, uint32 dataLength, const B1SECS2DataManager* dataManager)
+    : B1SECS2MessageReadable(wait, 2, 31, "recvMessageS2F31", data, dataLength, dataManager)
+    , _dateTime(dataManager)
+{
+}
+
+B1SECS2MessageS2F31Readable::~B1SECS2MessageS2F31Readable()
+{
+}
+
+B1String B1SECS2MessageS2F31Readable::fullName()
+{
+    return "Date and Time Set Request (DTS)";
+}
+
+void B1SECS2MessageS2F31Readable::implToString(B1String* string)
+{
+    appendStringDepth0(_dateTime->toString(), string);
+}
+
+bool B1SECS2MessageS2F31Readable::implReadData()
+{
+    /* Date and Time Set Request (DTS)
+    W
+    <TIME>
+    */
+    if (readSECS2Data(&_dateTime) != true) {
+        return false;
+    }
+    return true;
+}
