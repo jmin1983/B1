@@ -129,4 +129,9 @@ namespace BnD {
 
 }   //  !BnD
 
+template <>
+struct std::hash<BnD::B1String> {
+    size_t operator()(const BnD::B1String& s) const { return std::hash<std::string>()(s.to_string()); }
+};
+
 #endif  // !_B1BASE_STRING_H
