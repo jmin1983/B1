@@ -26,7 +26,7 @@ namespace BnD {
     class B1IOContext {
     public:
         B1IOContext(uint8 threadCountHint);
-        virtual ~B1IOContext();
+        ~B1IOContext();
     private:
         boost::asio::io_context* _context;
     public:

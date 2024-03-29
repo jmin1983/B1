@@ -2,7 +2,7 @@
 // B1HttpServer.h
 //
 // Library: B1Http
-// Package: B1Http
+// Package: Http
 // Module:  B1Http
 //
 // Written by jmin1983@gmail.com

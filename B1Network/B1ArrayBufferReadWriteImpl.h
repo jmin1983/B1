@@ -27,10 +27,12 @@ namespace BnD {
 
     class B1ArrayBufferReadWriteImpl : public B1BaseReadWriteImpl {
     public:
-        B1ArrayBufferReadWriteImpl(B1BaseSocket* baseSocket, B1ArrayBufferReadWriteImplListener* listener, size_t recvBufferSize);
+        B1ArrayBufferReadWriteImpl(B1ArrayBufferReadWriteImplListener* listener, size_t recvBufferSize);
         virtual ~B1ArrayBufferReadWriteImpl();
     protected:
         std::vector<uint8> _recvBuffer;
+    private:
+        class B1ASIOSocketImpl* asioSocketImpl() const;
     protected:
         bool implRead() final;
         bool implOnReadComplete(size_t receivedBytes) final;    //  return false if there are no more data to read.

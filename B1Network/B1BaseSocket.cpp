@@ -47,7 +47,6 @@ void B1BaseSocket::close()
         _impl->close();
     }
     else {
-        assert(false);
         if (_asioSocket) {
             _asioSocket->close();
         }
@@ -79,5 +78,15 @@ void B1BaseSocket::setImpl(B1BaseSocketImpl* impl)
     _impl = impl;
     if (_impl) {
         _impl->updateSocket(&_asioSocket);
+    }
+}
+
+void B1BaseSocket::resetImpl()
+{
+    if (_impl) {
+        if (auto asioSocket = _impl->rollbackSocket()) {
+            _asioSocket = asioSocket;
+        }
+        _impl = NULL;
     }
 }

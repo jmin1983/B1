@@ -20,6 +20,12 @@ void B1ASIOSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::so
     _asioSocket = pAsioSocket->get();
 }
 
+auto B1ASIOSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket>
+{
+    _asioSocket = NULL;
+    return NULL;
+}
+
 void B1ASIOSocketImpl::implClose()
 {
     if (_asioSocket && _asioSocket->is_open()) {
@@ -33,33 +39,36 @@ void B1ASIOSocketImpl::implClose()
 
 B1String B1ASIOSocketImpl::implPeerAddress() const
 {
-    try {
-        auto endPoint = _asioSocket->remote_endpoint();
-        auto address = endPoint.address();
-        return address.to_string();
-    }
-    catch (...) {
+    if (_asioSocket) {
+        try {
+            return _asioSocket->remote_endpoint().address().to_string();
+        }
+        catch (...) {
+        }
     }
     return "";
 }
 
 uint16 B1ASIOSocketImpl::implPeerPort() const
 {
-    try {
-        auto endPoint = _asioSocket->remote_endpoint();
-        return endPoint.port();
-    }
-    catch (...) {
+    if (_asioSocket) {
+        try {
+            return _asioSocket->remote_endpoint().port();
+        }
+        catch (...) {
+        }
     }
     return 0;
 }
 
 uint16 B1ASIOSocketImpl::implLocalPort() const
 {
-    try {
-        return _asioSocket->local_endpoint().port();
-    }
-    catch (...) {
+    if (_asioSocket) {
+        try {
+            return _asioSocket->local_endpoint().port();
+        }
+        catch (...) {
+        }
     }
     return 0;
 }
@@ -72,4 +81,9 @@ bool B1ASIOSocketImpl::implIsOpen() const
     catch (...) {
     }
     return false;
+}
+
+bool B1ASIOSocketImpl::implIsClosed() const
+{
+    return _asioSocket ? _asioSocket->is_open() != true : true;
 }

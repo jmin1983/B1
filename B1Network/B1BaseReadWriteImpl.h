@@ -23,7 +23,7 @@ namespace boost {
 };
 
 namespace BnD {
-    class B1BaseSocket;
+    class B1BaseSocketImpl;
     class B1BaseReadWriteImplListener {
     public:
         virtual void onReadFailed(int32 reason) {}
@@ -32,22 +32,31 @@ namespace BnD {
 
     class B1BaseReadWriteImpl {
     public:
-        B1BaseReadWriteImpl(B1BaseSocket* baseSocket, B1BaseReadWriteImplListener* listener);
+        B1BaseReadWriteImpl(B1BaseReadWriteImplListener* listener);
         virtual ~B1BaseReadWriteImpl();
     private:
-        B1BaseSocket* _baseSocket;
+        std::shared_ptr<B1BaseSocketImpl> _baseSocketImpl;
         B1BaseReadWriteImplListener* _listener;
     protected:
+        virtual B1BaseSocketImpl* createBaseSocketImpl();
         virtual bool implRead() = 0;
         virtual bool implOnReadComplete(size_t receivedBytes) = 0;  //  return false if there are no more data to read.
         virtual void implOnWriteComplete(size_t transferredBytes) {}
     protected:
-        B1BaseSocket* baseSocket() const { return _baseSocket; }
         B1BaseReadWriteImplListener* listener() const { return _listener; }
         void readComplete(const boost::system::error_code& error, size_t receivedBytes);
         void writeComplete(const boost::system::error_code& error, size_t transferredBytes);
     public:
+        bool initialize();
+        void finalize();
         bool read();
+        void close();
+        B1String peerAddress() const;
+        uint16 peerPort() const;
+        uint16 localPort() const;
+        bool isOpen() const;
+        bool isClosed() const;
+        B1BaseSocketImpl* baseSocketImpl() const { return _baseSocketImpl.get(); }
     };
 }   //  !BnD
 

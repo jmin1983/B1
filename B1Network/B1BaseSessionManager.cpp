@@ -41,14 +41,15 @@ void B1BaseSessionManager::implLooperFunc()
         if (sessionsPair.second._session->isConnected()) {
             sessionsPair.second._session->processConnected();
         }
+        else if (sessionsPair.second._session->isDisconnecting()) {
+            sessionsPair.second._session->setDisconnectedIfSessionClosed();
+        }
         else if (sessionsPair.second._session->isDisconnected()) {
             sessionsPair.second._session->processDisconnected();
         }
     }
     for (const auto& removeSession : removeSessions) {
         int32 handleID = removeSession._handleID;
-        removeSession._baseSocket->close();
-        removeSession._session->finalize();
         onSessionRemoved(handleID);
     }
     B1Thread::sleep(_workingInerval);
@@ -94,14 +95,19 @@ bool B1BaseSessionManager::modifySession(B1BaseSocket* baseSocket, std::shared_p
         assert(false);
         return false;
     }
-    itr->second._session->finalize();
+    session->setSessionHandleID(itr->second._session->sessionHandleID());
     itr->second._session = session;
+    B1LOG("session modified: sessionHandleID[%d]", itr->second._session->sessionHandleID());
     onSessionModified(itr->second._handleID, session);
     return true;
 }
 
 void B1BaseSessionManager::reserveRemoveSession(B1BaseSocket* baseSocket)
 {
+    if (isAlive() != true) {
+        B1LOG("reserveRemoveSession requested. but manager is not alived");
+        return;
+    }
     B1AutoLock al(_sessionsLock);
     auto itr = _sessions.find(baseSocket);
     if (itr == _sessions.end()) {
@@ -130,18 +136,22 @@ void B1BaseSessionManager::shutdown()
     join();
     disconnectAllSessions();
     bool timedout = true;
-    const int32 sleepTime = 100;    //  millisecond
-    const int32 trys = 10 * 60 * 2; //  2min
+    const int32 sleepTime = 1000;   //  millisecond.
+    const int32 trys = 60;          //  1 min.
     for (int32 i = 0; i < trys; ++i) {
         {
             B1AutoLock al(_sessionsLock);
             for (auto itr = _sessions.cbegin(); itr != _sessions.end();) {
-                if (itr->second._session->isDisconnected()) {
+                if (itr->second._session->isDisconnecting()) {
+                    itr->second._session->setDisconnectedIfSessionClosed();
+                }
+                else if (itr->second._session->isDisconnected()) {
                     _reservedRemoveSessions.push_back(itr->second);
                     _handleIDMap.erase(itr->second._handleID);
                     itr = _sessions.erase(itr);
                 }
                 else {
+                    B1LOG("waiting disconnection: sessionHandleID[%d]", itr->second._session->sessionHandleID());
                     ++itr;
                 }
             }
@@ -157,9 +167,6 @@ void B1BaseSessionManager::shutdown()
         assert(false);
         _handleIDMap.clear();
         _sessions.clear();
-    }
-    for (const auto& removeSession : _reservedRemoveSessions) {
-        removeSession._session->finalize();
     }
     onShuttingDown();
     _reservedRemoveSessions.clear();

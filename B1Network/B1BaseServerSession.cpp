@@ -28,6 +28,8 @@ B1BaseServerSession::~B1BaseServerSession()
 
 void B1BaseServerSession::implOnDisconnected(int32 reason)
 {
+    B1LOG("server session disconnected: sessionHandleID[%d], peerAddress[%s], localPort[%d], reason[%d]", _sessionHandleID, 
+        serverSocket() ? serverSocket()->peerAddress().cString() : "", serverSocket() ? serverSocket()->localPort() : 0, reason);
     if (_listener) {
         _listener->onServerSessionDisconnected(serverSocket(), reason);
     }
@@ -45,7 +47,7 @@ bool B1BaseServerSession::beginRead()
         assert(false);
         B1LOG("begin read failed -> disconnect: peerAddress[%s], localPort:[%d]", baseSocket()->peerAddress().cString(), baseSocket()->localPort());
         disconnect();
-        setSessionStatusDisconnected();
+        setSessionStatusDisconnecting();
         return false;
     }
     return true;

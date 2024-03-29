@@ -2,7 +2,7 @@
 // B1WebSocketServerSession.h
 //
 // Library: B1Http
-// Package: B1Http
+// Package: Http
 // Module:  B1Http
 //
 // Written by jmin1983@gmail.com
@@ -27,7 +27,6 @@ namespace boost {
 
 namespace BnD {
     class B1HttpMessage;
-    class B1WebSocketImpl;
     class B1WebSocketServerSession : protected B1WebSocketReadWriteImplListener
                                    , public B1BaseServerSession {
     public:
@@ -35,19 +34,18 @@ namespace BnD {
         virtual ~B1WebSocketServerSession();
     protected:
         virtual void onWebSocketAccepted() {}
+        virtual void implAcceptWebSocket(const B1HttpMessage& initialMessage);
     protected:  //  B1WebSocketReadWriteImplListener
         void onReadFailed(int32 reason) final;
         void onWriteFailed(int32 reason) final;
     protected:  //  B1BaseServerSession
-        B1BaseSocketImpl* createBaseSocketImpl() final;
-        B1BaseReadWriteImpl* createReadWriteImpl(B1BaseSocket* baseSocket) final;
+        virtual B1BaseReadWriteImpl* createReadWriteImpl() override;
     private:
-        void acceptComplete(const boost::system::error_code& error);
-    protected:
         B1WebSocketReadWriteImpl* readWriteImpl() const;
-        B1WebSocketImpl* webSocketImpl() const;
+    protected:
         void writeBinary(std::vector<uint8>&& data) const;
         void writeText(B1String&& text) const;
+        void acceptComplete(const boost::system::error_code& error);
     public:
         void acceptWebSocket(const B1HttpMessage& initialMessage);
     };

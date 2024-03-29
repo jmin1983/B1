@@ -13,12 +13,14 @@
 #include "B1ArrayBufferReadWriteImpl.h"
 #include "B1BaseSocket.h"
 
+#include <B1Network/B1BaseSocketImpl.h>
+
 #include <boost/bind/bind.hpp>
 
 using namespace BnD;
 
-B1ArrayBufferReadWriteImpl::B1ArrayBufferReadWriteImpl(B1BaseSocket* baseSocket, B1ArrayBufferReadWriteImplListener* listener, size_t recvBufferSize)
-    : B1BaseReadWriteImpl(baseSocket, listener)
+B1ArrayBufferReadWriteImpl::B1ArrayBufferReadWriteImpl(B1ArrayBufferReadWriteImplListener* listener, size_t recvBufferSize)
+    : B1BaseReadWriteImpl(listener)
     , _recvBuffer(recvBufferSize, 0)
 {
 }
@@ -27,11 +29,16 @@ B1ArrayBufferReadWriteImpl::~B1ArrayBufferReadWriteImpl()
 {
 }
 
+auto B1ArrayBufferReadWriteImpl::asioSocketImpl() const -> B1ASIOSocketImpl*
+{
+    return static_cast<B1ASIOSocketImpl*>(baseSocketImpl());
+}
+
 bool B1ArrayBufferReadWriteImpl::implRead()
 {
-    baseSocket()->asioSocket()->async_read_some(boost::asio::buffer(_recvBuffer),
-                                                boost::bind(&B1ArrayBufferReadWriteImpl::readComplete, this,
-                                                            boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    asioSocketImpl()->asioSocket()->async_read_some(boost::asio::buffer(_recvBuffer),
+                                                    boost::bind(&B1ArrayBufferReadWriteImpl::readComplete, this,
+                                                                boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
     return true;
 }
 
@@ -50,14 +57,14 @@ void B1ArrayBufferReadWriteImpl::implOnWriteComplete(size_t transferredBytes)
     }
 }
 
-B1ArrayBufferReadWriteImplListener* B1ArrayBufferReadWriteImpl::listener() const
+auto B1ArrayBufferReadWriteImpl::listener() const -> B1ArrayBufferReadWriteImplListener*
 {
     return static_cast<B1ArrayBufferReadWriteImplListener*>(B1BaseReadWriteImpl::listener());
 }
 
 void B1ArrayBufferReadWriteImpl::writeData(const uint8* data, size_t size)
 {
-    boost::asio::async_write(*baseSocket()->asioSocket(), boost::asio::buffer(data, size),
+    boost::asio::async_write(*asioSocketImpl()->asioSocket(), boost::asio::buffer(data, size),
                              boost::bind(&B1ArrayBufferReadWriteImpl::writeComplete, this,
                                          boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }

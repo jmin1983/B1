@@ -12,6 +12,9 @@
 #include "B1DBClient.h"
 #include "B1MariaDBHandle.h"
 
+#include <B1Network/B1IOContext.h>
+#include <B1Network/B1SSLContext.h>
+
 using namespace BnD;
 
 bool B1MariaDBHandle::initialize(bool useSSL)
@@ -19,13 +22,13 @@ bool B1MariaDBHandle::initialize(bool useSSL)
     if (_context || _connection || _sslConnection) {
         return false;
     }
-    _context.reset(new boost::asio::io_context());
+    _context.reset(new B1IOContext(1));
     if (useSSL) {
-        _sslContext.reset(new boost::asio::ssl::context(boost::asio::ssl::context::tls_client));
-        _sslConnection.reset(new boost::mysql::tcp_ssl_connection(_context->get_executor(), *_sslContext));
+        _sslContext.reset(new B1SSLContext(false));
+        _sslConnection.reset(new boost::mysql::tcp_ssl_connection(_context->nativeContext()->get_executor(), *_sslContext->nativeContext()));
     }
     else {
-        _connection.reset(new boost::mysql::tcp_connection(*_context));
+        _connection.reset(new boost::mysql::tcp_connection(*_context->nativeContext()));
     }
     return true;
 }

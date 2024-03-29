@@ -31,7 +31,7 @@ namespace BnD {
         virtual void onSessionModified(int32 handleID, std::shared_ptr<B1BaseSession> session) override;
         virtual void onSessionRemoved(int32 handleID) override;
     public:
-        std::map<int32, std::shared_ptr<B1BaseSession> > webSocketSessions() const;
+        auto webSocketSessions() const -> std::map<int32, std::shared_ptr<B1BaseSession> >;
     };
 }   //  !BnD
 

@@ -38,12 +38,15 @@ void B1BaseServer::onAcceptComplete(std::shared_ptr<B1ServerSocket> serverSocket
     }
     int32 handleID = _sessionManager->addSession(serverSocket, session);
     session->setSessionHandleID(handleID);
-    if (session->beginRead() != true) {
-        return;
-    }
     if (isAcceptableSession(serverSocket.get()) != true) {
         B1LOG("not acceptable session -> disconnect: peerAddress[%s], localPort:[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort());
         disconnect(serverSocket.get());
+        return;
+    }
+    if (session->beginRead() != true) {
+        B1LOG("unable to beginRead -> disconnect: peerAddress[%s], localPort:[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort());
+        disconnect(serverSocket.get());
+        return;
     }
 }
 
@@ -54,8 +57,6 @@ void B1BaseServer::onAcceptFailed(std::shared_ptr<B1ServerSocket> serverSocket, 
 
 void B1BaseServer::onServerSessionDisconnected(B1ServerSocket* serverSocket, int32 reason)
 {
-    B1LOG("server session disconnected: peerAddress[%s], localPort[%d], reason[%d]",
-          serverSocket ? serverSocket->peerAddress().cString() : "", serverSocket ? serverSocket->localPort() : 0, reason);
     _sessionManager->reserveRemoveSession(serverSocket);
 }
 

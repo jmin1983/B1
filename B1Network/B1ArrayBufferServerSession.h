@@ -33,7 +33,7 @@ namespace BnD {
         void onReadFailed(int32 reason) final;
         void onWriteFailed(int32 reason) final;
     protected:  //  B1BaseServerSession
-        B1BaseReadWriteImpl* createReadWriteImpl(B1BaseSocket* baseSocket) final;
+        B1BaseReadWriteImpl* createReadWriteImpl() final;
     protected:
         B1ArrayBufferReadWriteImpl* readWriteImpl() const;
         void writeData(const uint8* data, size_t size) const;

@@ -14,6 +14,8 @@
 #include "B1MariaDBHandle.h"
 #include "B1MariaDBResult.h"
 
+#include <B1Network/B1IOContext.h>
+
 using namespace BnD;
 
 B1MariaDBClient::B1MariaDBClient()
@@ -36,7 +38,7 @@ bool B1MariaDBClient::initialize(const B1String& address, uint16 port, const B1S
         return false;
     }
     try {
-        boost::asio::ip::tcp::resolver resolver(_handle->context()->get_executor());
+        boost::asio::ip::tcp::resolver resolver(_handle->context()->nativeContext()->get_executor());
         char portString[10] = {0};
         sprintf(portString, "%d", port);
         auto endpoints = resolver.resolve(address.cString(), portString);

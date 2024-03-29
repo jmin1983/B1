@@ -2,7 +2,7 @@
 // B1HttpServerSession.cpp
 //
 // Library: B1Http
-// Package: B1Http
+// Package: Http
 // Module:  B1Http
 //
 // Written by jmin1983@gmail.com
@@ -53,20 +53,20 @@ void B1HttpServerSession::onWriteComplete(bool keepAlive, size_t dataSize)
 
 void B1HttpServerSession::onReadFailed(int32 reason)
 {
-    setSessionStatusDisconnected(reason);
+    setSessionStatusDisconnecting(reason);
 }
 
 void B1HttpServerSession::onWriteFailed(int32 reason)
 {
-    setSessionStatusDisconnected(reason);
+    setSessionStatusDisconnecting(reason);
 }
 
-B1BaseReadWriteImpl* B1HttpServerSession::createReadWriteImpl(B1BaseSocket* baseSocket)
+auto B1HttpServerSession::createReadWriteImpl() -> B1BaseReadWriteImpl*
 {
-    return new B1HttpReadWriteImpl(baseSocket, this);
+    return new B1HttpReadWriteImpl(this);
 }
 
-B1HttpReadWriteImpl* B1HttpServerSession::readWriteImpl() const
+auto B1HttpServerSession::readWriteImpl() const -> B1HttpReadWriteImpl*
 {
     return static_cast<B1HttpReadWriteImpl*>(B1BaseServerSession::readWriteImpl());
 }

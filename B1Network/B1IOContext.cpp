@@ -11,8 +11,6 @@
 #include "B1Network.h"
 #include "B1IOContext.h"
 
-#include <B1Base/B1Thread.h>
-
 using namespace BnD;
 
 B1IOContext::B1IOContext(uint8 threadCountHint)

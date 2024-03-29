@@ -35,6 +35,7 @@ set_target_properties(B1Network
 target_include_directories(B1Network
 	PRIVATE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/include>
 )
 
 if(WIN32)

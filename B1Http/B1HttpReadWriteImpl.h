@@ -2,7 +2,7 @@
 // B1HttpReadWriteImpl.h
 //
 // Library: B1Http
-// Package: B1Http
+// Package: Http
 // Module:  B1Http
 //
 // Written by jmin1983@gmail.com
@@ -35,18 +35,21 @@ namespace BnD {
     public:
         virtual void onReadComplete(const B1HttpMessage& httpMessage) {}
         virtual void onWriteComplete(bool keepAlive, size_t dataSize) {}
-        virtual void onRequestWebSocketUpgrade() {}
     };
 
     class B1HttpReadWriteImpl : public B1BaseReadWriteImpl {
     public:
-        B1HttpReadWriteImpl(B1BaseSocket* baseSocket, B1HttpReadWriteImplListener* listener);
+        B1HttpReadWriteImpl(B1HttpReadWriteImplListener* listener);
     protected:
         std::shared_ptr<B1HttpMessage> _httpMessage;
     private:
+        class B1ASIOSocketImpl* asioSocketImpl() const;
+    protected:
         void writeResponseComplete(bool keepAlive, const boost::system::error_code& error, size_t transferredBytes);
     protected:
-        bool implRead() final;
+        virtual void implWriteResponse(boost::beast::http::message_generator&& response);
+    protected:
+        virtual bool implRead() override;
         bool implOnReadComplete(size_t receivedBytes) final;    //  return false if there are no more data to read.
     protected:
         B1HttpReadWriteImplListener* listener() const;

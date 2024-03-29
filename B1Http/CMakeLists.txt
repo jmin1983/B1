@@ -15,6 +15,10 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
+if(MSVC)
+	add_compile_options("$<$<CONFIG:DEBUG>:/bigobj>")
+endif()
+
 add_library(B1Http ${SRCS})
 if(MSVC)
 	target_precompile_headers(B1Http
@@ -35,6 +39,7 @@ set_target_properties(B1Http
 target_include_directories(B1Http
 	PRIVATE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/include>
 )
 
 if(WIN32)

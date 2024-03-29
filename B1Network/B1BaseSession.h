@@ -32,18 +32,21 @@ namespace BnD {
             STATUS_DISCONNECTED = 0,
             STATUS_CONNECTING,
             STATUS_CONNECTED,
+            STATUS_DISCONNECTING,
         };
     private:
         bool _firstConnectedProcess;
         B1BaseSocket* _baseSocket;
+        int32 _disconnectingReason;
+        STATUS _lastConnectionStatus;
         STATUS _connectionStatus;
     protected:
         int32 _sessionHandleID;
-        std::shared_ptr<B1BaseSocketImpl> _baseSocketImpl;
         std::shared_ptr<B1BaseReadWriteImpl> _readWriteImpl;
+    private:
+        void setSessionStatusDisconnected();
     protected:
-        virtual B1BaseSocketImpl* createBaseSocketImpl();
-        virtual B1BaseReadWriteImpl* createReadWriteImpl(B1BaseSocket* baseSocket) = 0;
+        virtual B1BaseReadWriteImpl* createReadWriteImpl() = 0;
         virtual void implOnConnect() {}                 //  called from network thread(DO NOT BLOCK). Connect not completed yet(do not call send, etc, ...).
         virtual void implOnDisconnected(int32 reason) {}//  called from network thread(DO NOT BLOCK). Disconnect already completed(do not call send, etc, ...).
         virtual void implDisconnect();
@@ -51,15 +54,16 @@ namespace BnD {
         virtual void implProcessConnected(bool firstConnectedProcess) {}    //  called from worker thread(if blocked, all sessions are also affected).
         virtual void implProcessDisconnected() {}                           //  called from worker thread(if blocked, all sessions are also affected).
     protected:
-        B1BaseSocket* baseSocket() const { return _baseSocket; }
-        B1BaseReadWriteImpl* readWriteImpl() const { return _readWriteImpl.get(); }
         void setSessionStatusConnecting();
         void setSessionStatusConnected();
-        void setSessionStatusDisconnected(int32 reason = 0);
+        void setSessionStatusDisconnecting(int32 reason = 0);
         bool beginRead();
+        B1BaseSocket* baseSocket() const { return _baseSocket; }    //  todo: remove this.
+        B1BaseReadWriteImpl* readWriteImpl() const { return _readWriteImpl.get(); }
     public:
         bool initialize();
         void finalize();
+        bool isDisconnecting() const;
         bool isDisconnected() const;
         bool isConnecting() const;
         bool isConnected() const;
@@ -73,6 +77,7 @@ namespace BnD {
         uint16 peerPort() const;
         uint16 localPort() const;
         int32 currentConnectionStatus() const;
+        void setDisconnectedIfSessionClosed();
     };
 }   //  !BnD
 

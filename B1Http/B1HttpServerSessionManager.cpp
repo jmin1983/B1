@@ -40,7 +40,7 @@ void B1HttpServerSessionManager::onSessionRemoved(int32 handleID)
     _webSocketSessions.erase(handleID);
 }
 
-std::map<int32, std::shared_ptr<B1BaseSession> > B1HttpServerSessionManager::webSocketSessions() const
+auto B1HttpServerSessionManager::webSocketSessions() const -> std::map<int32, std::shared_ptr<B1BaseSession> >
 {
     B1AutoLock al(_webSocketSessionsLock);
     return _webSocketSessions;

@@ -2,7 +2,7 @@
 // B1HttpServer.cpp
 //
 // Library: B1Http
-// Package: B1Http
+// Package: Http
 // Module:  B1Http
 //
 // Written by jmin1983@gmail.com
@@ -11,6 +11,7 @@
 
 #include "B1Http.h"
 #include "B1HttpServer.h"
+#include "B1HttpMessage.h"
 #include "B1HttpServerSession.h"
 #include "B1HttpServerSessionManager.h"
 #include "B1WebSocketServerSession.h"
@@ -34,6 +35,12 @@ B1WebSocketServerSession* B1HttpServer::createWebSocketServerSession(B1ServerSoc
 
 void B1HttpServer::onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSocket, const B1HttpMessage& httpMessage)
 {
+    auto baseSocket = B1NetworkTypeConverter::toBaseSocket(serverSocket);
+    auto baseSession = sessionManager()->getBaseSession(baseSocket);
+
+    auto httpMessageMoved = std::move(httpMessage);
+    baseSession->finalize();
+
     std::shared_ptr<B1WebSocketServerSession> session(createWebSocketServerSession(serverSocket));
     if (session->initialize() != true) {
         B1LOG("initialize session failed -> disconnect: peerAddress[%s], localPort:[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort());
@@ -41,7 +48,7 @@ void B1HttpServer::onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSoc
         assert(false);
         return;
     }
-    session->acceptWebSocket(httpMessage);
+    session->acceptWebSocket(httpMessageMoved);
     if (sessionManager()->modifySession(B1NetworkTypeConverter::toBaseSocket(serverSocket), session) != true) {
         B1LOG("modify session failed -> disconnect: peerAddress[%s], localPort:[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort());
         disconnect(serverSocket);

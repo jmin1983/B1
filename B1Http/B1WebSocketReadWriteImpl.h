@@ -2,7 +2,7 @@
 // B1WebSocketReadWriteImpl.h
 //
 // Library: B1Http
-// Package: B1Http
+// Package: Http
 // Module:  B1Http
 //
 // Written by jmin1983@gmail.com
@@ -29,20 +29,19 @@ namespace boost {
 };
 
 namespace BnD {
-    class B1WebSocketImpl;
     class B1WebSocketMessage;
     class B1WebSocketReadWriteImplListener : public B1BaseReadWriteImplListener {
     public:
-        virtual bool onWebSocketReadComplete(const B1String& text) { return true; }             //  return false if there are no more data to read.
-        virtual bool onWebSocketReadComplete(const std::vector<uint8>& data) { return true; }   //  return false if there are no more data to read.
+        virtual bool onWebSocketReadComplete(B1String&& text) { return true; }              //  return false if there are no more data to read.
+        virtual bool onWebSocketReadComplete(std::vector<uint8>&& data) { return true; }    //  return false if there are no more data to read.
         virtual void onWebSocketWriteComplete(size_t dataSize) {}
     };
 
     class B1WebSocketReadWriteImpl : public B1BaseReadWriteImpl {
     public:
-        B1WebSocketReadWriteImpl(B1BaseSocket* baseSocket, B1WebSocketReadWriteImplListener* listener);
+        B1WebSocketReadWriteImpl(B1WebSocketReadWriteImplListener* listener);
         virtual ~B1WebSocketReadWriteImpl();
-    private:
+    protected:
         class Writer : public B1Looper {
         public:
             Writer() : _owner(NULL), _readyToWrite(true) {}
@@ -61,22 +60,24 @@ namespace BnD {
             void writeComplete() { _readyToWrite = true; }
         } _writer;
     protected:
-        B1WebSocketImpl* _webSocketImpl;
         std::shared_ptr<B1WebSocketMessage> _webSocketMessage;
-    private:
-        void writeBinaryComplete(std::vector<uint8>* data, const boost::system::error_code& error, size_t transferredBytes);
-        void writeTextComplete(std::string* text, const boost::system::error_code& error, size_t transferredBytes);
     protected:
-        bool implRead() final;
-        bool implOnReadComplete(size_t receivedBytes) final;    //  return false if there are no more data to read.
+        virtual void implWriteBinary(std::vector<uint8>&& data);
+        virtual void implWriteText(B1String&& data);
+    protected:
+        virtual B1BaseSocketImpl* createBaseSocketImpl() override;
+        virtual bool implRead() override;
+        virtual bool implOnReadComplete(size_t receivedBytes) override; //  return false if there are no more data to read.
     protected:
         B1WebSocketReadWriteImplListener* listener() const;
-        void writeBinary(std::vector<uint8>* data);
-        void writeText(const B1String& text);
+        void writeBinary(std::vector<uint8>&& data);
+        void writeText(B1String&& text);
+        void writeBinaryComplete(std::vector<uint8>* data, const boost::system::error_code& error, size_t transferredBytes);
+        void writeTextComplete(std::string* text, const boost::system::error_code& error, size_t transferredBytes);
     public:
-        void setWebSocketImpl(B1WebSocketImpl* webSocketImpl);
         void addWriteBinary(std::vector<uint8>&& data);
         void addWriteText(B1String&& text);
+        class B1WebSocketImpl* webSocketImpl() const;
     };
 }   //  !BnD
 

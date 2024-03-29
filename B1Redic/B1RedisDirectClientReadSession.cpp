@@ -47,6 +47,9 @@ void B1RedisDirectClientReadSession::implOnRecvRedisSimpleStrings(const B1String
         return;
     }
     if (_recvedBuffer.empty() != true) {
+        if (string.caseInsensitiveCompare("pong")) {
+            return;
+        }
         B1LOG("_recvedBuffer is not empty, but recved simple_string:[%s]", string.cString());
         assert(false);
         return;

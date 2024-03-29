@@ -17,25 +17,28 @@
 #endif
 
 namespace BnD {
-    class B1IOContext;
     class B1BaseSocketImpl {
     public:
         B1BaseSocketImpl() {}
         virtual ~B1BaseSocketImpl() {}
     protected:
         virtual void implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) = 0;
+        virtual auto implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> = 0;
         virtual void implClose() = 0;
         virtual B1String implPeerAddress() const = 0;
         virtual uint16 implPeerPort() const = 0;
         virtual uint16 implLocalPort() const = 0;
         virtual bool implIsOpen() const = 0;
+        virtual bool implIsClosed() const = 0;
     public:
         void updateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) { implUpdateSocket(pAsioSocket); }
+        auto rollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> { return implRollbackSocket(); }
         void close() { implClose(); }
         B1String peerAddress() const { return implPeerAddress(); }
         uint16 peerPort() const { return implPeerPort(); }
         uint16 localPort() const { return implLocalPort(); }
         bool isOpen() const { return implIsOpen(); }
+        bool isClosed() const { return implIsClosed(); }
     };
 
     class B1ASIOSocketImpl : public B1BaseSocketImpl {
@@ -46,11 +49,15 @@ namespace BnD {
         boost::asio::ip::tcp::socket* _asioSocket;
     protected:
         void implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) final;
+        auto implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> final;
         void implClose() final;
         B1String implPeerAddress() const final;
         uint16 implPeerPort() const final;
         uint16 implLocalPort() const final;
         bool implIsOpen() const final;
+        bool implIsClosed() const final;
+    public:
+        boost::asio::ip::tcp::socket* asioSocket() const { return _asioSocket; }
     };
 }   //  !BnD
 

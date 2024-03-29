@@ -38,7 +38,7 @@ void B1BaseClientSession::onConnectComplete()
         assert(false);
         B1LOG("begin read failed -> disconnect");
         disconnect();
-        setSessionStatusDisconnected();
+        setSessionStatusDisconnecting();
     }
 }
 
@@ -47,7 +47,7 @@ void B1BaseClientSession::onConnectFailed(int32 reason)
     if (_listener) {
         _listener->onClientSessionConnectResult(clientSocket(), false, reason);
     }
-    setSessionStatusDisconnected(reason);
+    setSessionStatusDisconnecting(reason);
 }
 
 void B1BaseClientSession::implOnConnectionStatusChanged(STATUS previousStatus, STATUS newStatus)
@@ -80,7 +80,7 @@ void B1BaseClientSession::reconnect()
 {
     setSessionStatusConnecting();
     if (clientSocket()->reconnect() != true) {
-        setSessionStatusDisconnected();
+        setSessionStatusDisconnecting();
     }
 }
 
@@ -89,7 +89,7 @@ bool B1BaseClientSession::connect(B1String&& address, uint16 port)
     _closeConnection = false;
     setSessionStatusConnecting();
     if (clientSocket()->connect(std::move(address), port, this) != true) {
-        setSessionStatusDisconnected();
+        setSessionStatusDisconnecting();
         return false;
     }
     return true;

@@ -26,17 +26,17 @@ B1ArrayBufferServerSession::~B1ArrayBufferServerSession()
 
 void B1ArrayBufferServerSession::onReadFailed(int32 reason)
 {
-    setSessionStatusDisconnected(reason);
+    setSessionStatusDisconnecting(reason);
 }
 
 void B1ArrayBufferServerSession::onWriteFailed(int32 reason)
 {
-    setSessionStatusDisconnected(reason);
+    setSessionStatusDisconnecting(reason);
 }
 
-B1BaseReadWriteImpl* B1ArrayBufferServerSession::createReadWriteImpl(B1BaseSocket* baseSocket)
+B1BaseReadWriteImpl* B1ArrayBufferServerSession::createReadWriteImpl()
 {
-    return new B1ArrayBufferReadWriteImpl(baseSocket, this, CONSTS_BUFFER_SIZE);
+    return new B1ArrayBufferReadWriteImpl(this, CONSTS_BUFFER_SIZE);
 }
 
 B1ArrayBufferReadWriteImpl* B1ArrayBufferServerSession::readWriteImpl() const

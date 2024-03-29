@@ -2,7 +2,7 @@
 // B1HttpServerSession.h
 //
 // Library: B1Http
-// Package: B1Http
+// Package: Http
 // Module:  B1Http
 //
 // Written by jmin1983@gmail.com
@@ -31,16 +31,16 @@ namespace BnD {
         virtual ~B1HttpServerSession();
     private:
         B1HttpServerSessionListener* _httpServerSessionListener;
-        const B1String& _contentsRootPath;
     protected:
+        const B1String& _contentsRootPath;
         std::shared_ptr<B1HttpResponseGenerator> _responseGenerator;
     protected:  //  B1HttpReadWriteImplListener
-        void onReadComplete(const B1HttpMessage& httpMessage) final;
+        virtual void onReadComplete(const B1HttpMessage& httpMessage) override;
         void onWriteComplete(bool keepAlive, size_t dataSize) final;
         void onReadFailed(int32 reason) final;
         void onWriteFailed(int32 reason) final;
     protected:  //  B1BaseServerSession
-        B1BaseReadWriteImpl* createReadWriteImpl(B1BaseSocket* baseSocket) final;
+        virtual B1BaseReadWriteImpl* createReadWriteImpl() override;
     protected:
         B1HttpReadWriteImpl* readWriteImpl() const;
     };

@@ -19,10 +19,11 @@ using namespace BnD;
 
 B1BaseSession::B1BaseSession(B1BaseSocket* baseSocket)
     : _firstConnectedProcess(false)
-    , _baseSocket(baseSocket)
+    , _baseSocket(baseSocket)   //  can be NULL.
+    , _disconnectingReason(0)
+    , _lastConnectionStatus(STATUS_NONE)
     , _connectionStatus(STATUS_NONE)
     , _sessionHandleID(-1)
-    , _baseSocketImpl()
     , _readWriteImpl()
 {
 }
@@ -36,19 +37,31 @@ B1BaseSession::B1BaseSession(const B1BaseSession& baseSession, bool firstConnect
     , _baseSocket(baseSession._baseSocket)
     , _connectionStatus(baseSession._connectionStatus)
     , _sessionHandleID(-1)
-    , _baseSocketImpl()
     , _readWriteImpl()
 {
 }
 
-B1BaseSocketImpl* B1BaseSession::createBaseSocketImpl()
+void B1BaseSession::setSessionStatusDisconnected()
 {
-    return new B1ASIOSocketImpl();
+    const auto previousStatus = _connectionStatus;
+    const auto newStatus = STATUS_DISCONNECTED;
+
+    B1LOG("set connection_status to STATUS_DISCONNECTED: sessionHandleID[%d], previous_status:[%d], reason[%d]", _sessionHandleID, previousStatus, _disconnectingReason);
+    _connectionStatus = newStatus;
+    if (previousStatus != newStatus) {
+        implOnConnectionStatusChanged(previousStatus, newStatus);
+        if (STATUS_CONNECTED == _lastConnectionStatus) {
+            implOnDisconnected(_disconnectingReason);
+        }
+        _lastConnectionStatus = newStatus;
+    }
 }
 
 void B1BaseSession::implDisconnect()
 {
-    baseSocket()->close();
+    if (_readWriteImpl) {
+        _readWriteImpl->close();
+    }
 }
 
 void B1BaseSession::setSessionStatusConnecting()
@@ -56,7 +69,7 @@ void B1BaseSession::setSessionStatusConnecting()
     const auto previousStatus = _connectionStatus;
     const auto newStatus = STATUS_CONNECTING;
 
-    B1LOG("set connection_status to STATUS_CONNECTING: previous_status:[%d]", previousStatus);
+    B1LOG("set connection_status to STATUS_CONNECTING: sessionHandleID[%d], previous_status:[%d]", _sessionHandleID, previousStatus);
     _connectionStatus = newStatus;
     if (previousStatus != newStatus) {
         implOnConnectionStatusChanged(previousStatus, newStatus);
@@ -70,25 +83,24 @@ void B1BaseSession::setSessionStatusConnected()
     const auto previousStatus = _connectionStatus;
     const auto newStatus = STATUS_CONNECTED;
 
-    B1LOG("set connection_status to STATUS_CONNECTED: previous_status:[%d]", previousStatus);
+    B1LOG("set connection_status to STATUS_CONNECTED: sessionHandleID[%d], previous_status:[%d]", _sessionHandleID, previousStatus);
     _connectionStatus = newStatus;
     if (previousStatus != newStatus) {
         implOnConnectionStatusChanged(previousStatus, newStatus);
     }
 }
 
-void B1BaseSession::setSessionStatusDisconnected(int32 reason)
+void B1BaseSession::setSessionStatusDisconnecting(int32 reason)
 {
     const auto previousStatus = _connectionStatus;
-    const auto newStatus = STATUS_DISCONNECTED;
+    const auto newStatus = STATUS_DISCONNECTING;
 
-    B1LOG("set connection_status to STATUS_DISCONNECTED: previous_status:[%d], reason[%d]", previousStatus, reason);
+    B1LOG("set connection_status to STATUS_DISCONNECTING: sessionHandleID[%d], previous_status:[%d], reason[%d]", _sessionHandleID, previousStatus, reason);
+    _lastConnectionStatus = previousStatus;
+    _disconnectingReason = reason;
     _connectionStatus = newStatus;
     if (previousStatus != newStatus) {
         implOnConnectionStatusChanged(previousStatus, newStatus);
-        if (STATUS_CONNECTED == previousStatus) {
-            implOnDisconnected(reason);
-        }
     }
 }
 
@@ -102,20 +114,26 @@ bool B1BaseSession::initialize()
     if (_readWriteImpl != NULL) {
         return false;
     }
-    _baseSocketImpl.reset(createBaseSocketImpl());
-    baseSocket()->setImpl(_baseSocketImpl.get());
-    _readWriteImpl.reset(createReadWriteImpl(baseSocket()));
+    _readWriteImpl.reset(createReadWriteImpl());
+    if (_readWriteImpl->initialize() != true) {
+        return false;
+    }
+    _baseSocket->setImpl(_readWriteImpl->baseSocketImpl());
     return true;
 }
 
 void B1BaseSession::finalize()
 {
     if (_readWriteImpl) {
+        _baseSocket->resetImpl();
+        _readWriteImpl->finalize();
         _readWriteImpl.reset();
     }
-    if (_baseSocketImpl) {
-        _baseSocketImpl.reset();
-    }
+}
+
+bool B1BaseSession::isDisconnecting() const
+{
+    return STATUS_DISCONNECTING == _connectionStatus;
 }
 
 bool B1BaseSession::isDisconnected() const
@@ -130,11 +148,12 @@ bool B1BaseSession::isConnecting() const
 
 bool B1BaseSession::isConnected() const
 {
-    return STATUS_CONNECTED == _connectionStatus && baseSocket() && baseSocket()->isOpen();
+    return STATUS_CONNECTED == _connectionStatus && _readWriteImpl && _readWriteImpl->isOpen();
 }
 
 void B1BaseSession::disconnect()
 {
+    B1LOG("disconnect called: sessionHandleID[%d]", _sessionHandleID);
     implDisconnect();
 }
 
@@ -151,20 +170,29 @@ void B1BaseSession::processDisconnected()
 
 B1String B1BaseSession::peerAddress() const
 {
-    return baseSocket()->peerAddress();
+    return _readWriteImpl ? _readWriteImpl->peerAddress() : "";
 }
 
 uint16 B1BaseSession::peerPort() const
 {
-    return baseSocket()->peerPort();
+    return _readWriteImpl ? _readWriteImpl->peerPort() : 0;
 }
 
 uint16 B1BaseSession::localPort() const
 {
-    return baseSocket()->localPort();
+    return _readWriteImpl ? _readWriteImpl->localPort() : 0;
 }
 
 int32 B1BaseSession::currentConnectionStatus() const
 {
     return _connectionStatus;
+}
+
+void B1BaseSession::setDisconnectedIfSessionClosed()
+{
+    if (isDisconnecting()) {
+        if (_readWriteImpl && _readWriteImpl->isClosed()) {
+            setSessionStatusDisconnected();
+        }
+    }
 }
