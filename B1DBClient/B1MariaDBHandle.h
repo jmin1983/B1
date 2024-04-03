@@ -34,6 +34,7 @@ namespace BnD {
         B1IOContext* context() const { return _context.get(); }
         boost::mysql::tcp_connection* connection() const { return _connection.get(); }
         boost::mysql::tcp_ssl_connection* sslConnection() const { return _sslConnection.get(); }
+        bool isOpened() const;
     };
 }   //  !BnD
 

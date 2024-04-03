@@ -64,6 +64,27 @@ bool B1MariaDBResult::getSingleRowResult(const boost::mysql::rows_view& rows, st
     return true;
 }
 
+bool B1MariaDBResult::getResult(const boost::mysql::rows_view& rows, std::vector<std::vector<B1String> >* items) const
+{
+    items->clear();
+    items->reserve(rows.size());
+    for (boost::mysql::row_view row : rows) {
+        try {
+            std::vector<B1String> item;
+            item.reserve(row.size());
+            for (const auto& r : row) {
+                item.push_back(toString(r));
+            }
+            items->push_back(std::move(item));
+        }
+        catch (...) {
+            assert(false);
+            return false;
+        }
+    }
+    return true;
+}
+
 void B1MariaDBResult::getResult(const boost::mysql::rows_view& rows, std::vector<B1String>* col0) const
 {
     for (boost::mysql::row_view row : rows) {

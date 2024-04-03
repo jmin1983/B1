@@ -15,6 +15,8 @@
 #include <B1Network/B1IOContext.h>
 #include <B1Network/B1SSLContext.h>
 
+#include <boost/asio/ip/tcp.hpp>
+
 using namespace BnD;
 
 bool B1MariaDBHandle::initialize(bool useSSL)
@@ -57,4 +59,15 @@ void B1MariaDBHandle::finalize()
     if (_context) {
         _context.reset();
     }
+}
+
+bool B1MariaDBHandle::isOpened() const
+{
+    if (_connection) {
+        return _connection->stream().is_open();
+    }
+    else if (_sslConnection) {
+        return _sslConnection->stream().lowest_layer().is_open();
+    }
+    return false;
 }

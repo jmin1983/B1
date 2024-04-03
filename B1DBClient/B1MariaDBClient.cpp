@@ -14,8 +14,6 @@
 #include "B1MariaDBHandle.h"
 #include "B1MariaDBResult.h"
 
-#include <B1Network/B1IOContext.h>
-
 using namespace BnD;
 
 B1MariaDBClient::B1MariaDBClient()
@@ -26,64 +24,17 @@ B1MariaDBClient::~B1MariaDBClient()
 {
 }
 
-bool B1MariaDBClient::initialize(const B1String& address, uint16 port, const B1String& dbName, const B1String& user, const B1String& password, bool useSSL)
-{
-    if (_handle) {
-        return false;
-    }
-    _handle.reset(new B1MariaDBHandle());
-    if (_handle->initialize(useSSL) != true) {
-        _handle->finalize();
-        _handle.reset();
-        return false;
-    }
-    try {
-        boost::asio::ip::tcp::resolver resolver(_handle->context()->nativeContext()->get_executor());
-        char portString[10] = {0};
-        sprintf(portString, "%d", port);
-        auto endpoints = resolver.resolve(address.cString(), portString);
-        boost::mysql::handshake_params params(user.cString(), password.cString(), dbName.cString());
-        if (useSSL) {
-            _handle->sslConnection()->connect(*endpoints.begin(), params);
-        }
-        else {
-            _handle->connection()->connect(*endpoints.begin(), params);
-        }
-    }
-    catch (const boost::mysql::error_with_diagnostics& err) {
-        B1LOG("boost_my_sql_error: code[%d], msg[%s]", err.code().value(), err.what());
-        _handle->finalize();
-        _handle.reset();
-        return false;
-    }
-    catch (...) {
-        B1LOG("unknown error in boost_my_sql");
-        _handle->finalize();
-        _handle.reset();
-        return false;
-    }
-    return true;
-}
-
-void B1MariaDBClient::finalize()
-{
-    if (_handle) {
-        _handle->finalize();
-        _handle.reset();
-    }
-}
-
-bool B1MariaDBClient::execute(const B1String& sql, B1MariaDBResult* result) const
+bool B1MariaDBClient::execute(B1MariaDBHandle* handle, const B1String& sql, B1MariaDBResult* result) const
 {
     try {
-        if (auto connection = _handle->connection()) {
+        if (auto connection = handle->connection()) {
             boost::mysql::results temp;
             connection->execute(sql.cString(), temp);
             if (result) {
                 result->readDBResult(temp.rows());
             }
         }
-        else if (auto connection = _handle->sslConnection()) {
+        else if (auto connection = handle->sslConnection()) {
             boost::mysql::results temp;
             connection->execute(sql.cString(), temp);
             if (result) {
@@ -106,11 +57,11 @@ bool B1MariaDBClient::execute(const B1String& sql, B1MariaDBResult* result) cons
     return true;
 }
 
-bool B1MariaDBClient::executeBatch(const B1String& sql, B1MariaDBResult* result) const
+bool B1MariaDBClient::executeBatch(B1MariaDBHandle*handle, const B1String& sql, B1MariaDBResult* result) const
 {
     boost::mysql::execution_state state;
     try {
-        if (auto connection = _handle->connection()) {
+        if (auto connection = handle->connection()) {
             connection->start_execution(sql.cString(), state);
             while (state.complete() != true) {
                 auto rows = connection->read_some_rows(state);
@@ -119,7 +70,7 @@ bool B1MariaDBClient::executeBatch(const B1String& sql, B1MariaDBResult* result)
                 }
             }
         }
-        else if (auto connection = _handle->sslConnection()) {
+        else if (auto connection = handle->sslConnection()) {
             connection->start_execution(sql.cString(), state);
             while (state.complete() != true) {
                 auto rows = connection->read_some_rows(state);
@@ -144,7 +95,7 @@ bool B1MariaDBClient::executeBatch(const B1String& sql, B1MariaDBResult* result)
     return true;
 }
 
-bool B1MariaDBClient::executePrepared(const B1String& stmt,
+bool B1MariaDBClient::executePrepared(B1MariaDBHandle* handle, const B1String& stmt,
                                       const std::vector<B1String>& bind0, const std::vector<B1String>& bind1,
                                       const std::vector<std::vector<uint8> >& bind2, const std::vector<std::vector<uint8> >& bind3, const std::vector<std::vector<uint8> >& bind4) const
 {
@@ -156,14 +107,14 @@ bool B1MariaDBClient::executePrepared(const B1String& stmt,
         return false;
     }
     try {
-        if (auto connection = _handle->connection()) {
+        if (auto connection = handle->connection()) {
             auto statement = connection->prepare_statement(stmt.cString());
             for (size_t i = 0; i < bindSize; ++i) {
                 boost::mysql::results temp;
                 connection->execute(statement.bind(bind0[i].cString(), bind1[i].cString(), bind2[i], bind3[i], bind4[i]), temp);
             }
         }
-        else if (auto connection = _handle->sslConnection()) {
+        else if (auto connection = handle->sslConnection()) {
             auto statement = connection->prepare_statement(stmt.cString());
             for (size_t i = 0; i < bindSize; ++i) {
                 boost::mysql::results temp;

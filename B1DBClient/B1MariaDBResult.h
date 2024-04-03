@@ -36,6 +36,7 @@ namespace BnD {
         B1String toString(const boost::mysql::field_view& row) const;
         size_t rowSize(const boost::mysql::rows_view& rows) const;
         bool getSingleRowResult(const boost::mysql::rows_view& rows, std::vector<B1String>* items, size_t expectedSize = 0) const;
+        bool getResult(const boost::mysql::rows_view& rows, std::vector<std::vector<B1String> >* items) const;
         void getResult(const boost::mysql::rows_view& rows, std::vector<B1String>* col0) const;
         void getResult(const boost::mysql::rows_view& rows, std::vector<int32>* col0, std::vector<B1String>* col1, std::vector<B1String>* col2) const;
         void getResult(const boost::mysql::rows_view& rows,
