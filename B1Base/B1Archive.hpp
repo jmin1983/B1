@@ -32,6 +32,31 @@ namespace BnD {
     }
 
     template<typename T>
+    void B1Archive::writeData(const B1String& key, const std::unordered_map<B1String, T>& value)
+    {
+        boost::property_tree::ptree child, temp;
+        for (const auto& v : value) {
+            child.put(v.first.to_string(), v.second);
+        }
+        _rootNode->get().add_child(key.to_string(), child);
+    }
+
+    template<typename T>
+    bool B1Archive::readData(const B1String& key, std::unordered_map<B1String, T>* value) const
+    {
+        try {
+            if (auto child = _rootNode->get().get_child_optional(key.to_string())) {
+                for (const auto& v : *child) {
+                    value->insert(std::make_pair(v.first, v.second.get_value<T>()));
+                }
+                return true;
+            }
+        }
+        catch (...) {}
+        return false;
+    }
+
+    template<typename T>
     void B1Archive::writeObjectArray(const B1String& key, const std::vector<T>& value)
     {
         boost::property_tree::ptree child;

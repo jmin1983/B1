@@ -17,6 +17,7 @@
 #endif
 
 #include <vector>
+#include <unordered_map>
 
 namespace BnD {
     class B1Object;
@@ -58,6 +59,10 @@ namespace BnD {
         DECLARE_ARCHIVE_VALUE_FUNC(std::vector<float32>);
         DECLARE_ARCHIVE_VALUE_FUNC(std::vector<float64>);
         DECLARE_ARCHIVE_VALUE_FUNC(std::vector<B1String>);
+        template<typename T>
+        void writeData(const B1String& key, const std::unordered_map<B1String, T>& value);
+        template<typename T>
+        bool readData(const B1String& key, std::unordered_map<B1String, T>* value) const;
         template<typename T>
         void writeObjectArray(const B1String& key, const std::vector<T>& value);
         template<typename T>
