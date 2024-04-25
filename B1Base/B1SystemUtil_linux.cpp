@@ -44,7 +44,7 @@ bool B1SystemUtil::isProcessRunning(const B1String& processName)
 
 bool B1SystemUtil::createDirectory(const B1String& path)
 {
-    B1String opath = path;
+    B1String opath = path.copy();
     int32 len = opath.length();
     if (opath[len - 1] == '/') {
         opath[len - 1] = '\0';
@@ -116,18 +116,18 @@ uint32 B1SystemUtil::findFiles(const B1String& directoryPath, const B1String& fi
     B1StringUtil::removeLastPathSeparator(&path);
 
     uint32 count = 0;
-    B1String pathName;
     struct dirent* result;
     DIR* dir = opendir(path.cString());
     while (dir) {
         if (!(result = readdir(dir))) {
             break;  // no more file
         }
+        B1String pathName;
         pathName.from(result->d_name);
         if (fileExt.isEmpty() || checkFileExtension(pathName, fileExt)) {
             count++;
             if (resultFilenames) {
-                resultFilenames->push_back(pathName);
+                resultFilenames->push_back(std::move(pathName));
             }
         }
     }
@@ -300,7 +300,7 @@ int B1SystemUtil::getProcessID(const B1String& processName)
                     if (pos != std::string::npos)
                         cmdLine = cmdLine.substr(pos + 1);
                     // Compare against requested process name.
-                    if (processName == B1String(cmdLine))
+                    if (processName == B1String(std::move(cmdLine)))
                         pid = id;
                 }
             }
@@ -333,7 +333,7 @@ uint32 B1SystemUtil::createProcess(const B1String& process)
 uint32 B1SystemUtil::createProcessArg(const B1String& process, const B1String& arg)
 {
     std::vector<B1String> args(1);
-    args[0] = arg;
+    args[0] = arg.copy();
     return createProcessArgs(process, args);
 }
 

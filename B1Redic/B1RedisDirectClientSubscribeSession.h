@@ -32,7 +32,7 @@ namespace BnD {
     protected:
         void implProcessConnected(bool firstConnectedProcess) final;
     public:
-        bool subscribe(const std::set<B1String>& channels);
+        bool subscribe(std::set<B1String>&& channels);
     };
 }   //  !BnD
 

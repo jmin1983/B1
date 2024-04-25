@@ -82,7 +82,7 @@ namespace BnD {
         bool isSubscribeSessionConnected() const;
         bool isWriteSessionConnected() const;
         bool exists(const B1String& key);
-        bool subscribe(const std::set<B1String>& channels);
+        bool subscribe(std::set<B1String>&& channels);
         bool hmget(const B1String& key, const std::vector<B1String>& fields, std::vector<B1String>* out);
         B1String hmget(const B1String& key, const B1String& field);
         bool hgetall(const B1String& key, std::map<B1String, B1String>* out);

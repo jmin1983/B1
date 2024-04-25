@@ -53,9 +53,9 @@ void B1RedisDirectClientSubscribeSession::implProcessConnected(bool firstConnect
     }
 }
 
-bool B1RedisDirectClientSubscribeSession::subscribe(const std::set<B1String>& channels)
+bool B1RedisDirectClientSubscribeSession::subscribe(std::set<B1String>&& channels)
 {
-    _subscribeChannels = channels;
-    auto data = packetMaker()->makeDataSubscribe(channels);
+    _subscribeChannels.swap(channels);
+    auto data = packetMaker()->makeDataSubscribe(_subscribeChannels);
     return writeData(data);
 }

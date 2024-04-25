@@ -193,13 +193,13 @@ bool B1RedisDirectClient::exists(const B1String& key)
     return _readSession ? _readSession->exists(key) : false;
 }
 
-bool B1RedisDirectClient::subscribe(const std::set<B1String>& channels)
+bool B1RedisDirectClient::subscribe(std::set<B1String>&& channels)
 {
     if (NULL == _subscribeSession) {
         B1LOG("subscribe disabled in this client");
         return false;
     }
-    return _subscribeSession->subscribe(channels);
+    return _subscribeSession->subscribe(std::move(channels));
 }
 
 bool B1RedisDirectClient::hmget(const B1String& key, const std::vector<B1String>& fields, std::vector<B1String>* out)
