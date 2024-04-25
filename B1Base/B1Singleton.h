@@ -53,6 +53,11 @@ namespace BnD {
         {
             return dynamic_cast<U*>(_singleton);
         }
+        template <typename U>
+        static U* getTemplateStatic()
+        {
+            return static_cast<U*>(_singleton);
+        }
     };
 
     template <typename T>
