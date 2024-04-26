@@ -54,7 +54,8 @@ void* B1Thread::threadFunc(void* param)
         thread->implThreadEnd();
 #if defined(_WIN32) && !defined(_DEBUG)
     }
-    __except (B1DUMP(GetExceptionInformation(), typeid(*thread).name(), 6)) {
+    //__except (B1DUMP(GetExceptionInformation(), typeid(*thread).name(), 6)) {
+    __except(0) {
         abort();
     }
 #endif

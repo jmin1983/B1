@@ -63,6 +63,7 @@ namespace BnD {
         void shutdown();
         void disconnectAllSessions();
         int32 getHandleID(B1BaseSocket* baseSocket) const;
+        uint32 sessionCount() const;
         std::map<B1BaseSocket*, SessionData> getAllSessions() const;
         std::shared_ptr<B1BaseSession> getBaseSession(B1BaseSocket* baseSocket) const;
         std::shared_ptr<B1BaseSession> getBaseSessionByHandleID(int32 handleID) const;

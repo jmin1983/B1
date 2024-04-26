@@ -187,20 +187,26 @@ int32 B1BaseSessionManager::getHandleID(B1BaseSocket* baseSocket) const
     return itr != _sessions.end() ? itr->second._handleID : -1;
 }
 
-std::map<B1BaseSocket*, B1BaseSessionManager::SessionData> B1BaseSessionManager::getAllSessions() const
+uint32 B1BaseSessionManager::sessionCount() const
+{
+    B1AutoLock al(_sessionsLock);
+    return static_cast<uint32>(_sessions.size());
+}
+
+auto B1BaseSessionManager::getAllSessions() const -> std::map<B1BaseSocket*, B1BaseSessionManager::SessionData>
 {
     B1AutoLock al(_sessionsLock);
     return _sessions;
 }
 
-std::shared_ptr<B1BaseSession> B1BaseSessionManager::getBaseSession(B1BaseSocket* baseSocket) const
+auto B1BaseSessionManager::getBaseSession(B1BaseSocket* baseSocket) const -> std::shared_ptr<B1BaseSession>
 {
     B1AutoLock al(_sessionsLock);
     auto itr = _sessions.find(baseSocket);
     return itr != _sessions.end() ? itr->second._session : std::shared_ptr<B1BaseSession>();
 }
 
-std::shared_ptr<B1BaseSession> B1BaseSessionManager::getBaseSessionByHandleID(int32 handleID) const
+auto B1BaseSessionManager::getBaseSessionByHandleID(int32 handleID) const -> std::shared_ptr<B1BaseSession>
 {
     B1BaseSocket* baseSocket = NULL;
     B1AutoLock al(_sessionsLock);
