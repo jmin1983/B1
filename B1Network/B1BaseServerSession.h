@@ -28,7 +28,9 @@ namespace BnD {
     protected:
         B1BaseServerSessionListener* _listener;
     protected:
-        virtual void implOnDisconnected(int32 reason) override;
+        virtual void implOnServerSessionDisconnected(int32 reason) {}
+    protected:
+        void implOnDisconnected(int32 reason) final;
     protected:
         B1ServerSocket* serverSocket() const;
     public:

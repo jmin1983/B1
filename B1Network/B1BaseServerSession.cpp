@@ -30,6 +30,7 @@ void B1BaseServerSession::implOnDisconnected(int32 reason)
 {
     B1LOG("server session disconnected: sessionHandleID[%d], peerAddress[%s], localPort[%d], reason[%d]", _sessionHandleID, 
         serverSocket() ? serverSocket()->peerAddress().cString() : "", serverSocket() ? serverSocket()->localPort() : 0, reason);
+    implOnServerSessionDisconnected(reason);
     if (_listener) {
         _listener->onServerSessionDisconnected(serverSocket(), reason);
     }
