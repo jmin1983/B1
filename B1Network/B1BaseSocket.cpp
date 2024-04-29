@@ -90,3 +90,12 @@ void B1BaseSocket::resetImpl()
         _impl = NULL;
     }
 }
+
+void B1BaseSocket::cleanUp()
+{
+    if (_asioSocket->is_open()) {
+        B1LOG("asio still open! -> close");
+        _asioSocket->close();
+    }
+    _asioSocket.reset();
+}

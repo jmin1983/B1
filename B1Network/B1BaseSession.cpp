@@ -109,7 +109,7 @@ bool B1BaseSession::beginRead()
     return _readWriteImpl ? _readWriteImpl->read() : false;
 }
 
-bool B1BaseSession::initialize()
+bool B1BaseSession::initializeSession()
 {
     if (_readWriteImpl != NULL) {
         return false;
@@ -122,12 +122,19 @@ bool B1BaseSession::initialize()
     return true;
 }
 
-void B1BaseSession::finalize()
+void B1BaseSession::finalizeSession()
 {
     if (_readWriteImpl) {
         _baseSocket->resetImpl();
         _readWriteImpl->finalize();
         _readWriteImpl.reset();
+    }
+}
+
+void B1BaseSession::cleanupSession()
+{
+    if (_baseSocket) {
+        _baseSocket->cleanUp();
     }
 }
 

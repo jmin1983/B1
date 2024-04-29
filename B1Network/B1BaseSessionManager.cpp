@@ -50,6 +50,7 @@ void B1BaseSessionManager::implLooperFunc()
     }
     for (const auto& removeSession : removeSessions) {
         int32 handleID = removeSession._handleID;
+        removeSession._session->cleanupSession();
         onSessionRemoved(handleID);
     }
     B1Thread::sleep(_workingInerval);
@@ -146,8 +147,8 @@ void B1BaseSessionManager::shutdown()
                     itr->second._session->setDisconnectedIfSessionClosed();
                 }
                 else if (itr->second._session->isDisconnected()) {
-                    _reservedRemoveSessions.push_back(itr->second);
                     _handleIDMap.erase(itr->second._handleID);
+                    itr->second._session->cleanupSession();
                     itr = _sessions.erase(itr);
                 }
                 else {
@@ -169,7 +170,6 @@ void B1BaseSessionManager::shutdown()
         _sessions.clear();
     }
     onShuttingDown();
-    _reservedRemoveSessions.clear();
 }
 
 void B1BaseSessionManager::disconnectAllSessions()

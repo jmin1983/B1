@@ -39,10 +39,10 @@ void B1HttpServer::onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSoc
     auto baseSession = sessionManager()->getBaseSession(baseSocket);
 
     auto httpMessageMoved = std::move(httpMessage);
-    baseSession->finalize();
+    baseSession->finalizeSession();
 
     std::shared_ptr<B1WebSocketServerSession> session(createWebSocketServerSession(serverSocket));
-    if (session->initialize() != true) {
+    if (session->initializeSession() != true) {
         B1LOG("initialize session failed -> disconnect: peerAddress[%s], localPort:[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort());
         disconnect(serverSocket);
         assert(false);

@@ -30,8 +30,8 @@ B1BaseServer::~B1BaseServer()
 void B1BaseServer::onAcceptComplete(std::shared_ptr<B1ServerSocket> serverSocket)
 {
     auto session = std::shared_ptr<B1BaseServerSession>(createSession(serverSocket.get()));
-    if (session->initialize() != true) {
-        B1LOG("initialize session failed -> disconnect: peerAddress[%s], localPort:[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort());
+    if (session->initializeSession() != true) {
+        B1LOG("initializeSession failed -> disconnect: peerAddress[%s], localPort:[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort());
         disconnect(serverSocket.get());
         assert(false);
         return;

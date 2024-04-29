@@ -38,6 +38,7 @@ namespace BnD {
         void resetImpl();
     public:
         boost::asio::ip::tcp::socket* asioSocket() const { return _asioSocket.get(); }  //  for convenience use only.
+        void cleanUp();
     };
 }   //  !BnD
 

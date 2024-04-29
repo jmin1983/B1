@@ -61,8 +61,9 @@ namespace BnD {
         B1BaseSocket* baseSocket() const { return _baseSocket; }    //  todo: remove this.
         B1BaseReadWriteImpl* readWriteImpl() const { return _readWriteImpl.get(); }
     public:
-        bool initialize();
-        void finalize();
+        bool initializeSession();
+        void finalizeSession();
+        void cleanupSession();
         bool isDisconnecting() const;
         bool isDisconnected() const;
         bool isConnecting() const;
