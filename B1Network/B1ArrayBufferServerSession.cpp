@@ -46,7 +46,7 @@ B1ArrayBufferReadWriteImpl* B1ArrayBufferServerSession::readWriteImpl() const
 
 void B1ArrayBufferServerSession::writeData(const uint8* data, size_t size) const
 {
-    readWriteImpl()->writeData(data, size);
+    readWriteImpl()->requestWriteData(data, size);
 }
 
 bool B1ArrayBufferServerSession::writeData(const std::vector<uint8>& data) const

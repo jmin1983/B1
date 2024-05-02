@@ -18,7 +18,10 @@
 
 #include <B1Network/B1BaseReadWriteImpl.h>
 
+#include <list>
+
 namespace BnD {
+    class B1Lock;
     class B1ArrayBufferReadWriteImplListener : public B1BaseReadWriteImplListener {
     public:
         virtual void onReadComplete(uint8* data, size_t dataSize) {}
@@ -29,6 +32,10 @@ namespace BnD {
     public:
         B1ArrayBufferReadWriteImpl(B1ArrayBufferReadWriteImplListener* listener, size_t recvBufferSize);
         virtual ~B1ArrayBufferReadWriteImpl();
+    private:
+        std::shared_ptr<B1Lock> _dataToWriteLock;
+        bool _dataWriting;
+        std::list<std::vector<uint8> > _dataToWrite;
     protected:
         std::vector<uint8> _recvBuffer;
     private:
@@ -39,8 +46,9 @@ namespace BnD {
         void implOnWriteComplete(size_t transferredBytes) final;
     protected:
         B1ArrayBufferReadWriteImplListener* listener() const;
-    public:
         void writeData(const uint8* data, size_t size);
+    public:
+        void requestWriteData(const uint8* data, size_t size);
     };
 }   //  !BnD
 
