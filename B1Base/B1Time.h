@@ -60,7 +60,7 @@ namespace BnD {
             uint32 _value;
         };
         static int64 _adjustCurrentSeconds;
-        static int32 _adjustCurrentMilliseconds;
+        static int32 _adjustCurrentMicroSeconds;
     protected:
         bool localTime(time_t64 t, struct tm *lt) const;
         time_t64 mkTime(struct tm *lt) const;

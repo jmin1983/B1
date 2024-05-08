@@ -143,15 +143,6 @@ void B1Thread::setPriority(PRIORITY value)
 #endif
 }
 
-uint32 B1Thread::threadId() const
-{
-#if defined(_WIN32)
-    return ::GetCurrentThreadId();
-#else
-    return ::pthread_self();
-#endif
-}
-
 bool B1Thread::isAlive() const
 {
     return STATUS_READY ==      _status ||

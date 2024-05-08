@@ -13,6 +13,7 @@
 #include "B1Logger.h"
 #include "B1FileLog.h"
 #include "B1Lock.h"
+#include "B1SystemUtil.h"
 #include "B1Time.h"
 
 #include <stdarg.h>
@@ -55,11 +56,8 @@ bool BnD::testV1FileLog()
 
 void BnD::b1log(const B1String &string)
 {
-#if defined(_DO_NOT_USE_B1LOG)
-    return;
-#endif
     B1String timedLog;
-    timedLog.format("[%s] %s\n", B1Time::currentTimeInMicroseconds().cString(), string.cString());
+    timedLog.format("[%s][%u] %s\n", B1Time::currentTimeInMicroseconds().cString(), B1SystemUtil::getCurrentThreadID(), string.cString());
     if (g_fileLogger) {
         g_fileLogger->write(g_callback ? timedLog.copy() : std::move(timedLog));
     }

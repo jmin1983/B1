@@ -16,14 +16,14 @@
 #pragma once
 #endif
 
-#if defined(_DO_NOT_USE_B1LOG)
-#define B1LOG(...) ""
-#else
-#define __CLASS_NAME__ std::string(typeid(*this).name()).substr(6)
-#define B1LOG(...) b1log_cl((__CLASS_NAME__), __VA_ARGS__);
-#endif
+#include <boost/core/demangle.hpp>
 
-#include <string>
+#if defined(_WIN32)
+#define __CLASS_NAME__ boost::core::demangle(typeid(*this).name()).substr(6)
+#else
+#define __CLASS_NAME__ boost::core::demangle(typeid(*this).name())
+#endif
+#define B1LOG(...) b1log_cl((__CLASS_NAME__), __VA_ARGS__);
 
 namespace BnD {
     typedef bool(*b1log_callback_t)(const char* log, void* param);

@@ -38,6 +38,7 @@ namespace BnD {
         B1String getSystemID();
         int getProcessID();
         int getProcessID(const B1String& processName);
+        uint32 getCurrentThreadID();
         uint32 createProcess(const B1String& process);
         uint32 createProcessArg(const B1String& process, const B1String& arg);
         uint32 createProcessArgs(const B1String& process, const std::vector<B1String>& args);   //  max args_size is 5.

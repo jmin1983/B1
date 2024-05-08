@@ -33,6 +33,7 @@
 #include <errno.h>
 #include <ifaddrs.h>
 #include <netdb.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <fstream>
 
@@ -314,6 +315,11 @@ int B1SystemUtil::getProcessID(const B1String& processName)
     }
     closedir(dp);
     return pid;
+}
+
+uint32 B1SystemUtil::getCurrentThreadID()
+{
+    return static_cast<uint32>(::pthread_self());
 }
 
 uint32 B1SystemUtil::createProcess(const B1String& process)

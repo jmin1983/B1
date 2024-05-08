@@ -68,7 +68,6 @@ namespace BnD {
         bool run();
         void join();
         void setPriority(PRIORITY value);
-        uint32 threadId() const;
         bool isAlive() const;
         Status status() const { return _status; }
         static void sleep(uint32 millisecond);

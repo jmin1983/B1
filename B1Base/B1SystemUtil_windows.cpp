@@ -232,6 +232,11 @@ int B1SystemUtil::getProcessID(const B1String& processName)
     return -1;
 }
 
+uint32 B1SystemUtil::getCurrentThreadID()
+{
+    return static_cast<uint32>(::GetCurrentThreadId());
+}
+
 uint32 B1SystemUtil::createProcess(const B1String& process)
 {
     STARTUPINFOA si;

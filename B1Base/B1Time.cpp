@@ -23,7 +23,7 @@
 using namespace BnD;
 
 int64 B1Time::_adjustCurrentSeconds = 0;
-int32 B1Time::_adjustCurrentMilliseconds = 0;
+int32 B1Time::_adjustCurrentMicroSeconds = 0;
 
 B1Time::B1Time()
 {
@@ -301,10 +301,9 @@ B1String B1Time::timeInMicrosecond(int64 second, int32 microSecond)
         assert(false);
         return B1String();
     }
-    return B1String::formatAs("%04d-%02d-%02d_%02d:%02d:%02d.%03d.%03d",
+    return B1String::formatAs("%04d-%02d-%02d_%02d:%02d:%02d.%06d",
                                 crntTime->tm_year + 1900, crntTime->tm_mon + 1, crntTime->tm_mday,
-                                crntTime->tm_hour, crntTime->tm_min, crntTime->tm_sec,
-                                microSecond / 1000, microSecond % 1000);
+                                crntTime->tm_hour, crntTime->tm_min, crntTime->tm_sec, microSecond);
 }
 
 B1String B1Time::timeInSecond(int64 second, bool pretty)
@@ -333,19 +332,19 @@ bool B1Time::getCurrentTime(int64* second, int32* microSecond)
     if (gettimeofday(&crntTimeVal, NULL) < 0) {
         return false;
     }
-    if (_adjustCurrentSeconds != 0 || _adjustCurrentMilliseconds != 0) {
+    if (_adjustCurrentSeconds != 0 || _adjustCurrentMicroSeconds != 0) {
         int64 newSecond = crntTimeVal.tv_sec + _adjustCurrentSeconds;
-        int32 newMillisecond = crntTimeVal.tv_usec + _adjustCurrentMilliseconds;
-        if (newMillisecond >= 1000000) {
-            newMillisecond -= 1000000;
+        int32 newMicroSecond = crntTimeVal.tv_usec + _adjustCurrentMicroSeconds;
+        if (newMicroSecond >= 1000000) {
+            newMicroSecond -= 1000000;
             newSecond++;
         }
-        if (newSecond < 0 || newMillisecond < 0) {
+        if (newSecond < 0 || newMicroSecond < 0) {
             assert(false);
             return false;
         }
         *second = newSecond;
-        *microSecond = newMillisecond;
+        *microSecond = newMicroSecond;
     }
     else {
         *second = crntTimeVal.tv_sec;
@@ -374,11 +373,11 @@ void B1Time::setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds)
     }
     if (crntTimeVal.tv_usec > targetMicroSeconds) {
         _adjustCurrentSeconds = targetSeconds - crntTimeVal.tv_sec - 1;
-        _adjustCurrentMilliseconds = targetMicroSeconds - crntTimeVal.tv_usec + 1000000;
+        _adjustCurrentMicroSeconds = targetMicroSeconds - crntTimeVal.tv_usec + 1000000;
     }
     else {
         _adjustCurrentSeconds = targetSeconds - crntTimeVal.tv_sec;
-        _adjustCurrentMilliseconds = targetMicroSeconds - crntTimeVal.tv_usec;
+        _adjustCurrentMicroSeconds = targetMicroSeconds - crntTimeVal.tv_usec;
     }
 }
 
