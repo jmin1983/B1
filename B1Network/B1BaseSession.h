@@ -58,7 +58,7 @@ namespace BnD {
         void setSessionStatusConnected();
         void setSessionStatusDisconnecting(int32 reason = 0);
         bool beginRead();
-        B1BaseSocket* baseSocket() const { return _baseSocket; }    //  todo: remove this.
+        B1BaseSocket* baseSocket() const { return _baseSocket; }
         B1BaseReadWriteImpl* readWriteImpl() const { return _readWriteImpl.get(); }
     public:
         bool initializeSession();

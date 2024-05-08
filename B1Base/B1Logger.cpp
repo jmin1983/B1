@@ -22,29 +22,29 @@
 #include <Windows.h>
 #endif
 
-BnD::B1String BnD::v2log(const char* format, ...)
+BnD::B1String BnD::b1log(const char* format, ...)
 {
     B1String s;
     va_list args;
     va_start(args, format);
     s.appendvf(format, args);
     va_end(args);
-    v2log(s);
+    b1log(s);
     return s;
 }
 
-BnD::B1String BnD::v2log_cl(const std::string &className, const char* format, ...)
+BnD::B1String BnD::b1log_cl(const std::string &className, const char* format, ...)
 {
     B1String s = className + ": ";
     va_list args;
     va_start(args, format);
     s.appendvf(format, args);
     va_end(args);
-    v2log(s);
+    b1log(s);
     return s;
 }
 
-BnD::v2log_callback_t g_callback = NULL;
+BnD::b1log_callback_t g_callback = NULL;
 void* g_callbackParam = NULL;
 BnD::B1FileLog* g_fileLogger = NULL;
 
@@ -53,7 +53,7 @@ bool BnD::testV1FileLog()
     return g_fileLogger && g_fileLogger->testWriteLogFile();
 }
 
-void BnD::v2log(const B1String &string)
+void BnD::b1log(const B1String &string)
 {
 #if defined(_DO_NOT_USE_B1LOG)
     return;
@@ -81,7 +81,7 @@ void BnD::setLogger(B1FileLog *fileLogger)
     g_fileLogger = fileLogger;
 }
 
-void BnD::setLoggerCallback(v2log_callback_t callback, void* param)
+void BnD::setLoggerCallback(b1log_callback_t callback, void* param)
 {
     g_callback = callback;
     g_callbackParam = param;

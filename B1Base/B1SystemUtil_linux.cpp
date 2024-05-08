@@ -20,13 +20,19 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #if defined(__linux__)
 #include <sys/reboot.h>
 #endif
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/if.h>
 #include <dirent.h>
 #include <errno.h>
+#include <ifaddrs.h>
+#include <netdb.h>
 #include <stdio.h>
 #include <fstream>
 
@@ -379,7 +385,7 @@ int B1SystemUtil::terminateProcess(const B1String& processName)
     if (pid < 0)
         return ENOENT;
 
-    int result = kill(pid, SIGINT); //  linux service가 아닌 모든 프로세스는 SIGINT를 받으면 종료된다고 가정.
+    int result = kill(pid, SIGINT); //  Assume that all processes other than Linux Services will be killed when SIGINT is received.
     if (result != 0)
         return result;
     for (int32 i = 0; i < 1000; ++i) {
@@ -401,6 +407,24 @@ bool B1SystemUtil::rebootSystem()
 #else
     return false;
 #endif
+}
+
+bool B1SystemUtil::getLocalNetworkAddresses(std::list<B1String>* addresses)
+{
+    struct ifaddrs *addrs, *tmp;
+    getifaddrs(&addrs);
+    tmp = addrs;
+    while (tmp != 0) {
+        if (tmp->ifa_addr != 0 && tmp->ifa_addr->sa_family == AF_INET && (strcmp("lo", tmp->ifa_name) != 0 && (tmp->ifa_flags & (IFF_RUNNING)))) {
+            char host[NI_MAXHOST];
+            if (getnameinfo(tmp->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == 0) {
+                addresses->push_back(std::move(B1String(host)));
+            }
+        }
+        tmp = tmp->ifa_next;
+    }
+    freeifaddrs(addrs);
+    return addresses->empty();
 }
 
 #endif

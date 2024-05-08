@@ -43,6 +43,7 @@ namespace BnD {
         uint32 createProcessArgs(const B1String& process, const std::vector<B1String>& args);   //  max args_size is 5.
         int terminateProcess(const B1String& processName);
         bool rebootSystem();
+        bool getLocalNetworkAddresses(std::list<B1String>* addresses);
     }
 }   //  !BnD
 

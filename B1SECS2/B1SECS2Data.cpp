@@ -119,14 +119,14 @@ B1String B1SECS2Data::toString() const
 bool B1SECS2Data::readBodyFormat(const uint8* data, uint32 dataLength, uint32* pos, DATA_FORMAT* format, uint32* bodyLength)
 {
     if (*pos >= dataLength) {
-        v2log("dataLength error");
+        b1log("dataLength error");
         return false;
     }
     *format = static_cast<DATA_FORMAT>(data[*pos] >> 2);
     int8 bodyLengthSize = data[*pos] & 0x3;
     (*pos)++;
     if (*pos + bodyLengthSize > dataLength) {
-        v2log("bodyLengthSize over");
+        b1log("bodyLengthSize over");
         return false;
     }
     if (bodyLengthSize == 1)
@@ -144,7 +144,7 @@ bool B1SECS2Data::readBodyFormat(const uint8* data, uint32 dataLength, uint32* p
         *bodyLength = temp;
     }
     else {
-        v2log("bodyLengthSize error");
+        b1log("bodyLengthSize error");
         return false;
     }
     (*pos) += bodyLengthSize;

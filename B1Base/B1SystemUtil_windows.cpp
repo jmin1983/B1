@@ -20,6 +20,7 @@
 
 #include <windows.h>
 #include <Dbghelp.h>
+#include "iphlpapi.h"
 #if defined(UNICODE)
 #undef UNICODE
 #include <Tlhelp32.h>
@@ -28,6 +29,7 @@
 #include <Tlhelp32.h>
 #endif
 #pragma comment (lib, "Dbghelp.lib")
+#pragma comment (lib, "Iphlpapi.lib")
 
 using namespace BnD;
 
@@ -328,6 +330,29 @@ bool B1SystemUtil::rebootSystem()
     AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, (PTOKEN_PRIVILEGES)NULL, 0);
 
     return true;
+}
+
+bool B1SystemUtil::getLocalNetworkAddresses(std::list<B1String>* addresses)
+{
+    addresses->clear();
+    const size_t maxInterfaceCount = 10;
+    IP_ADAPTER_INFO adapterInfo[maxInterfaceCount];
+    DWORD dwBufLen = sizeof(adapterInfo);
+    if (GetAdaptersInfo(adapterInfo, &dwBufLen) == ERROR_SUCCESS) {
+        IP_ADAPTER_INFO* info = &adapterInfo[0];
+        while (info) {
+            PIP_ADDR_STRING ipAddress = &info->IpAddressList;
+            while (ipAddress) {
+                B1String address(ipAddress->IpAddress.String);
+                if (address != "0.0.0.0") {
+                    addresses->push_back(std::move(address));
+                }
+                ipAddress = ipAddress->Next;
+            }
+            info = info->Next;
+        }
+    }
+    return addresses->empty();
 }
 
 #endif

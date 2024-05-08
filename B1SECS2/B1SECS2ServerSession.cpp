@@ -326,7 +326,7 @@ void B1SECS2ServerSession::writeLog(const char* format, ...)
     va_start(args, format);
     s.appendvf(format, args);
     va_end(args);
-    v2log(s);
+    b1log(s);
 }
 
 const B1SECS2DataManager* B1SECS2ServerSession::secs2DataManager() const
