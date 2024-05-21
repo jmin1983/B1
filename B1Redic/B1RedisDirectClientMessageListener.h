@@ -20,7 +20,7 @@ namespace BnD {
     class B1String;
     class B1RedisDirectClientMessageListener {
     public:
-        virtual void onRecvMessagePublish(const B1String& channel, const B1String &message) {}
+        virtual void onRecvMessagePublish(const B1String& channel, const B1String& message) {}
         virtual bool onRecvMessagePolling(const B1String& key, const B1String& message) { return true; }    //  return false if message process incompleted.
     };
 }   //  !BnD

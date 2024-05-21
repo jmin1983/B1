@@ -37,7 +37,7 @@ namespace BnD {
         };
     public:
         B1RedisDirectClient(B1RedisDirectClientMessageListener* messageListener, B1RedisDirectClientListener* listener = NULL,
-                          int32 maxAliveCount = ALIVE_DEFAULT_MAX_COUNT, int32 aliveInterval = ALIVE_DEFAULT_INTERVAL);
+                            int32 maxAliveCount = ALIVE_DEFAULT_MAX_COUNT, int32 aliveInterval = ALIVE_DEFAULT_INTERVAL);
         virtual ~B1RedisDirectClient();
     protected:
         enum CONSTS {

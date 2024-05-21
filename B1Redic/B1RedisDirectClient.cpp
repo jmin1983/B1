@@ -23,7 +23,7 @@
 using namespace BnD;
 
 B1RedisDirectClient::B1RedisDirectClient(B1RedisDirectClientMessageListener* messageListener, B1RedisDirectClientListener* listener,
-                                     int32 maxAliveCount, int32 aliveInterval)
+                                         int32 maxAliveCount, int32 aliveInterval)
     : B1BaseClient()
     , _maxAliveCount(maxAliveCount)
     , _aliveInterval(aliveInterval)
