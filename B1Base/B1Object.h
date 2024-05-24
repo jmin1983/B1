@@ -17,6 +17,7 @@
 #endif
 
 #include <B1Base/B1Archive.h>
+#include <B1Base/B1DataType.h>
 
 #include <vector>
 
@@ -26,19 +27,6 @@ namespace BnD {
     public:
         B1Object() {}
         virtual ~B1Object() {}
-    public:
-        typedef std::pair<const B1String, bool> DataBool;
-        typedef std::pair<const B1String, int8> DataInt8;
-        typedef std::pair<const B1String, int16> DataInt16;
-        typedef std::pair<const B1String, int32> DataInt32;
-        typedef std::pair<const B1String, int64> DataInt64;
-        typedef std::pair<const B1String, uint8> DataUint8;
-        typedef std::pair<const B1String, uint16> DataUint16;
-        typedef std::pair<const B1String, uint32> DataUint32;
-        typedef std::pair<const B1String, uint64> DataUint64;
-        typedef std::pair<const B1String, float32> DataFloat32;
-        typedef std::pair<const B1String, float64> DataFloat64;
-        typedef std::pair<const B1String, B1String> DataString;
     protected:
         template<typename T>
         void writeDataToArchive(const T& data, B1Archive* archive) const

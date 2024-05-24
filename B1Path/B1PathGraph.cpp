@@ -48,6 +48,11 @@ void B1PathGraph::getAllPathsRecursive(const Item& current, int32 idTo, uint32 p
     visited->at(current._id) = false;
 }
 
+void B1PathGraph::addItem(int32 id)
+{
+    addItem(id, std::set<int32>());
+}
+
 void B1PathGraph::addItem(int32 id, const std::set<int32>& discriminationIDs)
 {
     _items.insert(std::make_pair(id, Item(id, discriminationIDs)));

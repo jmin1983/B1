@@ -25,6 +25,8 @@ namespace BnD {
         void removeLastPathSeparator(B1String *path);
         void binaryToHexaString(const std::vector<uint8>& source, B1String* result);
         void hexaStringToBinary(const B1String& source, std::vector<uint8>* result);
+        bool vectorIntToString(const std::vector<int32>& source, B1String* result);
+        bool stringToVectorInt(const B1String& source, std::vector<int32>* result);
     }
 }   //  !BnD
 

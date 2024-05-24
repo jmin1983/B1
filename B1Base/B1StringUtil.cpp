@@ -11,6 +11,7 @@
 
 #include "B1Base.h"
 #include "B1StringUtil.h"
+#include "B1Archive.h"
 
 using namespace BnD;
 
@@ -74,4 +75,19 @@ void B1StringUtil::hexaStringToBinary(const B1String& source, std::vector<uint8>
         auto lower = source.substring(i + 1, 1);
         result->at(index++) = static_cast<uint8>((strtol(upper.cString(), NULL, 16) << 4) + strtol(lower.cString(), NULL, 16));
     }
+}
+
+bool B1StringUtil::vectorIntToString(const std::vector<int32>& source, B1String* result)
+{
+    B1Archive archive;
+    archive.writeData("B1VectorInt32", source);
+    return archive.toString(result);
+}
+
+bool B1StringUtil::stringToVectorInt(const B1String& source, std::vector<int32>* result)
+{
+    B1Archive archive;
+    archive.fromString(source);
+    std::vector<int32>().swap(*result);
+    return archive.readData("B1VectorInt32", result);
 }

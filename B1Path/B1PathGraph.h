@@ -57,6 +57,7 @@ namespace BnD {
     protected:
         void getAllPathsRecursive(const Item& current, int32 idTo, uint32 pathCost, std::map<int32, bool>* visited, Path* path, std::list<Path>* result) const;
     public:
+        void addItem(int32 id);
         void addItem(int32 id, const std::set<int32>& discriminationIDs);
         bool setEdge(int32 idFrom, int32 idTo, uint32 cost);
         bool setEdge(int32 idFrom, int32 idTo, const std::vector<uint32>& costs);
