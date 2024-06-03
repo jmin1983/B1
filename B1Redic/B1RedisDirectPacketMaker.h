@@ -41,6 +41,7 @@ namespace BnD {
         std::vector<uint8> makeDataExists(const B1String& key);
         std::vector<uint8> makeDataHmget(const B1String& key, const std::vector<B1String>& fields);
         std::vector<uint8> makeDataHgetall(const B1String& key);
+        std::vector<uint8> makeDataScan(const B1String& cursor, const B1String& pattern, int32 count = -1);
         std::vector<uint8> makeDataSmembers(const B1String& key);
         std::vector<uint8> makeDataIncr(const B1String& key);
         std::vector<uint8> makeDataHmset(const B1String& key, const std::map<B1String, B1String>& fieldValues);

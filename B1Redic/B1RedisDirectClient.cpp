@@ -217,6 +217,11 @@ bool B1RedisDirectClient::hgetall(const B1String& key, std::map<B1String, B1Stri
     return _readSession ? _readSession->hgetall(key, out) : false;
 }
 
+bool B1RedisDirectClient::scan(const B1String& pattern, std::list<B1String>* out, int32 count)
+{
+    return _readSession ? _readSession->scan(pattern, out, count) : false;
+}
+
 bool B1RedisDirectClient::smembers(const B1String& key, std::list<B1String>* out)
 {
     return _readSession ? _readSession->smembers(key, out) : false;

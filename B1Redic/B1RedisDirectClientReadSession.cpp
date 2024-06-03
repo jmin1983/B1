@@ -210,6 +210,44 @@ bool B1RedisDirectClientReadSession::waitData(std::list<B1String>* data)
     return true;
 }
 
+bool B1RedisDirectClientReadSession::scan(const B1String& cursor, const B1String& pattern, std::list<B1String>* out, int32 count)
+{
+    _lock->lock();
+    if (setWaitData() != true) {
+        _lock->unlock();
+        disconnect();
+        return false;
+    }
+    {
+        auto data = packetMaker()->makeDataScan(cursor, pattern, count);
+        if (writeData(data) != true) {
+            _lock->unlock();
+            disconnect();
+            return false;
+        }
+    }
+    {
+        std::list<B1String> data;
+        if (waitData(&data) != true) {
+            _lock->unlock();
+            disconnect();
+            return false;
+        }
+        _lock->unlock();
+        if (data.empty()) {
+            assert(false);
+            return true;
+        }
+        if (data.size() > 1) {
+            out->insert(out->end(), ++data.begin(), data.end());
+        }
+        if (data.front() != "0") {
+            scan(data.front(), pattern, out, count);
+        }
+    }
+    return true;
+}
+
 bool B1RedisDirectClientReadSession::exists(const B1String& key)
 {
     _lock->lock();
@@ -322,6 +360,12 @@ bool B1RedisDirectClientReadSession::hgetall(const B1String& key, std::map<B1Str
         }
     }
     return true;
+}
+
+bool B1RedisDirectClientReadSession::scan(const B1String& pattern, std::list<B1String>* out, int32 count)
+{
+    out->clear();
+    return scan("0", pattern, out, count);
 }
 
 bool B1RedisDirectClientReadSession::smembers(const B1String& key, std::list<B1String>* out)

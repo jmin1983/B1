@@ -103,6 +103,48 @@ std::vector<uint8> B1RedisDirectPacketMaker::makeDataHgetall(const B1String& key
     return makeDataRedisKey("HGETALL", key);
 }
 
+std::vector<uint8> B1RedisDirectPacketMaker::makeDataScan(const B1String& cursor, const B1String& pattern, int32 count)
+{
+    std::vector<uint8> data;
+    if (pattern.isEmpty()) {
+        if (count > 0) {
+            const size_t argsSize = 3;
+            data.reserve((argsSize + 1) * CONSTS_STRING_DEFAULT_LENGTH);
+            setBulkStringCommand("SCAN", argsSize, &data);
+            appendBulkStringCommand(cursor, &data);
+            appendBulkStringCommand("COUNT", &data);
+            appendBulkStringCommand(B1String::formatAs("%d", count), &data);
+        }
+        else {
+            const size_t argsSize = 1;
+            data.reserve((argsSize + 1) * CONSTS_STRING_DEFAULT_LENGTH);
+            setBulkStringCommand("SCAN", argsSize, &data);
+            appendBulkStringCommand(cursor, &data);
+        }
+    }
+    else {
+        if (count > 0) {
+            const size_t argsSize = 5;
+            data.reserve((argsSize + 1) * CONSTS_STRING_DEFAULT_LENGTH);
+            setBulkStringCommand("SCAN", argsSize, &data);
+            appendBulkStringCommand(cursor, &data);
+            appendBulkStringCommand("MATCH", &data);
+            appendBulkStringCommand(pattern, &data);
+            appendBulkStringCommand("COUNT", &data);
+            appendBulkStringCommand(B1String::formatAs("%d", count), &data);
+        }
+        else {
+            const size_t argsSize = 3;
+            data.reserve((argsSize + 1) * CONSTS_STRING_DEFAULT_LENGTH);
+            setBulkStringCommand("SCAN", argsSize, &data);
+            appendBulkStringCommand(cursor, &data);
+            appendBulkStringCommand("MATCH", &data);
+            appendBulkStringCommand(pattern, &data);
+        }
+    }
+    return data;
+}
+
 std::vector<uint8> B1RedisDirectPacketMaker::makeDataSmembers(const B1String& key)
 {
     return makeDataRedisKey("SMEMBERS", key);

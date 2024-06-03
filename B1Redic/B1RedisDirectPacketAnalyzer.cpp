@@ -87,9 +87,9 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedi
         (*totalLength) += (string.length() + 2);
     }
     if (stringLength < 0) {
-        string->from("");   //  The client library API should not return an empty string, but a nil object... 하지만 우리는 그냥 empty_string을 return하자.
+        string->from("");   //  The client library API should not return an empty string, but a nil object... but... just returns empty_string for convenience.
     }
-    else {  //  bulk_string은 getValueLengthFromData() 쓰면 안됨.
+    else {  //  do not use getValueLengthFromData() for bulk_string.
         std::vector<char> buffer(stringLength + 1, 0);
         memcpy(&buffer[0], data + *totalLength, stringLength);
         string->from(&buffer[0]);
@@ -210,7 +210,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyze
 B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyzeRedisBulkStrings(uint8* data, size_t size, size_t* pos)
 {
     B1String string;
-    size_t totalLength = 0; //  초기화 필수.
+    size_t totalLength = 0; //  must do initialization.
     {
         auto result = getRedisBulkString(data, size, &string, &totalLength);
         if (result != ANALYZE_RESULT_SUCCESS) {
@@ -225,7 +225,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyze
 B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyzeRedisArrays(uint8* data, size_t size, size_t* pos)
 {
     std::list<B1String> strings;
-    size_t totalLength = 0; //  초기화 필수.
+    size_t totalLength = 0; //  must do initialization.
     {
         auto result = getRedisArrayString(data, size, &strings, &totalLength);
         if (result != ANALYZE_RESULT_SUCCESS) {
