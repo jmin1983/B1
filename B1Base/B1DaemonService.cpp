@@ -16,9 +16,9 @@
 
 using namespace BnD;
 
-B1DaemonService::B1DaemonService(int32 version, B1String&& buildDate, B1String&& name)
+B1DaemonService::B1DaemonService(int32 serviceID, int32 version, B1String&& buildDate, B1String&& name)
     : B1DaemonDelegate()
-    , B1MainService(version, std::move(buildDate), std::move(name))
+    , B1MainService(serviceID, version, std::move(buildDate), std::move(name))
     , _daemon()
     , _stopService(false)
 {

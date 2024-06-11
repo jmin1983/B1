@@ -24,7 +24,7 @@
 namespace BnD {
     class B1MainService {
     public:
-        B1MainService(int32 version, B1String&& buildDate, B1String&& name);
+        B1MainService(int32 serviceID, int32 version, B1String&& buildDate, B1String&& name);
         virtual ~B1MainService();
     private:
         enum CONSTS {
@@ -36,6 +36,7 @@ namespace BnD {
             MAIN_SERVICE_STATUS_STOPPING,
             MAIN_SERVICE_STATUS_STOPPED,
         };
+        const int32 _serviceID;
         const int32 _version;
         const B1String _buildDate;
         const B1String _mainServiceName;
@@ -55,6 +56,7 @@ namespace BnD {
         B1String softwareRev() const;
         B1String softwareDate() const;
         B1String toString() const;
+        int32 serviceID() const { return _serviceID; }
         const B1String& mainServiceName() const { return _mainServiceName; }
     };
 }   //  !BnD

@@ -104,6 +104,8 @@ namespace BnD {
         static bool getCurrentTime(int64* second, int32* microSecond);
         static bool getSystemTime(int64* second, int32* microSecond);
         static void setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds);
+        static void setAdjustCurrentTimeAsIs(int64 adjustCurrentSeconds, int32 adjustCurrentMilliseconds);
+        static void getAdjustCurrentTimeAsIs(int64* adjustCurrentSeconds, int32* adjustCurrentMilliseconds);
         static void setCurrentTime(const B1Time &t);    //  not supported in Windows.
         static bool setCurrentTime(const B1String& millisecondsString); //  not supported in Windows.
         static bool parseTimeStringType1(const B1String& string, uint64* seconds, uint32* milliSeconds);    //  "YYYY/MM/DD HH:mm:ss.";  

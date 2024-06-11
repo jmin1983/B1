@@ -381,6 +381,18 @@ void B1Time::setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds)
     }
 }
 
+void B1Time::setAdjustCurrentTimeAsIs(int64 adjustCurrentSeconds, int32 adjustCurrentMicroSeconds)
+{
+    _adjustCurrentSeconds = adjustCurrentSeconds;
+    _adjustCurrentMicroSeconds = adjustCurrentMicroSeconds;
+}
+
+void B1Time::getAdjustCurrentTimeAsIs(int64* adjustCurrentSeconds, int32* adjustCurrentMicroSeconds)
+{
+    *adjustCurrentSeconds = _adjustCurrentSeconds;
+    *adjustCurrentMicroSeconds = _adjustCurrentMicroSeconds;
+}
+
 void B1Time::setCurrentTime(const B1Time &t)
 {
 #if defined(_WIN32)
