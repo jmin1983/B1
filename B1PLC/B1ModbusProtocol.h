@@ -52,6 +52,7 @@ namespace BnD {
             uint8 _unitID;          //  slave address(255 if not used).
         };
         struct PDU {    //  ProtocolDataUnit.
+            PDU() : _functionCode(0), _data() {}
             uint8 _functionCode;    //  function codes as in other variants.
             std::vector<uint8> _data;
         };

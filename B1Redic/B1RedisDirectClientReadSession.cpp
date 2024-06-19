@@ -464,6 +464,9 @@ bool B1RedisDirectClientReadSession::time(uint64* seconds, uint32* microseconds,
         if (seconds) {
             try {
                 *seconds = data.front().toUint64();
+                if (ignoreAdjustSecond != true) {
+                    *seconds += _adjustSeconds;
+                }
             }
             catch (...) {
                 return false;
@@ -476,9 +479,6 @@ bool B1RedisDirectClientReadSession::time(uint64* seconds, uint32* microseconds,
             catch (...) {
                 return false;
             }
-        }
-        if (ignoreAdjustSecond != true) {
-            *seconds += _adjustSeconds;
         }
     }
     return true;

@@ -326,7 +326,7 @@ bool B1SystemUtil::rebootSystem()
     }
 
     // Display the shutdown dialog box and start the countdown.
-    if (!InitiateSystemShutdown(NULL, NULL, 0, FALSE, TRUE)) {
+    if (!InitiateSystemShutdownEx(NULL, NULL, 0, FALSE, TRUE, SHTDN_REASON_MAJOR_APPLICATION)) {
         return false;
     }
 
