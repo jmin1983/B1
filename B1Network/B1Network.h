@@ -23,8 +23,6 @@
 #if defined(_WIN32) && !defined(_WIN32_WINNT)
 #define _WIN32_WINNT 0x0A00
 #endif
-#define BOOST_DATE_TIME_NO_LIB
-#define BOOST_REGEX_NO_LIB
 #include <boost/asio.hpp>
 
 #endif  // !_B1NETWORK_H

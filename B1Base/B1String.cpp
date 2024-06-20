@@ -20,6 +20,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/find.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/scoped_array.hpp>
 
 #if !defined(_WIN32)

@@ -26,7 +26,6 @@ set_target_properties(B1Base
 target_include_directories(B1Base
 	PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/include>
 )
 
 if(WIN32)
