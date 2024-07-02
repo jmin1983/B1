@@ -16,9 +16,9 @@
 
 using namespace BnD;
 
-bool B1Object::archiveToString(B1String* result) const
+bool B1Object::archiveToString(B1String* result, bool pretty) const
 {
     B1Archive archive;
     archive.fromObject(*this);
-    return archive.toString(result);
+    return archive.toString(result, pretty);
 }

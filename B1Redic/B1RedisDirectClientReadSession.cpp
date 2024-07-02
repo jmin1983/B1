@@ -210,7 +210,7 @@ bool B1RedisDirectClientReadSession::waitData(std::list<B1String>* data)
     return true;
 }
 
-bool B1RedisDirectClientReadSession::scan(const B1String& cursor, const B1String& pattern, std::list<B1String>* out, int32 count)
+bool B1RedisDirectClientReadSession::scan(const B1String& cursor, const B1String& pattern, std::set<B1String>* out, int32 count)
 {
     _lock->lock();
     if (setWaitData() != true) {
@@ -239,7 +239,7 @@ bool B1RedisDirectClientReadSession::scan(const B1String& cursor, const B1String
             return true;
         }
         if (data.size() > 1) {
-            out->insert(out->end(), ++data.begin(), data.end());
+            out->insert(++data.begin(), data.end());
         }
         if (data.front() != "0") {
             scan(data.front(), pattern, out, count);
@@ -362,7 +362,7 @@ bool B1RedisDirectClientReadSession::hgetall(const B1String& key, std::map<B1Str
     return true;
 }
 
-bool B1RedisDirectClientReadSession::scan(const B1String& pattern, std::list<B1String>* out, int32 count)
+bool B1RedisDirectClientReadSession::scan(const B1String& pattern, std::set<B1String>* out, int32 count)
 {
     out->clear();
     return scan("0", pattern, out, count);

@@ -80,7 +80,7 @@ namespace BnD {
         virtual void archiveTo(B1Archive* archive) const {}
         virtual void unarchiveFrom(const B1Archive& archive) {}
     public:
-        bool archiveToString(B1String* result) const;
+        bool archiveToString(B1String* result, bool pretty = false) const;
     };
 }   //  !BnD
 
