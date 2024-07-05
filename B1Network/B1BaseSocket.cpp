@@ -93,7 +93,7 @@ void B1BaseSocket::resetImpl()
 
 void B1BaseSocket::cleanUp()
 {
-    if (_asioSocket->is_open()) {
+    if (_asioSocket && _asioSocket->is_open()) {
         B1LOG("asio still open! -> close");
         _asioSocket->close();
     }
