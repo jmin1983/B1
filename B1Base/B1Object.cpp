@@ -22,3 +22,10 @@ bool B1Object::archiveToString(B1String* result, bool pretty) const
     archive.fromObject(*this);
     return archive.toString(result, pretty);
 }
+
+void B1Object::unarchiveFromString(const B1String& string)
+{
+    B1Archive archive;
+    archive.fromString(string);
+    archive.toObject(this);
+}

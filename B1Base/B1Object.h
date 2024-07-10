@@ -81,6 +81,7 @@ namespace BnD {
         virtual void unarchiveFrom(const B1Archive& archive) {}
     public:
         bool archiveToString(B1String* result, bool pretty = false) const;
+        void unarchiveFromString(const B1String& string);
     };
 }   //  !BnD
 
