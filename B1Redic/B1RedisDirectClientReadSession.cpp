@@ -484,42 +484,6 @@ bool B1RedisDirectClientReadSession::time(uint64* seconds, uint32* microseconds,
     return true;
 }
 
-void B1RedisDirectClientReadSession::time(B1String* result, bool useTimeLength17)
-{
-    uint64 seconds = 0;
-    uint32 microseconds = 0;
-    if (time(&seconds, &microseconds) != true) {
-        B1LOG("can not get time from Server");
-        *result = B1Time::currentTimeInMilliseconds();
-        if (useTimeLength17) {
-            result->append("0");
-        }
-    }
-    else {
-        B1Time t(seconds);
-        if (useTimeLength17) {
-            result->format("%04d%02d%02d%02d%02d%02d%03d", t.year(), t.month(), t.day(), t.hour(), t.minute(), t.second(), static_cast<uint32>(microseconds / 1000));
-        }
-        else {
-            result->format("%04d%02d%02d%02d%02d%02d%02d", t.year(), t.month(), t.day(), t.hour(), t.minute(), t.second(), static_cast<uint32>(microseconds / 10000));
-        }
-    }
-}
-
-void B1RedisDirectClientReadSession::timeMMDDHHmmSSnnnn(B1String* result)
-{
-    uint64 seconds = 0;
-    uint32 microseconds = 0;
-    if (time(&seconds, &microseconds) != true) {
-        B1LOG("Can not get time from Server");
-        *result = B1Time::currentTimeMMDDHHmmSSnnnn();
-    }
-    else {
-        B1Time t(seconds);
-        result->format("%02d%02d%02d%02d%02d%04d", t.month(), t.day(), t.hour(), t.minute(), t.second(), static_cast<uint32>(microseconds / 100));
-    }
-}
-
 bool B1RedisDirectClientReadSession::shutdownRemoteRedis()
 {
     std::vector<B1String> args(1);

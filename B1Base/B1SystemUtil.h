@@ -36,8 +36,8 @@ namespace BnD {
         B1String getFileNameOnly();
         B1String getCurrentDirectory();
         B1String getSystemID();
-        int getProcessID();
         int getProcessID(const B1String& processName);
+        uint32 getCurrentProcessID();
         uint32 getCurrentThreadID();
         uint32 createProcess(const B1String& process);
         uint32 createProcessArg(const B1String& process, const B1String& arg);

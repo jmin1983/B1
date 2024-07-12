@@ -253,24 +253,6 @@ B1String B1Time::currentTimeInMicroseconds()
     return timeInMicrosecond(second, microSecond);
 }
 
-B1String B1Time::currentTimeMMDDHHmmSSnnnn()
-{
-    int64 second = 0;
-    int32 microSecond = 0;
-    if (getCurrentTime(&second, &microSecond) != true) {
-        return B1String();
-    }
-    time_t second_ = static_cast<time_t>(second);
-    tm* crntTime = localtime(static_cast<const time_t*>(&second_));
-    if (NULL == crntTime) {
-        return B1String();
-    }
-    return B1String::formatAs("%02d%02d%02d%02d%02d%04d",
-                                crntTime->tm_mon + 1, crntTime->tm_mday,
-                                crntTime->tm_hour, crntTime->tm_min, crntTime->tm_sec,
-                                microSecond / 100);
-}
-
 B1String B1Time::timeInMillisecond(int64 second, int32 microSecond, bool pretty)
 {
     time_t second_ = static_cast<time_t>(second);

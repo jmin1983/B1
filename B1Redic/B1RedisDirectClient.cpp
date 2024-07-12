@@ -237,20 +237,6 @@ bool B1RedisDirectClient::time(uint64* seconds, uint32* microseconds, bool ignor
     return _readSession ? _readSession->time(seconds, microseconds, ignoreAdjustSecond) : false;
 }
 
-void B1RedisDirectClient::time(B1String* result, bool useTimeLength17)
-{
-    if (_readSession) {
-        _readSession->time(result, useTimeLength17);
-    }
-}
-
-void B1RedisDirectClient::timeMMDDHHmmSSnnnn(B1String* result)
-{
-    if (_readSession) {
-        _readSession->timeMMDDHHmmSSnnnn(result);
-    }
-}
-
 bool B1RedisDirectClient::shutdownRemoteRedis()
 {
     return _readSession ? _readSession->shutdownRemoteRedis() : false;

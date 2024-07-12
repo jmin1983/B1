@@ -273,11 +273,6 @@ B1String B1SystemUtil::getSystemID()
     return result;
 }
 
-int B1SystemUtil::getProcessID()
-{
-    return getpid();
-}
-
 int B1SystemUtil::getProcessID(const B1String& processName)
 {
     int pid = -1;
@@ -315,6 +310,11 @@ int B1SystemUtil::getProcessID(const B1String& processName)
     }
     closedir(dp);
     return pid;
+}
+
+uint32 B1SystemUtil::getCurrentProcessID()
+{
+    return getpid();
 }
 
 uint32 B1SystemUtil::getCurrentThreadID()

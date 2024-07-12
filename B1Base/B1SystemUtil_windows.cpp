@@ -201,11 +201,6 @@ B1String B1SystemUtil::getSystemID()
     return B1String(info.szHwProfileGuid);
 }
 
-int B1SystemUtil::getProcessID()
-{
-    return ::GetCurrentProcessId();
-}
-
 int B1SystemUtil::getProcessID(const B1String& processName)
 {
     HANDLE processSnap;
@@ -230,6 +225,11 @@ int B1SystemUtil::getProcessID(const B1String& processName)
 
     CloseHandle(processSnap);
     return -1;
+}
+
+uint32 B1SystemUtil::getCurrentProcessID()
+{
+    return static_cast<uint32>(::GetCurrentProcessId());
 }
 
 uint32 B1SystemUtil::getCurrentThreadID()

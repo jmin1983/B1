@@ -97,7 +97,6 @@ namespace BnD {
         static B1String currentTimeInSeconds(bool pretty = false);
         static B1String currentTimeInMilliseconds(bool pretty = false);
         static B1String currentTimeInMicroseconds();    //  pretty only.
-        static B1String currentTimeMMDDHHmmSSnnnn();
         static B1String timeInMillisecond(int64 second, int32 microSecond, bool pretty = false);
         static B1String timeInMicrosecond(int64 second, int32 microSecond); //  pretty only.
         static B1String timeInSecond(int64 second, bool pretty = false);
