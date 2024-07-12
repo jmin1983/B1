@@ -71,16 +71,6 @@ B1WebSocketReadWriteImpl* B1WebSocketServerSession::readWriteImpl() const
     return static_cast<B1WebSocketReadWriteImpl*>(B1BaseServerSession::readWriteImpl());
 }
 
-void B1WebSocketServerSession::writeBinary(std::vector<uint8>&& data) const
-{
-    readWriteImpl()->addWriteBinary(std::move(data));
-}
-
-void B1WebSocketServerSession::writeText(B1String&& text) const
-{
-    readWriteImpl()->addWriteText(std::move(text));
-}
-
 void B1WebSocketServerSession::acceptComplete(const boost::system::error_code& error)
 {
     if (error) {
@@ -97,4 +87,14 @@ void B1WebSocketServerSession::acceptComplete(const boost::system::error_code& e
 void B1WebSocketServerSession::acceptWebSocket(const B1HttpMessage& initialMessage)
 {
     implAcceptWebSocket(initialMessage);
+}
+
+void B1WebSocketServerSession::writeBinary(std::vector<uint8>&& data) const
+{
+    readWriteImpl()->addWriteBinary(std::move(data));
+}
+
+void B1WebSocketServerSession::writeText(B1String&& text) const
+{
+    readWriteImpl()->addWriteText(std::move(text));
 }

@@ -43,11 +43,11 @@ namespace BnD {
     private:
         B1WebSocketReadWriteImpl* readWriteImpl() const;
     protected:
-        void writeBinary(std::vector<uint8>&& data) const;
-        void writeText(B1String&& text) const;
         void acceptComplete(const boost::system::error_code& error);
     public:
         void acceptWebSocket(const B1HttpMessage& initialMessage);
+        void writeBinary(std::vector<uint8>&& data) const;
+        void writeText(B1String&& text) const;
     };
 }   //  !BnD
 
