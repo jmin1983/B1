@@ -35,13 +35,12 @@ B1GEMServerSession::~B1GEMServerSession()
 void B1GEMServerSession::onSelectCompleted(uint16 sessionID, const std::vector<uint8>& systemBytes)
 {
     writeLog("onSelectCompleted");
-    implSendMessageS1F13(sessionID, systemBytes);
 }
 
 bool B1GEMServerSession::onRecvHSMSData(uint8 stream, uint8 function)
 {
     if (1 == stream && (13 == function || 14 == function)) {
-        return true;    //  S1F13 항상 허용.
+        return true;    //  S1F13 is always allowed.
     }
     if (isCommunicating() != true) {
         writeLog("Communications State is NOT COMMUNICATING");
