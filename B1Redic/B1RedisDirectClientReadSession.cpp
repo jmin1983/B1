@@ -122,7 +122,7 @@ void B1RedisDirectClientReadSession::implOnRecvRedisArrays(const std::list<B1Str
         for (const auto& string : strings) {
             log.appendf("[%s]", string.cString());
         }
-        B1LOG("%s", log.cString());
+        B1LOG(log.cString());
         assert(false);
         return;
     }

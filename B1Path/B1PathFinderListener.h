@@ -20,8 +20,8 @@ namespace BnD {
     class B1PathInfo;
     class B1PathFinderListener {
     public:
-        virtual void onPathFinderResult(int32 taskID, std::shared_ptr<B1PathInfo> result, const void *param) {}
-        virtual void onPathFinderFail(int32 taskID, int32 zoneIDFrom, int32 zoneIDTo, const std::vector<int32> &junctions, const void *param) {}
+        virtual void onPathFinderResult(int64 taskID, std::shared_ptr<B1PathInfo> result, const void *param) {}
+        virtual void onPathFinderFail(int64 taskID, int32 zoneIDFrom, int32 zoneIDTo, const std::vector<int32> &junctions, const void *param) {}
     };
 }   //  !BnD
 

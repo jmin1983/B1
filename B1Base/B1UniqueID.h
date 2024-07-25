@@ -31,14 +31,14 @@ namespace BnD {
     private:
         FILE* _fp;
         B1Lock _lock;
-        int32 _lastID;
-        std::pair<int32, int32> _range; //  pair<begin, end> begin <= x < end.
+        int64 _lastID;
+        std::pair<int64, int64> _range; //  pair<begin, end> begin <= x < end.
     private:
         bool writeLastIDToFile();
     public:
-        bool initialize(int32 begin, int32 end, const B1String& dirPath, const B1String& fileName);
+        bool initialize(int64 begin, int64 end, const B1String& dirPath, const B1String& fileName);
         void finalize();
-        int32 generateNextID();
+        int64 generateNextID();
     };
 }   //  !BnD
 

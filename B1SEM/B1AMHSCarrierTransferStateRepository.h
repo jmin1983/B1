@@ -33,7 +33,7 @@ namespace BnD {
     protected:
         B1AMHSCarrierTransferStateRepositoryListener* _listener;
         std::shared_ptr<B1RecursiveLock> _lock;
-        std::map<int32, std::shared_ptr<B1AMHSCarrierTransferState> > _data;  //  map<task_id, data>
+        std::map<int64, std::shared_ptr<B1AMHSCarrierTransferState> > _data;  //  map<task_id, data>
     protected:
         virtual bool implInitialize() { return true; }
         virtual void implFinalize() {}

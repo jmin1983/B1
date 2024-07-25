@@ -19,21 +19,21 @@
 namespace BnD {
     struct B1GEMDataValueCondition {
         B1GEMDataValueCondition() : _taskID(-1), _locationID(-1), _hostID(-1) {}
-        B1GEMDataValueCondition(int32 taskID, int32 locationID, int32 hostID = -1) : _taskID(taskID), _locationID(locationID), _hostID(hostID) {}
+        B1GEMDataValueCondition(int64 taskID, int32 locationID, int32 hostID = -1) : _taskID(taskID), _locationID(locationID), _hostID(hostID) {}
         virtual ~B1GEMDataValueCondition() {}
-        const int32 _taskID;
+        const int64 _taskID;
         const int32 _locationID;
         const int32 _hostID;
-        int32 taskID() const { return _taskID; }
+        int64 taskID() const { return _taskID; }
         int32 locationID() const { return _locationID; }
         int32 hostID() const { return _hostID; }
         bool hasValidTaskID() const { return _taskID > -1; }
         bool hasValidLocationID() const { return _locationID > -1; }
         bool hasValidHostID() const { return _hostID > -1; }
-        B1String toString() const { return B1String::formatAs("[%d][%d][%d]", taskID(), locationID(), hostID()); }
+        B1String toString() const { return B1String::formatAs("[%lld][%d][%d]", taskID(), locationID(), hostID()); }
     };
     struct B1GEMDataValueConditionTaskID : B1GEMDataValueCondition {
-        B1GEMDataValueConditionTaskID(int32 taskID) : B1GEMDataValueCondition(taskID, -1, -1) {}
+        B1GEMDataValueConditionTaskID(int64 taskID) : B1GEMDataValueCondition(taskID, -1, -1) {}
     };
     struct B1GEMDataValueConditionLocationID : B1GEMDataValueCondition {
         B1GEMDataValueConditionLocationID(int32 locationID) : B1GEMDataValueCondition(-1, locationID, -1) {}

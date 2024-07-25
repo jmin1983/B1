@@ -41,7 +41,7 @@ namespace BnD {
                                  B1AMHSStorageLocationStateRepository* storageLocationStateRepository,
                                  B1AMHSTSSCStateRepository* systemStateRepository,
                                  B1AMHSVehicleStateRepository* vehicleStateRepository,
-                                 int32 taskID, int32 locationID, int32 hostID = -1)
+                                 int64 taskID, int32 locationID, int32 hostID = -1)
             : B1GEMDataValueCondition(taskID, locationID, hostID)
             , _carrierTransferStateRepository(carrierTransferStateRepository)
             , _portStateRepository(portStateRepository)
@@ -72,7 +72,7 @@ namespace BnD {
                                        B1AMHSStorageLocationStateRepository* storageLocationStateRepository,
                                        B1AMHSTSSCStateRepository* systemStateRepository,
                                        B1AMHSVehicleStateRepository* vehicleStateRepository,
-                                       int32 taskID)
+                                       int64 taskID)
             : B1AMHSDataValueCondition(carrierTransferStateRepository,
                                        portStateRepository,
                                        storageLocationStateRepository,

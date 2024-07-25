@@ -41,7 +41,7 @@ bool B1UniqueID::writeLastIDToFile()
     return true;
 }
 
-bool B1UniqueID::initialize(int32 begin, int32 end, const B1String& dirPath, const B1String& fileName)
+bool B1UniqueID::initialize(int64 begin, int64 end, const B1String& dirPath, const B1String& fileName)
 {
     if (_fp != NULL) {
         return false;
@@ -84,9 +84,9 @@ void B1UniqueID::finalize()
     }
 }
 
-int32 B1UniqueID::generateNextID()
+int64 B1UniqueID::generateNextID()
 {
-    int32 nextID = -1;
+    int64 nextID = -1;
     {
         B1AutoLock al(_lock);
         if (++_lastID >= _range.second) {
