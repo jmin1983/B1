@@ -43,6 +43,7 @@ namespace BnD {
     protected:
         bool implRead() final;
         bool implOnReadComplete(size_t receivedBytes) final;    //  return false if there are no more data to read.
+        void implOnWriteFailed(int32 reason) final;
         void implOnWriteComplete(size_t transferredBytes) final;
     protected:
         B1ArrayBufferReadWriteImplListener* listener() const;

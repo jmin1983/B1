@@ -59,6 +59,7 @@ void B1BaseReadWriteImpl::writeComplete(const boost::system::error_code& error, 
                 baseSocketImpl()->peerAddress().cString(), baseSocketImpl()->peerPort(), baseSocketImpl()->localPort());
             baseSocketImpl()->close();
         }
+        implOnWriteFailed(error.value());
         if (_listener) {
             _listener->onWriteFailed(error.value());
         }

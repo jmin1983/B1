@@ -31,7 +31,7 @@ namespace BnD {
     class B1String;
     B1String b1log(const char* format, ...);
     B1String b1log_cl(const std::string& className, const char* format, ...);
-    bool testV1FileLog();
+    bool testB1FileLog();
     void b1log(const B1String& string);
     void setLogger(B1FileLog *fileLogger);
     void setLoggerCallback(b1log_callback_t callback, void* param = NULL);

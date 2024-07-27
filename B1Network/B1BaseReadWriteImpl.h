@@ -41,6 +41,7 @@ namespace BnD {
         virtual B1BaseSocketImpl* createBaseSocketImpl();
         virtual bool implRead() = 0;
         virtual bool implOnReadComplete(size_t receivedBytes) = 0;  //  return false if there are no more data to read.
+        virtual void implOnWriteFailed(int32 reason) {}
         virtual void implOnWriteComplete(size_t transferredBytes) {}
     protected:
         B1BaseReadWriteImplListener* listener() const { return _listener; }

@@ -49,7 +49,7 @@ BnD::b1log_callback_t g_callback = NULL;
 void* g_callbackParam = NULL;
 BnD::B1FileLog* g_fileLogger = NULL;
 
-bool BnD::testV1FileLog()
+bool BnD::testB1FileLog()
 {
     return g_fileLogger && g_fileLogger->testWriteLogFile();
 }

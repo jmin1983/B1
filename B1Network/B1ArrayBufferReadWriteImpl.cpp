@@ -54,6 +54,13 @@ bool B1ArrayBufferReadWriteImpl::implOnReadComplete(size_t receivedBytes)
     return true;    //  continue read();
 }
 
+void B1ArrayBufferReadWriteImpl::implOnWriteFailed(int32 reason)
+{
+    B1AutoLock al(*_dataToWriteLock);
+    _dataToWrite.clear();
+    _dataWriting = false;
+}
+
 void B1ArrayBufferReadWriteImpl::implOnWriteComplete(size_t transferredBytes)
 {
     if (auto l = listener()) {
@@ -82,6 +89,10 @@ auto B1ArrayBufferReadWriteImpl::listener() const -> B1ArrayBufferReadWriteImplL
 
 void B1ArrayBufferReadWriteImpl::writeData(const uint8* data, size_t size)
 {
+    if (asioSocketImpl()->asioSocket()->is_open() != true) {
+        B1LOG("socket is not opened!");
+        assert(false);
+    }
     boost::asio::async_write(*asioSocketImpl()->asioSocket(), boost::asio::buffer(data, size),
                              boost::bind(&B1ArrayBufferReadWriteImpl::writeComplete, this,
                                          boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
