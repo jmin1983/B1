@@ -233,22 +233,34 @@ B1String B1Time::currentTimeInSeconds(bool pretty)
     return timeInSecond(second, pretty);
 }
 
-B1String B1Time::currentTimeInMilliseconds(bool pretty)
+B1String B1Time::currentTimeInMilliseconds(bool pretty, int64* currentSecond, int32* currentMicroSecond)
 {
     int64 second = 0;
     int32 microSecond = 0;
     if (getCurrentTime(&second, &microSecond) != true) {
         return B1String();
     }
+    if (currentSecond) {
+        *currentSecond = second;
+    }
+    if (currentMicroSecond) {
+        *currentMicroSecond = microSecond;
+    }
     return timeInMillisecond(second, microSecond, pretty);
 }
 
-B1String B1Time::currentTimeInMicroseconds()
+B1String B1Time::currentTimeInMicroseconds(int64* currentSecond, int32* currentMicroSecond)
 {
     int64 second = 0;
     int32 microSecond = 0;
     if (getCurrentTime(&second, &microSecond) != true) {
         return B1String();
+    }
+    if (currentSecond) {
+        *currentSecond = second;
+    }
+    if (currentMicroSecond) {
+        *currentMicroSecond = microSecond;
     }
     return timeInMicrosecond(second, microSecond);
 }
@@ -417,114 +429,6 @@ bool B1Time::setCurrentTime(const B1String& millisecondsString)
     int result = settimeofday(&tv, 0/*&tz*/);
     return 0 == result;
 #endif
-}
-
-bool B1Time::parseTimeStringType1(const B1String& string, uint64* seconds, uint32* milliSeconds)
-{
-    if (string.length() != 23) {
-        assert(false);
-        return false;
-    }
-    try {
-        int32 YY = string.substring(0, 4).toInt32();
-        int32 MM = string.substring(5, 2).toInt32();
-        int32 DD = string.substring(8, 2).toInt32();
-        int32 HH = string.substring(11, 2).toInt32();
-        int32 mm = string.substring(14, 2).toInt32();
-        int32 ss = string.substring(17, 2).toInt32();
-        int32 fff = string.substring(20, 3).toInt32();
-        if (seconds) {
-            *seconds = B1Time(YY, MM, DD, HH, mm, ss).to_time_t();
-        }
-        if (milliSeconds) {
-            *milliSeconds = fff * 100;
-        }
-    }
-    catch (...) {
-        return false;
-    }
-    return true;
-}
-
-bool B1Time::parseTimeStringType2(const B1String& string, uint64* seconds, uint32* milliSeconds)
-{
-    if (string.length() != 22) {
-        assert(false);
-        return false;
-    }
-    try {
-        int32 YY = string.substring(0, 4).toInt32();
-        int32 MM = string.substring(5, 2).toInt32();
-        int32 DD = string.substring(8, 2).toInt32();
-        int32 HH = string.substring(11, 2).toInt32();
-        int32 mm = string.substring(14, 2).toInt32();
-        int32 ss = string.substring(17, 2).toInt32();
-        int32 fff = string.substring(20, 2).toInt32();
-        if (seconds) {
-            *seconds = B1Time(YY, MM, DD, HH, mm, ss).to_time_t();
-        }
-        if (milliSeconds) {
-            *milliSeconds = fff * 100;
-        }
-    }
-    catch (...) {
-        return false;
-    }
-    return true;
-}
-
-bool B1Time::parseTimeString16(const B1String& string, uint64* seconds, uint32* milliSeconds)
-{
-    if (string.length() != 16) {
-        assert(false);
-        return false;
-    }
-    try {
-        int32 YY = string.substring(0, 4).toInt32();
-        int32 MM = string.substring(4, 2).toInt32();
-        int32 DD = string.substring(6, 2).toInt32();
-        int32 HH = string.substring(8, 2).toInt32();
-        int32 mm = string.substring(10, 2).toInt32();
-        int32 ss = string.substring(12, 2).toInt32();
-        int32 fff = string.substring(14, 2).toInt32();
-        if (seconds) {
-            *seconds = B1Time(YY, MM, DD, HH, mm, ss).to_time_t();
-        }
-        if (milliSeconds) {
-            *milliSeconds = fff * 100;
-        }
-    }
-    catch (...) {
-        return false;
-    }
-    return true;
-}
-
-bool B1Time::parseTimeString17(const B1String& string, uint64* seconds, uint32* milliSeconds)
-{    
-    if (string.length() != 17) {
-        assert(false);
-        return false;
-    }
-    try {
-        int32 YY = string.substring(0, 4).toInt32();
-        int32 MM = string.substring(4, 2).toInt32();
-        int32 DD = string.substring(6, 2).toInt32();
-        int32 HH = string.substring(8, 2).toInt32();
-        int32 mm = string.substring(10, 2).toInt32();
-        int32 ss = string.substring(12, 2).toInt32();
-        int32 fff = string.substring(14, 3).toInt32();
-        if (seconds) {
-            *seconds = B1Time(YY, MM, DD, HH, mm, ss).to_time_t();
-        }
-        if (milliSeconds) {
-            *milliSeconds = fff * 100;
-        }
-    }
-    catch (...) {
-        return false;
-    }
-    return true;
 }
 
 bool BnD::isSameDate(const B1Time& t1, const B1Time& t2)

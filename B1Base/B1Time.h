@@ -95,8 +95,8 @@ namespace BnD {
         static int32 daysInMonth(int32 year, int32 month);
         static B1Time currentTime();
         static B1String currentTimeInSeconds(bool pretty = false);
-        static B1String currentTimeInMilliseconds(bool pretty = false);
-        static B1String currentTimeInMicroseconds();    //  pretty only.
+        static B1String currentTimeInMilliseconds(bool pretty = false, int64* currentSecond = NULL, int32* currentMicroSecond = NULL);
+        static B1String currentTimeInMicroseconds(int64* currentSecond = NULL, int32* currentMicroSecond = NULL);   //  pretty only.
         static B1String timeInMillisecond(int64 second, int32 microSecond, bool pretty = false);
         static B1String timeInMicrosecond(int64 second, int32 microSecond); //  pretty only.
         static B1String timeInSecond(int64 second, bool pretty = false);
@@ -107,10 +107,6 @@ namespace BnD {
         static void getAdjustCurrentTimeAsIs(int64* adjustCurrentSeconds, int32* adjustCurrentMilliseconds);
         static void setCurrentTime(const B1Time &t);    //  not supported in Windows.
         static bool setCurrentTime(const B1String& millisecondsString); //  not supported in Windows.
-        static bool parseTimeStringType1(const B1String& string, uint64* seconds, uint32* milliSeconds);    //  "YYYY/MM/DD HH:mm:ss.";  
-        static bool parseTimeStringType2(const B1String& string, uint64* seconds, uint32* milliSeconds);    //  "YYYY-MM-DD_HH:mm:ss.fff";
-        static bool parseTimeString16(const B1String& string, uint64* seconds, uint32* milliSeconds);       //  YYYYMMDDHHmmssff
-        static bool parseTimeString17(const B1String& string, uint64* seconds, uint32* milliSeconds);       //  YYYYMMDDHHmmssfff
     public:
         B1Time& operator=(const B1Time &t) { set(t); return *this; }
         bool operator==(const B1Time &t) const { return _value == t._value; }
