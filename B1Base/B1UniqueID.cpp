@@ -53,7 +53,7 @@ bool B1UniqueID::initialize(int64 begin, int64 end, const B1String& dirPath, con
     _range.second = end;
     const B1String fileFullPath = dirPath + "/" + fileName;
     if (B1SystemUtil::isFileExist(fileFullPath)) {
-        FILE* fp = fopen(fileFullPath.cString(), "r");
+        FILE* fp = fopen(fileFullPath.cString(), "rb");
         if (NULL == fp) {
             return false;
         }
@@ -65,7 +65,7 @@ bool B1UniqueID::initialize(int64 begin, int64 end, const B1String& dirPath, con
     else {
         B1SystemUtil::createDirectory(dirPath);
     }
-    _fp = fopen(fileFullPath.cString(), "w");
+    _fp = fopen(fileFullPath.cString(), "wb");
     if (NULL == _fp) {
         return false;
     }
