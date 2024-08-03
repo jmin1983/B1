@@ -24,7 +24,7 @@
 namespace BnD {
     class B1MainService {
     public:
-        B1MainService(int32 serviceID, int32 version, B1String&& buildDate, B1String&& name);
+        B1MainService(int32 serviceID, int32 version, B1String&& buildDate, B1String&& serviceName, B1String&& systemName);
         virtual ~B1MainService();
     private:
         enum CONSTS {
@@ -40,6 +40,7 @@ namespace BnD {
         const int32 _version;
         const B1String _buildDate;
         const B1String _mainServiceName;
+        const B1String _systemServiceName;
         MAIN_SERVICE_STATUS _mainServiceStatus;
         B1Condition _mainCondition;
     protected:

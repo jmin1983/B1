@@ -23,7 +23,7 @@ namespace BnD {
     class B1DaemonService : protected B1DaemonDelegate
                           , public B1MainService {
     public:
-        B1DaemonService(int32 serviceID, int32 version, B1String&& buildDate, B1String&& name);
+        B1DaemonService(int32 serviceID, int32 version, B1String&& buildDate, B1String&& serviceName, B1String&& systemName);
         virtual ~B1DaemonService();
     private:
         std::shared_ptr<class B1Daemon> _daemon;

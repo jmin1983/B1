@@ -18,11 +18,12 @@
 
 using namespace BnD;
 
-B1MainService::B1MainService(int32 serviceID, int32 version, B1String&& buildDate, B1String&& name)
+B1MainService::B1MainService(int32 serviceID, int32 version, B1String&& buildDate, B1String&& serviceName, B1String&& systemName)
     : _serviceID(serviceID)
     , _version(version)
     , _buildDate(buildDate)
-    , _mainServiceName(name)
+    , _mainServiceName(serviceName)
+    , _systemServiceName(systemName)
     , _mainServiceStatus(MAIN_SERVICE_STATUS_STOPPED)
     , _mainCondition()
 {
@@ -36,6 +37,7 @@ std::map<B1String, B1String> B1MainService::makeVersionInfoMap() const
 {
     std::map<B1String, B1String> values;
     values.insert(std::make_pair("ServiceName", _mainServiceName.copy()));
+    values.insert(std::make_pair("SystemName", _systemServiceName.copy()));
     values.insert(std::make_pair("ServiceID", B1String::formatAs("%d", serviceID())));
     values.insert(std::make_pair("BuildNum", softwareRev()));
     values.insert(std::make_pair("BuildDate", softwareDate()));
