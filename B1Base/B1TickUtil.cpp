@@ -34,5 +34,9 @@ uint64 B1TickUtil::currentTick()
 
 uint64 B1TickUtil::diffTick(uint64 t1, uint64 t2)
 {
+#if defined(__arm__)
+    return (t1 <= t2) ? t2 - t1 : (std::numeric_limits<uint32>::max() - t1) + t2 + 1;
+#else
     return (t1 < t2) ? t2 - t1 : t1 - t2;
+#endif
 }
