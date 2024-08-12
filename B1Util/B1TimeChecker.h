@@ -20,6 +20,7 @@ namespace BnD {
     class B1TimeChecker {
     public:
         B1TimeChecker();
+        virtual ~B1TimeChecker() {}
     protected:
         bool _started;
         uint64 _interval;
