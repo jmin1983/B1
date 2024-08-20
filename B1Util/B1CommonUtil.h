@@ -16,9 +16,12 @@
 #pragma once
 #endif
 
+#include <vector>
+
 namespace BnD {
     namespace B1CommonUtil {
-        int32 isInRange(float64 l, float64 r, float64 range);
+        int32 isInRange(float64 l, float64 r, float64 range);   //  return -1 if l > r, return 1 if l < r, return 0 if same.
+        std::vector<std::vector<uint8> > splitData(std::vector<uint8>&& data, size_t limitSize);
     };
 }   //  !BnD
 

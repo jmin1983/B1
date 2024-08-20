@@ -48,7 +48,11 @@ void B1BaseSocket::close()
     }
     else {
         if (_asioSocket) {
-            _asioSocket->close();
+            try {
+                _asioSocket->close();
+            }
+            catch (...) {
+            }
         }
     }
 }
@@ -95,7 +99,11 @@ void B1BaseSocket::cleanUp()
 {
     if (_asioSocket && _asioSocket->is_open()) {
         B1LOG("asio still open! -> close");
-        _asioSocket->close();
+        try {
+            _asioSocket->close();
+        }
+        catch (...) {
+        }
     }
     _asioSocket.reset();
 }

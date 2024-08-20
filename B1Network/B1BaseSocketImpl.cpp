@@ -13,7 +13,16 @@
 #include "B1BaseSocketImpl.h"
 #include "B1IOContext.h"
 
+#include <B1Base/B1Lock.h>
+
 using namespace BnD;
+
+B1ASIOSocketImpl::B1ASIOSocketImpl()
+    : B1BaseSocketImpl()
+    , _asioSocket(NULL)
+    , _closeLock(std::make_shared<B1Lock>())
+{
+}
 
 void B1ASIOSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket)
 {
@@ -28,12 +37,18 @@ auto B1ASIOSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip::
 
 void B1ASIOSocketImpl::implClose()
 {
+    B1AutoLock al(*_closeLock);
     if (_asioSocket && _asioSocket->is_open()) {
         try {
             _asioSocket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
         }
-        catch (...) {}
-        _asioSocket->close();
+        catch (...) {
+        }
+        try {
+            _asioSocket->close();
+        }
+        catch (...) {
+        }
     }
 }
 

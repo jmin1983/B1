@@ -21,7 +21,7 @@ B1BaseSession::B1BaseSession(B1BaseSocket* baseSocket)
     : _firstConnectedProcess(false)
     , _baseSocket(baseSocket)   //  can be NULL.
     , _disconnectingReason(0)
-    , _lastConnectionStatus(STATUS_NONE)
+    , _wasConnected(false)
     , _connectionStatus(STATUS_NONE)
     , _sessionHandleID(-1)
     , _readWriteImpl()
@@ -36,7 +36,7 @@ B1BaseSession::B1BaseSession(const B1BaseSession& baseSession, bool firstConnect
     : _firstConnectedProcess(firstConnectedProcess)
     , _baseSocket(baseSession._baseSocket)
     , _disconnectingReason(0)
-    , _lastConnectionStatus(STATUS_NONE)
+    , _wasConnected(false)
     , _connectionStatus(baseSession._connectionStatus)
     , _sessionHandleID(-1)
     , _readWriteImpl()
@@ -48,14 +48,15 @@ void B1BaseSession::setSessionStatusDisconnected()
     const auto previousStatus = _connectionStatus;
     const auto newStatus = STATUS_DISCONNECTED;
 
-    B1LOG("set connection_status to STATUS_DISCONNECTED: sessionHandleID[%d], previous_status:[%d], reason[%d]", _sessionHandleID, previousStatus, _disconnectingReason);
+    B1LOG("set connection_status to STATUS_DISCONNECTED: sessionHandleID[%d], previous_status:[%d], was_connected[%d], reason[%d]",
+        _sessionHandleID, previousStatus, _wasConnected ? 1 : 0, _disconnectingReason);
     _connectionStatus = newStatus;
     if (previousStatus != newStatus) {
         implOnConnectionStatusChanged(previousStatus, newStatus);
-        if (STATUS_CONNECTED == _lastConnectionStatus) {
+        if (_wasConnected) {
             implOnDisconnected(_disconnectingReason);
+            _wasConnected = false;
         }
-        _lastConnectionStatus = newStatus;
     }
 }
 
@@ -90,15 +91,19 @@ void B1BaseSession::setSessionStatusConnected()
     if (previousStatus != newStatus) {
         implOnConnectionStatusChanged(previousStatus, newStatus);
     }
+    _wasConnected = true;
 }
 
 void B1BaseSession::setSessionStatusDisconnecting(int32 reason)
 {
+    if (STATUS_DISCONNECTED == _connectionStatus) {
+        B1LOG("set connection_status to STATUS_DISCONNECTING. but already disconnected: sessionHandleID[%d], reason[%d]", _sessionHandleID, reason);
+        return;
+    }
     const auto previousStatus = _connectionStatus;
     const auto newStatus = STATUS_DISCONNECTING;
 
     B1LOG("set connection_status to STATUS_DISCONNECTING: sessionHandleID[%d], previous_status:[%d], reason[%d]", _sessionHandleID, previousStatus, reason);
-    _lastConnectionStatus = previousStatus;
     _disconnectingReason = reason;
     _connectionStatus = newStatus;
     if (previousStatus != newStatus) {

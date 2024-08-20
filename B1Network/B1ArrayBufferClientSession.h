@@ -29,6 +29,8 @@ namespace BnD {
         enum CONSTS {
             CONSTS_BUFFER_SIZE = 1024 * 4,
         };
+    protected:
+        virtual size_t arrayBufferSize() { return CONSTS_BUFFER_SIZE; }
     protected:  //  B1ArrayBufferReadWriteImplListener
         void onReadFailed(int32 reason) final;
         void onWriteFailed(int32 reason) final;

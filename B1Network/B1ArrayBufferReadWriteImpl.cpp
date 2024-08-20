@@ -91,7 +91,7 @@ void B1ArrayBufferReadWriteImpl::writeData(const uint8* data, size_t size)
 {
     if (asioSocketImpl()->asioSocket()->is_open() != true) {
         B1LOG("socket is not opened!");
-        assert(false);
+        //assert(false);
     }
     boost::asio::async_write(*asioSocketImpl()->asioSocket(), boost::asio::buffer(data, size),
                              boost::bind(&B1ArrayBufferReadWriteImpl::writeComplete, this,

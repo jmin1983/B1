@@ -36,7 +36,7 @@ void B1ArrayBufferServerSession::onWriteFailed(int32 reason)
 
 B1BaseReadWriteImpl* B1ArrayBufferServerSession::createReadWriteImpl()
 {
-    return new B1ArrayBufferReadWriteImpl(this, CONSTS_BUFFER_SIZE);
+    return new B1ArrayBufferReadWriteImpl(this, arrayBufferSize());
 }
 
 B1ArrayBufferReadWriteImpl* B1ArrayBufferServerSession::readWriteImpl() const

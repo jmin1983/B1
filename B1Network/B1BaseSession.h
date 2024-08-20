@@ -38,7 +38,7 @@ namespace BnD {
         bool _firstConnectedProcess;
         B1BaseSocket* _baseSocket;
         int32 _disconnectingReason;
-        STATUS _lastConnectionStatus;
+        bool _wasConnected;
         STATUS _connectionStatus;
     protected:
         int32 _sessionHandleID;

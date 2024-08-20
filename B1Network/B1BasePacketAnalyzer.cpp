@@ -15,18 +15,13 @@
 
 using namespace BnD;
 
-B1BasePacketAnalyzer::B1BasePacketAnalyzer()
+B1BasePacketAnalyzer::B1BasePacketAnalyzer(size_t defaultBufferSize)
 {
-    _recvdBuffer.reserve(CONSTS_DEFAULT_BUFFER_RESERVED_SIZE);
+    _recvdBuffer.reserve(defaultBufferSize);
 }
 
 B1BasePacketAnalyzer::~B1BasePacketAnalyzer()
 {
-}
-
-uint32 B1BasePacketAnalyzer::defaultBufferReservedSize() const
-{
-    return CONSTS_DEFAULT_BUFFER_RESERVED_SIZE;
 }
 
 bool B1BasePacketAnalyzer::analyzeData(const uint8* data, size_t size)
@@ -64,17 +59,13 @@ bool B1BasePacketAnalyzer::analyzeData(const uint8* data, size_t size)
                 assert(false);
                 return false;
             }
-            std::vector<uint8> newBuffer;
-            newBuffer.reserve(defaultBufferReservedSize());
-            newBuffer.insert(newBuffer.end(), (uint8*)data + pos, (uint8*)data + size);
+            std::vector<uint8> newBuffer((uint8*)data + pos, (uint8*)data + size);
             _recvdBuffer.swap(newBuffer);
             analyzeData(NULL, 0);
         }
     }
     else if (ANALYZE_RESULT_NOT_ENOUTH_DATA == result) {
-        std::vector<uint8> newBuffer;
-        newBuffer.reserve(defaultBufferReservedSize());
-        newBuffer.insert(newBuffer.end(), (uint8*)data, (uint8*)data + size);
+        std::vector<uint8> newBuffer((uint8*)data, (uint8*)data + size);
         _recvdBuffer.swap(newBuffer);
     }
     return true;

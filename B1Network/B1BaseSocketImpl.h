@@ -17,6 +17,7 @@
 #endif
 
 namespace BnD {
+    class B1Lock;
     class B1BaseSocketImpl {
     public:
         B1BaseSocketImpl() {}
@@ -43,10 +44,11 @@ namespace BnD {
 
     class B1ASIOSocketImpl : public B1BaseSocketImpl {
     public:
-        B1ASIOSocketImpl() : _asioSocket(NULL) {}
+        B1ASIOSocketImpl();
         virtual ~B1ASIOSocketImpl() {}
     protected:
         boost::asio::ip::tcp::socket* _asioSocket;
+        std::shared_ptr<B1Lock> _closeLock;
     protected:
         void implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) final;
         auto implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> final;

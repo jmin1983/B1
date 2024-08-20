@@ -36,7 +36,7 @@ void B1ArrayBufferClientSession::onWriteFailed(int32 reason)
 
 B1BaseReadWriteImpl* B1ArrayBufferClientSession::createReadWriteImpl()
 {
-    return new B1ArrayBufferReadWriteImpl(this, CONSTS_BUFFER_SIZE);
+    return new B1ArrayBufferReadWriteImpl(this, arrayBufferSize());
 }
 
 B1ArrayBufferReadWriteImpl* B1ArrayBufferClientSession::readWriteImpl() const
@@ -46,7 +46,9 @@ B1ArrayBufferReadWriteImpl* B1ArrayBufferClientSession::readWriteImpl() const
 
 void B1ArrayBufferClientSession::writeData(const uint8* data, size_t size) const
 {
-    readWriteImpl()->requestWriteData(data, size);
+    if (isConnected()) {
+        readWriteImpl()->requestWriteData(data, size);
+    }
 }
 
 bool B1ArrayBufferClientSession::writeData(const std::vector<uint8>& data) const

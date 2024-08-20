@@ -19,7 +19,7 @@
 namespace BnD {
     class B1BasePacketAnalyzer {
     public:
-        B1BasePacketAnalyzer();
+        B1BasePacketAnalyzer(size_t defaultBufferSize = CONSTS_DEFAULT_BUFFER_RESERVED_SIZE);
         virtual ~B1BasePacketAnalyzer();
     protected:
         enum CONSTS {
@@ -33,7 +33,6 @@ namespace BnD {
         };
         std::vector<uint8> _recvdBuffer;
     protected:
-        virtual uint32 defaultBufferReservedSize() const;
         virtual ANALYZE_RESULT implAnalyzeData(uint8* data, size_t size, size_t* pos) = 0;
     protected:
         bool analyzeData(const uint8* data, size_t size);
