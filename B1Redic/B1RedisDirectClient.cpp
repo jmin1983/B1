@@ -74,7 +74,7 @@ B1BaseClientSession* B1RedisDirectClient::createSession(B1ClientSocket* clientSo
 }
 
 bool B1RedisDirectClient::initialize(const B1String& address, uint16 port, int32 db,
-                                   bool useSubscribe, B1String&& pollingKey, bool startWritingNow)
+                                     bool useSubscribe, B1String&& pollingKey, bool startWritingNow, const uint32 connectTimeout)
 {
     if (_readSession != NULL || _subscribeSession != NULL || _writeSession != NULL) {
         assert(false);
@@ -122,12 +122,49 @@ bool B1RedisDirectClient::initialize(const B1String& address, uint16 port, int32
         if (isReadSessionConnected() && isWriteSessionConnected() && (useSubscribe != true || isSubscribeSessionConnected())) {
             break;
         }
-        if (B1TickUtil::diffTick(connectTimeoutTickBegin, B1TickUtil::currentTick()) > CONSTS_CONNECT_TIMEOUT) {
+        if (B1TickUtil::diffTick(connectTimeoutTickBegin, B1TickUtil::currentTick()) > connectTimeout) {
             disconnect(readContext);
             disconnect(writeContext);
             if (subscribeContext) {
                 disconnect(subscribeContext);
             }
+            _readSession = NULL;
+            _subscribeSession = NULL;
+            _writeSession = NULL;
+            shutdown();
+            return false;
+        }
+        B1Thread::sleep(1);
+    }
+    return true;
+}
+
+bool B1RedisDirectClient::initializeReadOnly(const B1String& address, uint16 port, int32 db, const uint32 connectTimeout)
+{
+    if (_readSession != NULL || _subscribeSession != NULL || _writeSession != NULL) {
+        assert(false);
+        return false;
+    }
+    if (startup() != true) {
+        return false;
+    }
+    _db = db;
+    auto readContext = B1BaseClient::connect(address.copy(), port, (void*)static_cast<intptr_t>(SESSION_TYPE_READ));
+    if (NULL == readContext) {
+        _readSession = NULL;
+        _subscribeSession = NULL;
+        _writeSession = NULL;
+        shutdown();
+        return false;
+    }
+
+    uint64 connectTimeoutTickBegin = B1TickUtil::currentTick();
+    while (true) {
+        if (isReadSessionConnected()) {
+            break;
+        }
+        if (B1TickUtil::diffTick(connectTimeoutTickBegin, B1TickUtil::currentTick()) > connectTimeout) {
+            disconnect(readContext);
             _readSession = NULL;
             _subscribeSession = NULL;
             _writeSession = NULL;

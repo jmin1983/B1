@@ -33,7 +33,7 @@ namespace BnD {
     B1String b1log_cl(const std::string& className, const char* format, ...);
     bool testB1FileLog();
     void b1log(const B1String& string);
-    void setLogger(B1FileLog *fileLogger);
+    void setLogger(B1FileLog* fileLogger);
     void setLoggerCallback(b1log_callback_t callback, void* param = NULL);
     void resetLogCallback();
 }   //  !BnD

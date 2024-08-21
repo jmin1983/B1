@@ -113,6 +113,9 @@ bool B1FileLog::start(B1String&& dirPath, B1String&& fileName, int32 maxRemainFi
     }
     _fileExtension = std::move(fileExtension);
     B1SystemUtil::createDirectory(dirPath);
+    if (B1SystemUtil::isFileExist(dirPath) != true) {
+        return false;
+    }
     bool result = B1Looper::run();
     if (result) {
         _dirPath = std::move(dirPath);

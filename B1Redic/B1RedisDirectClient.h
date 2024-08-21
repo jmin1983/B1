@@ -41,7 +41,6 @@ namespace BnD {
         virtual ~B1RedisDirectClient();
     protected:
         enum CONSTS {
-            CONSTS_CONNECT_TIMEOUT = 1000 * 10,
             CONSTS_CONNECTED_CHECK_INTERVAL = 200,
         };
         enum SESSION_TYPE {
@@ -73,7 +72,9 @@ namespace BnD {
         int32 db() const { return _db; }
         const B1String& pollingKey() const { return _pollingKey; }
         bool initialize(const B1String& address, uint16 port, int32 db,
-                        bool useSubscribe = true, B1String&& pollingKey = "", bool startWritingNow = true);    //  disable polling if pollingKey is empty.
+                        bool useSubscribe = true, B1String&& pollingKey = "", bool startWritingNow = true,  //  disable polling if pollingKey is empty.
+                        const uint32 connectTimeout = 4 * 1000);
+        bool initializeReadOnly(const B1String& address, uint16 port, int32 db, const uint32 connectTimeout = 4 * 1000);
         void finalize();
         bool startPolling();
         void startWriting();

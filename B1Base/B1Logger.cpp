@@ -34,7 +34,7 @@ BnD::B1String BnD::b1log(const char* format, ...)
     return s;
 }
 
-BnD::B1String BnD::b1log_cl(const std::string &className, const char* format, ...)
+BnD::B1String BnD::b1log_cl(const std::string& className, const char* format, ...)
 {
     B1String s = className + ": ";
     va_list args;
@@ -54,7 +54,7 @@ bool BnD::testB1FileLog()
     return g_fileLogger && g_fileLogger->testWriteLogFile();
 }
 
-void BnD::b1log(const B1String &string)
+void BnD::b1log(const B1String& string)
 {
     B1String timedLog;
     timedLog.format("[%s][%u] %s\n", B1Time::currentTimeInMicroseconds().cString(), B1SystemUtil::getCurrentThreadID(), string.cString());
@@ -74,7 +74,7 @@ void BnD::b1log(const B1String &string)
     }
 }
 
-void BnD::setLogger(B1FileLog *fileLogger)
+void BnD::setLogger(B1FileLog* fileLogger)
 {
     g_fileLogger = fileLogger;
 }
