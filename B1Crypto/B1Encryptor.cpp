@@ -256,6 +256,9 @@ bool B1Encryptor::decryptAES256Base64(const B1String& key, const B1String& sourc
 
 bool B1Encryptor::decryptAES256Hex(const B1String& key, const B1String& source, B1String* result)
 {
+    if (source.isEmpty()) {
+        return false;
+    }
     std::vector<unsigned char> encrypted;
     B1StringUtil::hexaStringToBinary(source, &encrypted);
     return decryptAES256(key, encrypted, result);

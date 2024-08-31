@@ -54,10 +54,12 @@ namespace BnD {
         void stop();
         bool isWorking() const { return MAIN_SERVICE_STATUS_WORKING == _mainServiceStatus; }
         bool isStopped() const { return MAIN_SERVICE_STATUS_STOPPED == _mainServiceStatus; }
+        int32 serviceID() const { return _serviceID; }
+        int32 version() const { return _version; }
+        const B1String& buildDate() const { return _buildDate; }
         B1String softwareRev() const;
         B1String softwareDate() const;
         B1String toString() const;
-        int32 serviceID() const { return _serviceID; }
         const B1String& mainServiceName() const { return _mainServiceName; }
     };
 }   //  !BnD
