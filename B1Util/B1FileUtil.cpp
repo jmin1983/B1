@@ -75,39 +75,3 @@ bool B1FileUtil::writeFile(const std::vector<uint8>& data, const B1String& fileP
     }
     return false;
 }
-
-bool B1FileUtil::readFileVersion(const B1String& filePath, int32* version, B1String* buildDate)
-{
-    auto data = readFile(filePath);
-    int32 versionData = 0;
-    int32 buildDateLengthData = 0;
-    if (data.size() < sizeof(versionData) + sizeof(buildDateLengthData)) {
-        return false;
-    }
-    memcpy(&versionData, &data[0], sizeof(versionData));
-    memcpy(&buildDateLengthData, &data[sizeof(versionData)], sizeof(buildDateLengthData));
-    if (version) {
-        *version = TO_INT32_FOR_NETWORK(versionData);
-    }
-    int32 buildDateLength = TO_INT32_FOR_NETWORK(buildDateLengthData);
-    if (data.size() < sizeof(versionData) + sizeof(buildDateLengthData) + buildDateLength) {
-        return false;
-    }
-    if (buildDate) {
-        std::vector<char> temp(data.begin() + sizeof(versionData) + sizeof(buildDateLengthData), data.end());
-        temp.push_back(0);
-        buildDate->from(&temp[0]);
-    }
-    return true;
-}
-
-bool B1FileUtil::writeFileVersion(int32 version, const B1String& buildDate, const B1String& filePath)
-{
-    std::vector<uint8> data;
-    int32 versionData = TO_INT32_FOR_NETWORK(version);
-    int32 buildDateLengthData = TO_INT32_FOR_NETWORK(buildDate.length());
-    data.insert(data.end(), (uint8*)&versionData, (uint8*)&versionData + sizeof(versionData));
-    data.insert(data.end(), (uint8*)&buildDateLengthData, (uint8*)&buildDateLengthData + sizeof(buildDateLengthData));
-    data.insert(data.end(), buildDate.cString(), buildDate.cString() + buildDate.length());
-    return writeFile(data, filePath);
-}

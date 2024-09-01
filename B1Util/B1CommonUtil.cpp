@@ -51,28 +51,3 @@ auto B1CommonUtil::splitData(std::vector<uint8>&& data, size_t limitSize) -> std
     }
     return result;
 }
-
-bool B1CommonUtil::getFileVersion(const B1String& filePath, int32* version, B1String* buildDate)
-{
-    std::vector<B1String> args(2);
-    args[0] = "VERSION";
-    args[1] = "version";
-    if (B1SystemUtil::createProcessArgs(filePath, args) != 0) {
-        return false;
-    }
-    const B1String versionFilePath = filePath + "." + args[1];
-    bool fileGenerated = false;
-    for (int32 i = 0; i < 10; ++i) {
-        if (B1SystemUtil::isFileExist(versionFilePath)) {
-            fileGenerated = true;
-            break;
-        }
-        B1Thread::sleep(100);
-    }
-    if (fileGenerated != true) {
-        return false;
-    }
-    bool result = B1FileUtil::readFileVersion(filePath + "." + args[1], version, buildDate);
-    B1SystemUtil::deleteFile(versionFilePath);
-    return result;
-}

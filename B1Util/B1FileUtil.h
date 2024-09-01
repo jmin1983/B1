@@ -22,8 +22,6 @@ namespace BnD {
         bool writeFileFromString(const B1String& string, const B1String& filePath);
         std::vector<uint8> readFile(const B1String& filePath);
         bool writeFile(const std::vector<uint8>& data, const B1String& filePath);
-        bool readFileVersion(const B1String& filePath, int32* version, B1String* buildDate);
-        bool writeFileVersion(int32 version, const B1String& buildDate, const B1String& filePath);
     };
 }   //  !BnD
 

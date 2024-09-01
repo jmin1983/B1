@@ -22,7 +22,6 @@ namespace BnD {
     namespace B1CommonUtil {
         int32 isInRange(float64 l, float64 r, float64 range);   //  return -1 if l > r, return 1 if l < r, return 0 if same.
         std::vector<std::vector<uint8> > splitData(std::vector<uint8>&& data, size_t limitSize);
-        bool getFileVersion(const B1String& filePath, int32* version, B1String* buildDate);
     };
 }   //  !BnD
 
