@@ -12,8 +12,6 @@
 #include "B1Util.h"
 #include "B1FileUtil.h"
 
-#include <B1Base/B1Endian.h>
-
 using namespace BnD;
 
 B1String B1FileUtil::readFileToString(const B1String& filePath)

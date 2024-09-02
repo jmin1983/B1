@@ -14,7 +14,6 @@
 #include "B1FileUtil.h"
 
 #include <B1Base/B1SystemUtil.h>
-#include <B1Base/B1Thread.h>
 
 using namespace BnD;
 
