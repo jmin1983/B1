@@ -16,6 +16,29 @@
 
 using namespace BnD;
 
+B1String B1MD5::getFileMD5(const std::vector<uint8>& data)
+{
+    if (data.empty()) {
+        return "";
+    }
+    EVP_MD_CTX* context = EVP_MD_CTX_new();
+    const EVP_MD* md = EVP_md5();
+    unsigned char md_value[EVP_MAX_MD_SIZE];
+    unsigned int mdLen = 0;
+    std::string output;
+
+    EVP_DigestInit_ex2(context, md, NULL);
+    EVP_DigestUpdate(context, &data[0], data.size());
+    EVP_DigestFinal_ex(context, md_value, &mdLen);
+    EVP_MD_CTX_free(context);
+
+    output.resize(mdLen * 2);
+    for (unsigned int i = 0; i < mdLen; ++i) {
+        std::sprintf(&output[i * 2], "%02x", md_value[i]);
+    }
+    return output;
+}
+
 B1String B1MD5::getFileMD5(const B1String& filePath)
 {
     std::vector<uint8> buffer;
@@ -33,23 +56,5 @@ B1String B1MD5::getFileMD5(const B1String& filePath)
         }
         fclose(fp);
     }
-    if (buffer.empty()) {
-        return "";
-    }
-    EVP_MD_CTX* context = EVP_MD_CTX_new();
-    const EVP_MD* md = EVP_md5();
-    unsigned char md_value[EVP_MAX_MD_SIZE];
-    unsigned int mdLen = 0;
-    std::string output;
-
-    EVP_DigestInit_ex2(context, md, NULL);
-    EVP_DigestUpdate(context, &buffer[0], buffer.size());
-    EVP_DigestFinal_ex(context, md_value, &mdLen);
-    EVP_MD_CTX_free(context);
-
-    output.resize(mdLen * 2);
-    for (unsigned int i = 0; i < mdLen; ++i) {
-        std::sprintf(&output[i * 2], "%02x", md_value[i]);
-    }
-    return output;
+    return getFileMD5(buffer);
 }

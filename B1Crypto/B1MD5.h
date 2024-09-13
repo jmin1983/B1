@@ -18,6 +18,7 @@
 
 namespace BnD {
     namespace B1MD5 {
+        B1String getFileMD5(const std::vector<uint8>& data);
         B1String getFileMD5(const B1String& filePath);
     };
 }   //  !BnD
