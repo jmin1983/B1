@@ -30,6 +30,7 @@ namespace BnD {
         bool moveFile(const B1String& dstPath, const B1String& srcPath, bool replaceIfExist = false);
         bool deleteFile(const B1String& path);
         bool checkFileExtension(const B1String& path, const B1String& fileExt);
+        bool fileLastModifiedTime(const B1String& path, int64* modifiedTime);
         B1String fileExtensionOnly(const B1String& path);
         B1String removeFileExtension(const B1String& path);
         B1String getModuleFileName();

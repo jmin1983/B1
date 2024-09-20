@@ -12,8 +12,21 @@
 #include "B1Base.h"
 #include "B1SystemUtil.h"
 
+#include <sys/stat.h>
+
 #ifdef _WIN32
 #include "B1SystemUtil_windows.cpp"
 #else 
 #include "B1SystemUtil_linux.cpp"
 #endif // _WIN32
+
+bool B1SystemUtil::fileLastModifiedTime(const B1String& path, int64* modifiedTime)
+{
+    struct stat buffer;
+    int result = stat(path.cString(), &buffer);
+    if (result != 0) {
+        return false;
+    }
+    *modifiedTime = buffer.st_mtime;
+    return true;
+}
