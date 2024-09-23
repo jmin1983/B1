@@ -51,12 +51,8 @@ auto B1FileUtil::readFile(const B1String& filePath) -> std::vector<uint8>
         long size = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         std::vector<uint8> buffer(size);
-        try {
-            if (fread(&buffer[0], sizeof(uint8), size, fp) > 0) {
-                //  noop.
-            }
-        }
-        catch (...) {
+        if (fread(&buffer[0], sizeof(uint8), size, fp) > 0) {
+            //  noop.
         }
         fclose(fp);
         return buffer;

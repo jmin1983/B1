@@ -12,7 +12,9 @@
 #include "B1Crypto.h"
 #include "B1MD5.h"
 
-#include <openssl/evp.h>
+#include <B1Base/B1StringUtil.h>
+
+#include <openssl/md5.h>
 
 using namespace BnD;
 
@@ -21,22 +23,15 @@ B1String B1MD5::getFileMD5(const std::vector<uint8>& data)
     if (data.empty()) {
         return "";
     }
-    EVP_MD_CTX* context = EVP_MD_CTX_new();
-    const EVP_MD* md = EVP_md5();
-    unsigned char md_value[EVP_MAX_MD_SIZE];
-    unsigned int mdLen = 0;
-    std::string output;
+    std::vector<uint8> hash(MD5_DIGEST_LENGTH);
+    MD5_CTX md5;
+    MD5_Init(&md5);
+    MD5_Update(&md5, &data[0], data.size());
+    MD5_Final(&hash[0], &md5);
 
-    EVP_DigestInit_ex2(context, md, NULL);
-    EVP_DigestUpdate(context, &data[0], data.size());
-    EVP_DigestFinal_ex(context, md_value, &mdLen);
-    EVP_MD_CTX_free(context);
-
-    output.resize(mdLen * 2);
-    for (unsigned int i = 0; i < mdLen; ++i) {
-        std::sprintf(&output[i * 2], "%02x", md_value[i]);
-    }
-    return output;
+    B1String result;
+    B1StringUtil::binaryToHexaString(hash, &result);
+    return result;
 }
 
 B1String B1MD5::getFileMD5(const B1String& filePath)
