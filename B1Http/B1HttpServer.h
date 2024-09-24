@@ -43,6 +43,7 @@ namespace BnD {
         virtual void implFinalize();
     protected:
         std::map<int32, std::shared_ptr<B1BaseSession> > allWebSocketSessions() const;
+        std::shared_ptr<B1BaseSession> webSocketSessionByHandleID(int32 handleID) const;
     public:
         bool initialize(int32 port);
         void finalize();

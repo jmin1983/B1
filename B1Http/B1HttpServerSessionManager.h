@@ -25,13 +25,14 @@ namespace BnD {
         virtual ~B1HttpServerSessionManager();
     protected:
         mutable B1Lock _webSocketSessionsLock;
-        std::map<int32, std::shared_ptr<B1BaseSession> > _webSocketSessions;
+        std::map<int32, std::shared_ptr<B1BaseSession> > _webSocketSessions;    //  map<handle_id, session>
     protected:
         virtual void onShuttingDown() override;
         virtual void onSessionModified(int32 handleID, std::shared_ptr<B1BaseSession> session) override;
         virtual void onSessionRemoved(int32 handleID) override;
     public:
-        auto webSocketSessions() const -> std::map<int32, std::shared_ptr<B1BaseSession> >;
+        std::map<int32, std::shared_ptr<B1BaseSession> > webSocketSessions() const;
+        std::shared_ptr<B1BaseSession> webSocketSessionByHandleID(int32 handleID) const;
     };
 }   //  !BnD
 

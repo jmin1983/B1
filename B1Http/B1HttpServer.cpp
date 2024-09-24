@@ -86,9 +86,14 @@ void B1HttpServer::implFinalize()
     shutdown();
 }
 
-std::map<int32, std::shared_ptr<B1BaseSession> > B1HttpServer::allWebSocketSessions() const
+auto B1HttpServer::allWebSocketSessions() const -> std::map<int32, std::shared_ptr<B1BaseSession> >
 {
     return static_cast<B1HttpServerSessionManager*>(sessionManager())->webSocketSessions();
+}
+
+auto B1HttpServer::webSocketSessionByHandleID(int32 handleID) const -> std::shared_ptr<B1BaseSession>
+{
+    return static_cast<B1HttpServerSessionManager*>(sessionManager())->webSocketSessionByHandleID(handleID);
 }
 
 bool B1HttpServer::initialize(int32 port)

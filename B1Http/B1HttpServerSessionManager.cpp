@@ -45,3 +45,10 @@ auto B1HttpServerSessionManager::webSocketSessions() const -> std::map<int32, st
     B1AutoLock al(_webSocketSessionsLock);
     return _webSocketSessions;
 }
+
+auto B1HttpServerSessionManager::webSocketSessionByHandleID(int32 handleID) const->std::shared_ptr<B1BaseSession>
+{
+    B1AutoLock al(_webSocketSessionsLock);
+    auto itr = _webSocketSessions.find(handleID);
+    return itr != _webSocketSessions.end() ? itr->second : std::shared_ptr<B1BaseSession>();
+}
