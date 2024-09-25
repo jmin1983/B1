@@ -11,6 +11,7 @@
 
 #include "B1Util.h"
 #include "B1Compressor.h"
+#include "B1FileUtil.h"
 
 #include <zlib/zlib.h>
 
@@ -119,4 +120,70 @@ auto B1Compressor::decompress(const std::vector<uint8>& data, const size_t buffe
     } while (returnValue != Z_STREAM_END);
     (void)inflateEnd(&zStream);
     return unpacked;
+}
+
+bool B1Compressor::compressToFile(const std::vector<uint8>& data, const B1String& filePath)
+{
+    if (data.empty()) {
+        return false;
+    }
+    if (auto fp = gzopen(filePath.cString(), "wb")) {
+        if (gzwrite(fp, &data[0], data.size()) <= 0) {
+            int errnum = 0;
+            B1String errorMessage(gzerror(fp, &errnum));
+            b1log("compressToFile failed: filePath[%s], reason[%d], message[%s]", filePath.cString(), errnum, errorMessage.cString());
+            gzclose(fp);
+            return false;
+        }
+        gzclose(fp);
+        return true;
+    }
+    return false;
+}
+
+auto B1Compressor::decompressFromFile(const B1String& filePath) -> std::vector<uint8>
+{
+    const size_t bufferSize = 1024 * 1024;
+    std::vector<uint8> result;
+    result.reserve(128 * bufferSize);
+    if (auto fp = gzopen(filePath.cString(), "rb")) {
+        std::vector<uint8> buffer(bufferSize, 0);
+        while (true) {
+            auto readSize = gzread(fp, &buffer[0], bufferSize);
+            if (readSize > 0) {
+                if (bufferSize < readSize) {
+                    b1log("decompressFromFile failed: filePath[%s], readSize is smaller than bufferSize", filePath.cString());
+                    gzclose(fp);
+                    return std::vector<uint8>();
+                }
+                result.insert(result.end(), std::make_move_iterator(buffer.begin()), std::make_move_iterator(buffer.begin() + readSize));
+            }
+            else if (readSize < 0) {
+                int errnum = 0;
+                B1String errorMessage(gzerror(fp, &errnum));
+                b1log("decompressFromFile failed: filePath[%s], reason[%d], message[%s]", filePath.cString(), errnum, errorMessage.cString());
+                gzclose(fp);
+                return std::vector<uint8>();
+            }
+            else {
+                break;
+            }
+        }
+        gzclose(fp);
+    }
+    return result;
+}
+
+bool B1Compressor::compressFromFileToFile(const B1String& filePathFrom, const B1String& filePathTo)
+{
+    return compressToFile(B1FileUtil::readFile(filePathFrom), filePathTo);
+}
+
+bool B1Compressor::decompressFromFileToFile(const B1String& filePathFrom, const B1String& filePathTo)
+{
+    auto fileData = decompressFromFile(filePathFrom);
+    if (fileData.empty()) {
+        return false;
+    }
+    return B1FileUtil::writeFile(fileData, filePathTo);
 }
