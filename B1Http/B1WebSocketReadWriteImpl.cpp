@@ -84,6 +84,18 @@ void B1WebSocketReadWriteImpl::Writer::addWriteText(B1String&& text)
     _textData.push_back(std::move(text));
 }
 
+bool B1WebSocketReadWriteImpl::Writer::isBinaryDataEmpty() const
+{
+    B1AutoLock al(_lock);
+    return _binaryData.empty();
+}
+
+bool B1WebSocketReadWriteImpl::Writer::isTextDataEmpty() const
+{
+    B1AutoLock al(_lock);
+    return _textData.empty();
+}
+
 void B1WebSocketReadWriteImpl::implWriteBinary(std::vector<uint8>&& data)
 {
     webSocketImpl()->webSocketStream()->binary(true);
@@ -191,6 +203,16 @@ void B1WebSocketReadWriteImpl::addWriteBinary(std::vector<uint8>&& data)
 void B1WebSocketReadWriteImpl::addWriteText(B1String&& text)
 {
     _writer.addWriteText(std::move(text));
+}
+
+bool B1WebSocketReadWriteImpl::isBinaryDataEmpty() const
+{
+    return _writer.isBinaryDataEmpty();
+}
+
+bool B1WebSocketReadWriteImpl::isTextDataEmpty() const
+{
+    return _writer.isTextDataEmpty();
 }
 
 auto B1WebSocketReadWriteImpl::webSocketImpl() const ->B1WebSocketImpl*

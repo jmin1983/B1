@@ -48,7 +48,7 @@ namespace BnD {
         protected:
             B1WebSocketReadWriteImpl* _owner;
             bool _readyToWrite;
-            B1Lock _lock;
+            mutable B1Lock _lock;
             std::list<std::vector<uint8> > _binaryData;
             std::list<B1String> _textData;
         protected:
@@ -58,6 +58,8 @@ namespace BnD {
             void addWriteBinary(std::vector<uint8>&& data);
             void addWriteText(B1String&& text);
             void writeComplete() { _readyToWrite = true; }
+            bool isBinaryDataEmpty() const;
+            bool isTextDataEmpty() const;
         } _writer;
     protected:
         std::shared_ptr<B1WebSocketMessage> _webSocketMessage;
@@ -77,6 +79,8 @@ namespace BnD {
     public:
         void addWriteBinary(std::vector<uint8>&& data);
         void addWriteText(B1String&& text);
+        bool isBinaryDataEmpty() const;
+        bool isTextDataEmpty() const;
         class B1WebSocketImpl* webSocketImpl() const;
     };
 }   //  !BnD

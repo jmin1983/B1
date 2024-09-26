@@ -98,3 +98,13 @@ void B1WebSocketServerSession::writeText(B1String&& text) const
 {
     readWriteImpl()->addWriteText(std::move(text));
 }
+
+bool B1WebSocketServerSession::isBinaryDataAllWritten() const
+{
+    return readWriteImpl()->isBinaryDataEmpty();
+}
+
+bool B1WebSocketServerSession::isTextDataAllWritten() const
+{
+    return readWriteImpl()->isTextDataEmpty();
+}
