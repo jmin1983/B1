@@ -14,7 +14,7 @@
 
 #include <B1Base/B1StringUtil.h>
 
-#include <openssl/md5.h>
+#include <openssl/evp.h>
 
 using namespace BnD;
 
@@ -23,11 +23,16 @@ B1String B1MD5::getFileMD5(const std::vector<uint8>& data)
     if (data.empty()) {
         return "";
     }
-    std::vector<uint8> hash(MD5_DIGEST_LENGTH);
-    MD5_CTX md5;
-    MD5_Init(&md5);
-    MD5_Update(&md5, &data[0], data.size());
-    MD5_Final(&hash[0], &md5);
+    EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
+
+    EVP_DigestInit_ex(mdctx, EVP_md5(), NULL);
+    EVP_DigestUpdate(mdctx, &data[0], data.size());
+    unsigned int md5DigestLength = EVP_MD_size(EVP_md5());
+    unsigned char* md5Digest = (unsigned char*)OPENSSL_malloc(md5DigestLength);
+    EVP_DigestFinal_ex(mdctx, md5Digest, &md5DigestLength);
+    std::vector<uint8> hash(md5Digest, md5Digest + md5DigestLength);
+    OPENSSL_free(md5Digest);
+    EVP_MD_CTX_free(mdctx);
 
     B1String result;
     B1StringUtil::binaryToHexaString(hash, &result);
