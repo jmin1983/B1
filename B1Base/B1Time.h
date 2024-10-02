@@ -100,12 +100,12 @@ namespace BnD {
         static B1String timeInMillisecond(int64 second, int32 microSecond, bool pretty = false);
         static B1String timeInMicrosecond(int64 second, int32 microSecond); //  pretty only.
         static B1String timeInSecond(int64 second, bool pretty = false);
+        static B1String getCurrentTimeZone();
         static bool getCurrentTime(int64* second, int32* microSecond);
         static bool getSystemTime(int64* second, int32* microSecond);
         static void setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds);
-        static void setAdjustCurrentTimeAsIs(int64 adjustCurrentSeconds, int32 adjustCurrentMilliseconds);
-        static void getAdjustCurrentTimeAsIs(int64* adjustCurrentSeconds, int32* adjustCurrentMilliseconds);
-        static void setCurrentTime(const B1Time &t);    //  not supported in Windows.
+        static void setCurrentTimeZone(const B1String& timezone);       //  not supported in Windows.
+        static void setCurrentTime(const B1Time &t);                    //  not supported in Windows.
         static bool setCurrentTime(const B1String& millisecondsString); //  not supported in Windows.
     public:
         B1Time& operator=(const B1Time &t) { set(t); return *this; }

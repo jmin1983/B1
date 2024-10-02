@@ -347,6 +347,16 @@ bool B1Time::getCurrentTime(int64* second, int32* microSecond)
     return true;
 }
 
+B1String B1Time::getCurrentTimeZone()
+{
+    tzset();
+#if defined(_WIN32)
+    return _tzname[0];
+#else
+    return tzname[0];
+#endif
+}
+
 bool B1Time::getSystemTime(int64* second, int32* microSecond)
 {
     timeval crntTimeVal;
@@ -373,18 +383,6 @@ void B1Time::setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds)
         _adjustCurrentSeconds = targetSeconds - crntTimeVal.tv_sec;
         _adjustCurrentMicroSeconds = targetMicroSeconds - crntTimeVal.tv_usec;
     }
-}
-
-void B1Time::setAdjustCurrentTimeAsIs(int64 adjustCurrentSeconds, int32 adjustCurrentMicroSeconds)
-{
-    _adjustCurrentSeconds = adjustCurrentSeconds;
-    _adjustCurrentMicroSeconds = adjustCurrentMicroSeconds;
-}
-
-void B1Time::getAdjustCurrentTimeAsIs(int64* adjustCurrentSeconds, int32* adjustCurrentMicroSeconds)
-{
-    *adjustCurrentSeconds = _adjustCurrentSeconds;
-    *adjustCurrentMicroSeconds = _adjustCurrentMicroSeconds;
 }
 
 void B1Time::setCurrentTime(const B1Time &t)
@@ -428,6 +426,16 @@ bool B1Time::setCurrentTime(const B1String& millisecondsString)
     tv.tv_usec = csecond * 10000;
     int result = settimeofday(&tv, 0/*&tz*/);
     return 0 == result;
+#endif
+}
+
+void B1Time::setCurrentTimeZone(const B1String& timezone)
+{
+#if defined(_WIN32)
+    return;
+#else
+    setenv("TZ", timezone.cString(), 1);
+    tzset();
 #endif
 }
 
