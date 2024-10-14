@@ -184,9 +184,9 @@ bool B1FileLog::testWriteLogFile()
     if (NULL == fp) {
         return false;
     }
-    fprintf(fp, "write file checked at:%s", current.toString().cString());
+    bool result = (fprintf(fp, "write file checked at:%s", current.toString().cString()) < 0) ? false : true;
     fclose(fp);
-    return true;
+    return result;
 }
 
 bool B1FileLog::write(B1String&& log)
