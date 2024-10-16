@@ -39,6 +39,8 @@ namespace BnD {
         bool initialize(int64 begin, int64 end, const B1String& dirPath, const B1String& fileName);
         void finalize();
         int64 generateNextID();
+        bool isInRange(int64 id) const;
+        std::pair<int64, int64> idRange() const { return _range; }
     };
 }   //  !BnD
 

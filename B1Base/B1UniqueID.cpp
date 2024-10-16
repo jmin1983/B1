@@ -99,3 +99,8 @@ int64 B1UniqueID::generateNextID()
     }
     return nextID;
 }
+
+bool B1UniqueID::isInRange(int64 id) const
+{
+    return _range.first <= id && id < _range.second;
+}
