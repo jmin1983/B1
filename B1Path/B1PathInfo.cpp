@@ -80,6 +80,31 @@ void B1PathInfo::removeAfterCurrentIndex(uint32 offset)
     }
 }
 
+void B1PathInfo::removeBeforeCurrentIndex()
+{
+    if (_currentIndex < 1) {
+        return;
+    }
+    int32 diff = currentIndex();
+    if (diff >= _zoneIDs.size()) {
+        assert(false);
+        return;
+    }
+    std::vector<int32> newZoneIDs(_zoneIDs.begin() + diff, _zoneIDs.end());
+    _zoneIDs.swap(newZoneIDs);
+    if (_junctionIndex.empty() != true) {
+        std::set<int32> newJunctionIndex;
+        for (int32 index : _junctionIndex) {
+            int32 newJunction = index - diff;
+            if (newJunction > -1) {
+                newJunctionIndex.insert(newJunction);
+            }
+        }
+        _junctionIndex.swap(newJunctionIndex);
+    }
+    setCurrentIndex(0);
+}
+
 void B1PathInfo::getCurrentZoneIDs(std::vector<int32> *zoneIDs, uint32 indexCount) const
 {
     zoneIDs->reserve(indexCount);

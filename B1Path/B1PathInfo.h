@@ -27,7 +27,7 @@ namespace BnD {
         virtual ~B1PathInfo();
     protected:
         std::vector<int32> _zoneIDs;
-        std::set<uint32> _junctionIndex;
+        std::set<int32> _junctionIndex;
         int32 _currentIndex;
     protected:
         virtual void archiveTo(B1Archive *archive) const override;
@@ -38,8 +38,8 @@ namespace BnD {
         void addJunctionIndex(uint32 index) { _junctionIndex.insert(index); }
         const std::vector<int32>& zoneIDs() const { return _zoneIDs; }
               std::vector<int32>& zoneIDs()       { return _zoneIDs; }
-        const std::set<uint32>& junctionIndex() const { return _junctionIndex; }
-              std::set<uint32>& junctionIndex()       { return _junctionIndex; }
+        const std::set<int32>& junctionIndex() const { return _junctionIndex; }
+              std::set<int32>& junctionIndex()       { return _junctionIndex; }
         int32 currentIndex() const { return _currentIndex; }
         int32 currentZoneID() const;
         bool getJunctionZoneIDsIfJunction(std::vector<int32>* result) const;
@@ -47,6 +47,7 @@ namespace BnD {
         void increaseCurrentIndex() { _currentIndex++; }
         void setCurrentIndex(int32 value) { _currentIndex = value; }
         void removeAfterCurrentIndex(uint32 offset);
+        void removeBeforeCurrentIndex();
 
         void getCurrentZoneIDs(std::vector<int32> *zoneIDs, uint32 indexCount) const;   //  indexCount: _currentIndex로부터 가져올 zoneID 갯수.
         bool getZoneID(int32 *zoneID, int32 offset) const;  //  offset: _currentIndex로부터 차이.
