@@ -39,6 +39,7 @@ std::map<B1String, B1String> B1MainService::makeVersionInfoMap() const
     values.insert(std::make_pair("ServiceName", _mainServiceName.copy()));
     values.insert(std::make_pair("SystemName", _systemServiceName.copy()));
     values.insert(std::make_pair("ServiceID", B1String::formatAs("%d", serviceID())));
+    values.insert(std::make_pair("SystemID", B1SystemUtil::getSystemID()));
     values.insert(std::make_pair("BuildNum", softwareRev()));
     values.insert(std::make_pair("BuildDate", softwareDate()));
     values.insert(std::make_pair("StartTime", B1Time::currentTimeInMilliseconds(true)));
