@@ -30,7 +30,11 @@ namespace BnD {
         virtual ~B1RedisDirectClientReadSession();
     protected:
         enum CONSTS {
+#if defined(_DEBUG)
+            CONSTS_WAIT_DATA_TIME_OUT = 30000,
+#else
             CONSTS_WAIT_DATA_TIME_OUT = 3000,
+#endif
         };
     private:
         bool _inited;

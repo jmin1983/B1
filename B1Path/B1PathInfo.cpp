@@ -75,8 +75,8 @@ bool B1PathInfo::getJunctionZoneIDsIfJunction(std::vector<int32>* result) const
 
 void B1PathInfo::removeAfterCurrentIndex(uint32 offset)
 {
-    if (static_cast<int32>(_zoneIDs.size()) > static_cast<int32>(_currentIndex + offset)) {
-        _zoneIDs.erase(_zoneIDs.begin() + _currentIndex + offset, _zoneIDs.end());
+    if (static_cast<int32>(_zoneIDs.size()) > static_cast<int32>(_currentIndex + offset + 1)) {
+        _zoneIDs.erase(_zoneIDs.begin() + _currentIndex + offset + 1, _zoneIDs.end());
     }
 }
 
