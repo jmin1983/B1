@@ -83,10 +83,10 @@ void B1PathGraph::setItemAdditionalCost(int32 id, size_t index, ADDITIONAL_COST 
 {
     auto itr = _items.find(id);
     if (itr == _items.end()) {
-        B1LOG("item add_cost changed but invalid id: id[%d], cost[%d]", id, cost);
+        //B1LOG("item add_cost changed but invalid id: id[%d], cost[%d]", id, cost);
         return;
     }
-    B1LOG("item add_cost changed: id[%d], cost[%d]", id, cost);
+    //B1LOG("item add_cost changed: id[%d], cost[%d]", id, cost);
     itr->second._additionalCost = cost;
 }
 
@@ -105,7 +105,7 @@ void B1PathGraph::setEdgeAdditionalCost(int32 idFrom, int32 idTo, size_t index, 
         B1LOG("edge add_cost changed but invalid index: id[%d][%d], index[%d], cost[%d]", idFrom, idTo, index, cost);
         return;
     }
-    B1LOG("edge add_cost changed: id[%d][%d], index[%d], cost[%d]", idFrom, idTo, index, cost);
+    //B1LOG("edge add_cost changed: id[%d][%d], index[%d], cost[%d]", idFrom, idTo, index, cost);
     jtr->second[index]._additionalCost = cost;
 }
 
