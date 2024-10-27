@@ -33,7 +33,12 @@ auto B1BaseReadWriteImpl::createBaseSocketImpl() -> B1BaseSocketImpl*
 void B1BaseReadWriteImpl::readComplete(const boost::system::error_code& error, size_t receivedBytes)
 {
     if (error) {
-        B1LOG("read failed: reason[%d], message[%s]", error.value(), error.message().c_str());
+        if (boost::asio::error::operation_aborted == error.value()) {
+            B1LOG("read aborted: reason[%d], message[%s]", error.value(), error.message().c_str());
+        }
+        else {
+            B1LOG("read failed: reason[%d], message[%s]", error.value(), error.message().c_str());
+        }
         if (baseSocketImpl()->isOpen()) {
             B1LOG("read failed but socket still opened -> close: peerAddress[%s], peerPort[%d], localPort[%d]",
                   baseSocketImpl()->peerAddress().cString(), baseSocketImpl()->peerPort(), baseSocketImpl()->localPort());

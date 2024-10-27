@@ -54,7 +54,12 @@ void B1BaseServer::onAcceptComplete(std::shared_ptr<B1ServerSocket> serverSocket
 
 void B1BaseServer::onAcceptFailed(std::shared_ptr<B1ServerSocket> serverSocket, int32 reason)
 {
-    B1LOG("accept error: peerAddress[%s], localPort[%d], reason[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort(), reason);
+    if (boost::asio::error::operation_aborted == reason) {
+        B1LOG("accept aborted: peerAddress[%s], localPort[%d], reason[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort(), reason);
+    }
+    else {
+        B1LOG("accept error: peerAddress[%s], localPort[%d], reason[%d]", serverSocket->peerAddress().cString(), serverSocket->localPort(), reason);
+    }
 }
 
 void B1BaseServer::onServerSessionDisconnected(B1ServerSocket* serverSocket, int32 reason)
