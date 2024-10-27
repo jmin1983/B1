@@ -162,7 +162,12 @@ void B1GEMServer::getCommState(B1GEMConsts::COMM_STATE* state)
     }
 }
 
-CONTROL_STATE B1GEMServer::controlState() const
+bool B1GEMServer::isSessionEmpty() const
+{
+    return sessionManager()->empty();
+}
+
+auto B1GEMServer::controlState() const -> CONTROL_STATE
 {
     return _controlState.data();
 }

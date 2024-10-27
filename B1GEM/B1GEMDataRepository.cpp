@@ -187,7 +187,7 @@ bool B1GEMDataRepository::getEventReportData(const B1SECS2DataCEID& ceID, const 
     auto evt = _eventRepository->findEvent(ceID);
     if (evt == NULL) {
         B1LOG("find event failed: [%s]", ceID->toString().cString());
-        assert(false);
+        //assert(false);
         return false;
     }
     auto reports = _reportRepository->findReports(evt->reportIDs());

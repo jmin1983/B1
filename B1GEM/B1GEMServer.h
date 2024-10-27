@@ -64,6 +64,7 @@ namespace BnD {
         void setCommStateCommunicating() const;
         void setControlState(B1GEMConsts::CONTROL_STATE state) const;
         void getCommState(B1GEMConsts::COMM_STATE* state);
+        bool isSessionEmpty() const;
         B1GEMConsts::CONTROL_STATE controlState() const;
         B1GEMDataRepository* dataRepository() const { return _dataRepository.get(); }
         void sendAlarm(const B1SECS2DataALID& alID, bool isSetAlarm, bool sendRelatedCEID, const B1GEMDataValueCondition& gemCondition);
