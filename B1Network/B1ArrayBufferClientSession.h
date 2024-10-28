@@ -38,7 +38,7 @@ namespace BnD {
         B1BaseReadWriteImpl* createReadWriteImpl() final;
     protected:
         B1ArrayBufferReadWriteImpl* readWriteImpl() const;
-        void writeData(const uint8* data, size_t size) const;
+        bool writeData(const uint8* data, size_t size) const;
         bool writeData(const std::vector<uint8>& data) const;
     };
 }   //  !BnD

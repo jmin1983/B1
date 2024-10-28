@@ -44,11 +44,13 @@ B1ArrayBufferReadWriteImpl* B1ArrayBufferClientSession::readWriteImpl() const
     return static_cast<B1ArrayBufferReadWriteImpl*>(B1BaseClientSession::readWriteImpl());
 }
 
-void B1ArrayBufferClientSession::writeData(const uint8* data, size_t size) const
+bool B1ArrayBufferClientSession::writeData(const uint8* data, size_t size) const
 {
     if (isConnected()) {
         readWriteImpl()->requestWriteData(data, size);
+        return true;
     }
+    return false;
 }
 
 bool B1ArrayBufferClientSession::writeData(const std::vector<uint8>& data) const
@@ -57,6 +59,5 @@ bool B1ArrayBufferClientSession::writeData(const std::vector<uint8>& data) const
     if (dataSize < 1) {
         return false;
     }
-    writeData(&data[0], dataSize);
-    return true;
+    return writeData(&data[0], dataSize);
 }
