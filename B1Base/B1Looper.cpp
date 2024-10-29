@@ -40,7 +40,7 @@ void B1Looper::implThreadFunc()
             uint64 diff = B1TickUtil::diffTick(begin, B1TickUtil::currentTick());
             uint64 interval = resumeInterval > diff ? resumeInterval - diff : 0;
             if (interval) {
-                _event.wait(interval);
+                _event.wait(static_cast<uint32>(interval));
             }
         }
     }

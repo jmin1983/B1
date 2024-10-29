@@ -40,13 +40,13 @@ auto B1Compressor::compress(const std::vector<uint8>& data, const size_t bufferS
             assert(false);
             return std::vector<uint8>();
         }
-        int32 reamins = data.size() - dataPos;
+        int32 reamins = static_cast<int32>(data.size() - dataPos);
         size_t currentDataSize = bufferSize < reamins ? bufferSize : reamins;
-        zStream.avail_in = currentDataSize;
+        zStream.avail_in = (uInt)currentDataSize;
         zStream.next_in = (Bytef*)&data[dataPos];
         auto flush = dataPos + currentDataSize == data.size() ? Z_FINISH : Z_NO_FLUSH;
         do {    //  run deflate() on input until output buffer not full, finish compression if all of source has been read in.
-            zStream.avail_out = bufferSize;
+            zStream.avail_out = (uInt)bufferSize;
             std::vector<uint8> buffer(bufferSize, 0);
             zStream.next_out = &buffer[0];
             returnValue = deflate(&zStream, flush); // no bad return value.
@@ -90,12 +90,12 @@ auto B1Compressor::decompress(const std::vector<uint8>& data, const size_t buffe
             assert(false);
             return std::vector<uint8>();
         }
-        int32 reamins = data.size() - dataPos;
+        int32 reamins = static_cast<int32>(data.size() - dataPos);
         size_t currentDataSize = bufferSize < reamins ? bufferSize : reamins;
-        zStream.avail_in = currentDataSize;
+        zStream.avail_in = (uInt)currentDataSize;
         zStream.next_in = (Bytef*)&data[dataPos];
         do {    //  run inflate() on input until output buffer not full.
-            zStream.avail_out = bufferSize;
+            zStream.avail_out = (uInt)bufferSize;
             std::vector<uint8> buffer(bufferSize, 0);
             zStream.next_out = &buffer[0];
             returnValue = inflate(&zStream, Z_NO_FLUSH);
@@ -128,7 +128,7 @@ bool B1Compressor::compressToFile(const std::vector<uint8>& data, const B1String
         return false;
     }
     if (auto fp = gzopen(filePath.cString(), "wb")) {
-        if (gzwrite(fp, &data[0], data.size()) <= 0) {
+        if (gzwrite(fp, &data[0], (unsigned)data.size()) <= 0) {
             int errnum = 0;
             B1String errorMessage(gzerror(fp, &errnum));
             b1log("compressToFile failed: filePath[%s], reason[%d], message[%s]", filePath.cString(), errnum, errorMessage.cString());

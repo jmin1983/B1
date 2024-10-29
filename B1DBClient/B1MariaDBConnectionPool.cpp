@@ -149,10 +149,10 @@ void B1MariaDBConnectionPool::checkConnections()
     }
     if (deadHandleCount > 0) {
         B1AutoLock al(*_lock);
-        for (uint32 i = 0; i < deadHandleCount; ++i) {
+        for (int32 i = 0; i < deadHandleCount; ++i) {
             auto newHandle = createNewHandle();
             if (newHandle == NULL) {
-                B1LOG("unable to re-create new handle: index[%u], total[%u]", i, deadHandleCount);
+                B1LOG("unable to re-create new handle: index[%d], total[%d]", i, deadHandleCount);
                 return;
             }
             _handles.insert(std::make_pair(newHandle, false));

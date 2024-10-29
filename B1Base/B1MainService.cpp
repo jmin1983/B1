@@ -75,7 +75,7 @@ void B1MainService::wait()
     if (isStopped()) {
         return;
     }
-    uint64 nextWaitInterval = CONSTS_MAIN_THREAD_PROCESS_INTERVAL_DEFAULT;
+    uint32 nextWaitInterval = CONSTS_MAIN_THREAD_PROCESS_INTERVAL_DEFAULT;
     while (MAIN_SERVICE_STATUS_WORKING == _mainServiceStatus) {
         if (_mainCondition.wait(nextWaitInterval) != true) {
             uint64 begin = B1TickUtil::currentTick();
@@ -86,7 +86,7 @@ void B1MainService::wait()
             else {
                 uint64 diff = B1TickUtil::diffTick(begin, B1TickUtil::currentTick());
                 if (CONSTS_MAIN_THREAD_PROCESS_INTERVAL_DEFAULT > diff) {
-                    nextWaitInterval = std::max<uint64>(CONSTS_MAIN_THREAD_PROCESS_INTERVAL_MIN, CONSTS_MAIN_THREAD_PROCESS_INTERVAL_DEFAULT - diff);
+                    nextWaitInterval = std::max<uint32>(CONSTS_MAIN_THREAD_PROCESS_INTERVAL_MIN, static_cast<uint32>(CONSTS_MAIN_THREAD_PROCESS_INTERVAL_DEFAULT - diff));
                 }
                 else {
                     nextWaitInterval = CONSTS_MAIN_THREAD_PROCESS_INTERVAL_MIN;

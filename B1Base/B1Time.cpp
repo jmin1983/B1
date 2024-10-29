@@ -349,10 +349,11 @@ bool B1Time::getCurrentTime(int64* second, int32* microSecond)
 
 B1String B1Time::getCurrentTimeZone()
 {
-    tzset();
 #if defined(_WIN32)
+    _tzset();
     return _tzname[0];
 #else
+    tzset();
     return tzname[0];
 #endif
 }

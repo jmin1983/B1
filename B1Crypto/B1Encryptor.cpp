@@ -97,7 +97,7 @@ bool B1Encryptor::decryptAES256(const B1String& key, const std::vector<uint8>& s
     EVP_CIPHER_CTX_set_padding(ctx._ctx, 0);
     int32 lengthUpdate;
     std::vector<unsigned char> decrypted(source.size() + 1, 0);
-    if (EVP_DecryptUpdate(ctx._ctx, &decrypted[0], &lengthUpdate, &source[0], source.size()) != 1) {
+    if (EVP_DecryptUpdate(ctx._ctx, &decrypted[0], &lengthUpdate, &source[0], (int)source.size()) != 1) {
         return false;
     }
     int32 lengthFinal;
@@ -142,7 +142,7 @@ void B1Encryptor::encodeBase64(const std::vector<uint8>& source, B1String* resul
     const char base64digits[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     auto src = &source[0];
-    int32 sourceLength = source.size();
+    int32 sourceLength = static_cast<int32>(source.size());
     std::vector<char> dest;
     dest.reserve(sourceLength * 2);
     for (; 3 <= sourceLength; sourceLength -= 3) {
@@ -177,7 +177,7 @@ bool B1Encryptor::decodeBase64(const B1String& source, std::vector<uint8>* resul
     if (source.isEmpty()) {
         return false;
     }
-    int32 sourceOffset = 0;
+    uint32 sourceOffset = 0;
     std::vector<uint8> dest;
     dest.reserve(source.length());
     uint8 digit1, digit2, digit3, digit4;
