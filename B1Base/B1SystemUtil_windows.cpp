@@ -44,6 +44,16 @@ bool B1SystemUtil::isProcessRunning(const B1String& processName)
     return getProcessID(processName) > -1;
 }
 
+bool B1SystemUtil::isProcessRunning(int pid)
+{
+    HANDLE hProcess = OpenProcess(MAXIMUM_ALLOWED, FALSE, pid);
+    if (hProcess == NULL) {
+        return false;
+    }
+    CloseHandle(hProcess);
+    return true;
+}
+
 bool B1SystemUtil::createDirectory(const B1String& path)
 {
     B1String opath = path.copy();
@@ -237,7 +247,7 @@ uint32 B1SystemUtil::getCurrentThreadID()
     return static_cast<uint32>(::GetCurrentThreadId());
 }
 
-uint32 B1SystemUtil::createProcess(const B1String& process)
+uint32 B1SystemUtil::createProcess(const B1String& process, int* createdPid)
 {
     STARTUPINFOA si;
     PROCESS_INFORMATION pi;
@@ -245,36 +255,45 @@ uint32 B1SystemUtil::createProcess(const B1String& process)
     si.cb = sizeof(si);
     si.dwFlags = STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_HIDE;
-    if (::CreateProcessA(NULL, const_cast<char*>(process.cString()), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi) != TRUE)
+    if (::CreateProcessA(NULL, const_cast<char*>(process.cString()), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi) != TRUE) {
         return GetLastError();
+    }
+    if (createdPid) {
+        *createdPid = pi.dwProcessId;
+    }
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     return ERROR_SUCCESS;
 }
 
-uint32 B1SystemUtil::createProcessArg(const B1String& process, const B1String& arg)
+uint32 B1SystemUtil::createProcessArg(const B1String& process, const B1String& arg, int* createdPid)
 {
     std::vector<B1String> args(1);
     args[0] = arg.copy();
-    return createProcessArgs(process, args);
+    return createProcessArgs(process, args, createdPid);
 }
 
-uint32 B1SystemUtil::createProcessArgs(const B1String& process, const std::vector<B1String>& args)
+uint32 B1SystemUtil::createProcessArgs(const B1String& process, const std::vector<B1String>& args, int* createdPid)
 {
     B1String temp;
     temp.format("\"%s\"", process.cString());
     for (const auto& arg : args) {
         temp.appendf(" \"%s\"", arg.cString());
     }
-    return createProcess(temp);
+    return createProcess(temp, createdPid);
 }
 
 int B1SystemUtil::terminateProcess(const B1String& processName)
 {
     int pid = B1SystemUtil::getProcessID(processName);
-    if (pid < 0)
+    if (pid < 0) {
         return ENOENT;
+    }
+    return terminateProcess(pid);
+}
 
+int B1SystemUtil::terminateProcess(int pid)
+{
     HANDLE hProcess = OpenProcess(MAXIMUM_ALLOWED, FALSE, pid);
     if (hProcess == NULL) {
         return GetLastError();

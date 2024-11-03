@@ -49,6 +49,28 @@ bool B1SystemUtil::isProcessRunning(const B1String& processName)
     return getProcessID(processName) > -1;
 }
 
+bool B1SystemUtil::isProcessRunning(int pid)
+{
+    if (kill(pid, 0) != 0) {
+        return false;
+    }
+    bool isZombie = false;
+    {
+        B1String temp(B1String::formatAs("/proc/%d/stat", pid));
+        FILE* fpstat = fopen(temp.cString(), "r");
+        if (fpstat) {
+            int rpid = 0;
+            char rcmd[32];
+            char rstatc = 0;
+            if (fscanf(fpstat, "%d %30s %c", &rpid, rcmd, &rstatc) > 0) {
+                isZombie = rstatc == 'Z';
+            }
+            fclose(fpstat);
+        }
+    }
+    return isZombie != true;
+}
+
 bool B1SystemUtil::createDirectory(const B1String& path)
 {
     B1String opath = path.copy();
@@ -322,41 +344,49 @@ uint32 B1SystemUtil::getCurrentThreadID()
     return static_cast<uint32>(::pthread_self());
 }
 
-uint32 B1SystemUtil::createProcess(const B1String& process)
+uint32 B1SystemUtil::createProcess(const B1String& process, int* createdPid)
 {
-    if (isFileExist(process) != true)
+    if (isFileExist(process) != true) {
         return ENOENT;
+    }
     int pid = fork();
-    if (pid < 0)
+    if (pid < 0) {  //  parent process. but child couldn't be created.
         return errno;
-    else if (pid == 0) {
-        if (execl(process.cString(), process.cString(), NULL) == -1)
+    }
+    else if (pid == 0) {    //  child process.
+        if (execl(process.cString(), process.cString(), NULL) == -1) {
             return errno;
+        }
         exit(0);
     }
-    else if (pid > 0) {
+    else if (pid > 0) { //  parent process.
         int status;
         waitpid(pid, &status, WNOHANG);
+        if (createdPid) {
+            *createdPid = pid;
+        }
         return 0;
     }
     return 0;
 }
 
-uint32 B1SystemUtil::createProcessArg(const B1String& process, const B1String& arg)
+uint32 B1SystemUtil::createProcessArg(const B1String& process, const B1String& arg, int* createdPid)
 {
     std::vector<B1String> args(1);
     args[0] = arg.copy();
-    return createProcessArgs(process, args);
+    return createProcessArgs(process, args, createdPid);
 }
 
-uint32 B1SystemUtil::createProcessArgs(const B1String& process, const std::vector<B1String>& args)
+uint32 B1SystemUtil::createProcessArgs(const B1String& process, const std::vector<B1String>& args, int* createdPid)
 {
-    if (isFileExist(process) != true)
+    if (isFileExist(process) != true) {
         return ENOENT;
+    }
     int pid = fork();
-    if (pid < 0)
+    if (pid < 0) {  //  parent process. but child couldn't be created.
         return errno;
-    else if (pid == 0) {
+    }
+    else if (pid == 0) {    //  child process.
         int result = -1;
         if (args.empty())
             result = execl(process.cString(), process.cString(), NULL);
@@ -373,13 +403,17 @@ uint32 B1SystemUtil::createProcessArgs(const B1String& process, const std::vecto
         else {
             return E2BIG;
         }
-        if (-1 == result)
+        if (-1 == result) {
             return errno;
+        }
         exit(0);
     }
-    else if (pid > 0) {
+    else if (pid > 0) { //  parent process.
         int status;
         waitpid(pid, &status, WNOHANG);
+        if (createdPid) {
+            *createdPid = pid;
+        }
         return 0;
     }
     return 0;
@@ -388,15 +422,22 @@ uint32 B1SystemUtil::createProcessArgs(const B1String& process, const std::vecto
 int B1SystemUtil::terminateProcess(const B1String& processName)
 {
     int pid = B1SystemUtil::getProcessID(processName);
-    if (pid < 0)
+    if (pid < 0) {
         return ENOENT;
+    }
+    return terminateProcess(pid);
+}
 
+int B1SystemUtil::terminateProcess(int pid)
+{
     int result = kill(pid, SIGINT); //  Assume that all processes other than Linux Services will be killed when SIGINT is received.
-    if (result != 0)
+    if (result != 0) {
         return result;
+    }
     for (int32 i = 0; i < 1000; ++i) {
-        if (B1SystemUtil::getProcessID(processName) == -1)
+        if (isProcessRunning(pid) != true) {
             return 0;
+        }
         B1Thread::sleep(10);
     }
     result = kill(pid, 9);

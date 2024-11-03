@@ -23,6 +23,7 @@ namespace BnD {
     namespace B1SystemUtil {
         bool isFileExist(const B1String& path);
         bool isProcessRunning(const B1String& processName);
+        bool isProcessRunning(int pid);
         bool createDirectory(const B1String& path);
         bool deleteDirectory(const B1String& path);
         uint32 findFiles(const B1String& directoryPath, const B1String& fileExt, std::list<B1String>* resultFilenames = NULL);
@@ -40,10 +41,11 @@ namespace BnD {
         int getProcessID(const B1String& processName);
         uint32 getCurrentProcessID();
         uint32 getCurrentThreadID();
-        uint32 createProcess(const B1String& process);
-        uint32 createProcessArg(const B1String& process, const B1String& arg);
-        uint32 createProcessArgs(const B1String& process, const std::vector<B1String>& args);   //  max args_size is 5.
+        uint32 createProcess(const B1String& process, int* createdPid = NULL);
+        uint32 createProcessArg(const B1String& process, const B1String& arg, int* createdPid = NULL);
+        uint32 createProcessArgs(const B1String& process, const std::vector<B1String>& args, int* createdPid = NULL);   //  max args_size is 5.
         int terminateProcess(const B1String& processName);
+        int terminateProcess(int pid);
         bool rebootSystem();
         bool getLocalNetworkAddresses(std::list<B1String>* addresses);
     }
