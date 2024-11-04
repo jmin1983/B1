@@ -93,7 +93,15 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedi
         std::vector<char> buffer(stringLength + 1, 0);
         memcpy(&buffer[0], data + *totalLength, stringLength);
         string->from(&buffer[0]);
-        (*totalLength) += (stringLength + 2);
+        if (data[*totalLength + stringLength] == '\r' && data[*totalLength + stringLength + 1] == '\n') {
+            (*totalLength) += (stringLength + 2);
+        }
+        else if (data[*totalLength + stringLength] == '\r' || data[*totalLength + stringLength] == '\n') {
+            (*totalLength) += (stringLength + 1);
+        }
+        else {
+            (*totalLength) += stringLength;
+        }
     }
     return ANALYZE_RESULT_SUCCESS;
 }
