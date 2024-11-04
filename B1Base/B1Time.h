@@ -101,8 +101,8 @@ namespace BnD {
         static B1String timeInMicrosecond(int64 second, int32 microSecond); //  pretty only.
         static B1String timeInSecond(int64 second, bool pretty = false);
         static B1String getCurrentTimeZone();
-        static bool getCurrentTime(int64* second, int32* microSecond);
-        static bool getSystemTime(int64* second, int32* microSecond);
+        static bool getCurrentTime(int64* second, int32* microSecond = NULL);
+        static bool getSystemTime(int64* second, int32* microSecond = NULL);
         static void setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds);
         static void setCurrentTimeZone(const B1String& timezone);       //  not supported in Windows.
         static void setCurrentTime(const B1Time &t);                    //  not supported in Windows.

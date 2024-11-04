@@ -320,6 +320,17 @@ B1String B1Time::timeInSecond(int64 second, bool pretty)
     }
 }
 
+B1String B1Time::getCurrentTimeZone()
+{
+#if defined(_WIN32)
+    _tzset();
+    return _tzname[0];
+#else
+    tzset();
+    return tzname[0];
+#endif
+}
+
 bool B1Time::getCurrentTime(int64* second, int32* microSecond)
 {
     timeval crntTimeVal;
@@ -338,24 +349,17 @@ bool B1Time::getCurrentTime(int64* second, int32* microSecond)
             return false;
         }
         *second = newSecond;
-        *microSecond = newMicroSecond;
+        if (microSecond) {
+            *microSecond = newMicroSecond;
+        }
     }
     else {
         *second = crntTimeVal.tv_sec;
-        *microSecond = crntTimeVal.tv_usec;
+        if (microSecond) {
+            *microSecond = crntTimeVal.tv_usec;
+        }
     }
     return true;
-}
-
-B1String B1Time::getCurrentTimeZone()
-{
-#if defined(_WIN32)
-    _tzset();
-    return _tzname[0];
-#else
-    tzset();
-    return tzname[0];
-#endif
 }
 
 bool B1Time::getSystemTime(int64* second, int32* microSecond)
@@ -365,7 +369,9 @@ bool B1Time::getSystemTime(int64* second, int32* microSecond)
         return false;
     }
     *second = crntTimeVal.tv_sec;
-    *microSecond = crntTimeVal.tv_usec;
+    if (microSecond) {
+        *microSecond = crntTimeVal.tv_usec;
+    }
     return true;
 }
 
