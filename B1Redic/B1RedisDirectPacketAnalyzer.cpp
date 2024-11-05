@@ -66,6 +66,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedi
 
 B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedisBulkString(uint8* data, size_t size, B1String* string, size_t* totalLength) const
 {
+    size_t currentTotal = 0;
     int32 stringLength = 0; //  -1 if null.
     {
         B1String string;
@@ -84,25 +85,21 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedi
                 return ANALYZE_RESULT_NOT_ENOUTH_DATA;
             }
         }
-        (*totalLength) += (string.length() + 2);
+        currentTotal += (string.length() + 2);
     }
     if (stringLength < 0) {
         string->from("");   //  The client library API should not return an empty string, but a nil object... but... just returns empty_string for convenience.
     }
     else {  //  do not use getValueLengthFromData() for bulk_string.
+        if (currentTotal + stringLength + 2 > size) {
+            return ANALYZE_RESULT_NOT_ENOUTH_DATA;
+        }
         std::vector<char> buffer(stringLength + 1, 0);
-        memcpy(&buffer[0], data + *totalLength, stringLength);
+        memcpy(&buffer[0], data + currentTotal, stringLength);
         string->from(&buffer[0]);
-        if (data[*totalLength + stringLength] == '\r' && data[*totalLength + stringLength + 1] == '\n') {
-            (*totalLength) += (stringLength + 2);
-        }
-        else if (data[*totalLength + stringLength] == '\r' || data[*totalLength + stringLength] == '\n') {
-            (*totalLength) += (stringLength + 1);
-        }
-        else {
-            (*totalLength) += stringLength;
-        }
+        currentTotal += (stringLength + 2);
     }
+    (*totalLength) += currentTotal;
     return ANALYZE_RESULT_SUCCESS;
 }
 
