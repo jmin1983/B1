@@ -91,3 +91,8 @@ void BnD::resetLogCallback()
     g_callback = NULL;
     g_callbackParam = NULL;
 }
+
+BnD::B1String BnD::loggerFileDirPath()
+{
+    return g_fileLogger ? g_fileLogger->dirPath().copy() : "";
+}

@@ -36,6 +36,7 @@ namespace BnD {
     void setLogger(B1FileLog* fileLogger);
     void setLoggerCallback(b1log_callback_t callback, void* param = NULL);
     void resetLogCallback();
+    B1String loggerFileDirPath();
 }   //  !BnD
 
 #endif  // !_B1BASE_LOGGER_H

@@ -57,6 +57,7 @@ namespace BnD {
         bool write(B1String&& log);
         void flush();
         void deleteDeprecatedFiles();
+        const B1String& dirPath() const { return _dirPath; }
     };
 }   //  !BnD
 
