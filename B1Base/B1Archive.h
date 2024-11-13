@@ -16,6 +16,7 @@
 #pragma once
 #endif
 
+#include <map>
 #include <vector>
 #include <unordered_map>
 
@@ -59,6 +60,10 @@ namespace BnD {
         DECLARE_ARCHIVE_VALUE_FUNC(std::vector<float32>);
         DECLARE_ARCHIVE_VALUE_FUNC(std::vector<float64>);
         DECLARE_ARCHIVE_VALUE_FUNC(std::vector<B1String>);
+        template<typename T>
+        void writeData(const B1String& key, const std::map<int32, T>& value);
+        template<typename T>
+        bool readData(const B1String& key, std::map<int32, T>* value) const;
         template<typename T>
         void writeData(const B1String& key, const std::unordered_map<B1String, T>& value);
         template<typename T>

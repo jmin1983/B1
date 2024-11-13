@@ -21,6 +21,7 @@
 #include "B1Object.h"
 #include "B1String.h"
 
+#include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 namespace BnD {
@@ -29,6 +30,31 @@ namespace BnD {
         : _rootNode(new B1ArchiveNode())
     {
         _rootNode->_ptree = t;
+    }
+
+    template<typename T>
+    void B1Archive::writeData(const B1String& key, const std::map<int32, T>& value)
+    {
+        boost::property_tree::ptree child, temp;
+        for (const auto& v : value) {
+            child.put(std::to_string(v.first), v.second);
+        }
+        _rootNode->get().add_child(key.to_string(), child);
+    }
+
+    template<typename T>
+    bool B1Archive::readData(const B1String& key, std::map<int32, T>* value) const
+    {
+        try {
+            if (auto child = _rootNode->get().get_child_optional(key.to_string())) {
+                for (const auto& v : *child) {
+                    value->insert(std::make_pair(boost::lexical_cast<int32>(v.first), v.second.get_value<T>()));
+                }
+                return true;
+            }
+        }
+        catch (...) {}
+        return false;
     }
 
     template<typename T>

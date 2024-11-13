@@ -54,6 +54,7 @@ B1BaseClientSession* B1RedisDirectClient::createSession(B1ClientSocket* clientSo
     switch (static_cast<int32>((intptr_t)param)) {
         default:
             assert(false);
+            break;
         case SESSION_TYPE_WRITE:
             assert(_writeSession == NULL);
             _writeSession = new B1RedisDirectClientWriteSession(clientSocket, this, this, _startWritingNow);

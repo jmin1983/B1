@@ -16,8 +16,7 @@
 #pragma once
 #endif
 
-#include <B1Base/B1Archive.h>
-
+#include <map>
 #include <vector>
 
 namespace BnD {
@@ -35,6 +34,8 @@ namespace BnD {
     typedef std::pair<const B1String, B1String> DataString;
     typedef std::pair<const B1String, std::vector<int32> > DataVectorInt32;
     typedef std::pair<const B1String, std::vector<B1String> > DataVectorString;
+    typedef std::pair<const B1String, std::map<int32, int32> > DataMapInt32;
+    typedef std::pair<const B1String, std::map<int32, B1String> > DataMapString;
 }   //  !BnD
 
 #endif  // !_B1BASE_DATA_TYPE_H
