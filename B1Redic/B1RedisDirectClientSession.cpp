@@ -16,7 +16,6 @@
 #include "B1RedisDirectProtocol.h"
 
 #include <B1Base/B1TickUtil.h>
-#include <B1Base/B1Lock.h>
 
 using namespace BnD;
 

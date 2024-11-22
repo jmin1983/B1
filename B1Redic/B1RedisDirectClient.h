@@ -30,7 +30,7 @@ namespace BnD {
     class B1RedisDirectClientSubscribeSession;
     class B1RedisDirectClientWriteSession;
     class B1RedisDirectClient : protected B1BaseClient {
-    public:
+    protected:
         enum ALIVE {
             ALIVE_DEFAULT_MAX_COUNT = 2,
             ALIVE_DEFAULT_INTERVAL = 1000,

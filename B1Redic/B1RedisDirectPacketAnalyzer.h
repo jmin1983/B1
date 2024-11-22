@@ -25,16 +25,16 @@ namespace BnD {
     protected:
         virtual void implOnRecvRedisSimpleStrings(const B1String& string) {}
         virtual void implOnRecvRedisErrors(const B1String& message) {}
-        virtual void implOnRecvRedisIntegers(const B1String& int64String) {}    //  그냥 string으로 올린다. int64 범위긴 하다.
+        virtual void implOnRecvRedisIntegers(const B1String& int64String) {}        //  just using string. actually it is int64 range value.
         virtual void implOnRecvRedisBulkStrings(const B1String& string) {}
-        virtual void implOnRecvRedisArrays(const std::list<B1String>& strings) {} //  resp_type에 상관 없이 string으로 처리. empty if null_array.
+        virtual void implOnRecvRedisArrays(const std::list<B1String>& strings) {}   //  just set as string. ignore the resp_type. empty if null_array.
     protected:
         ANALYZE_RESULT implAnalyzeData(uint8* data, size_t size, size_t* pos) final;
+    protected:
         bool getValueLengthFromData(uint8* data, size_t size, size_t* length) const;
         ANALYZE_RESULT getRedisString(uint8* data, size_t size, B1String* string) const;
         ANALYZE_RESULT getRedisBulkString(uint8* data, size_t size, B1String* string, size_t* totalLength) const;
         ANALYZE_RESULT getRedisArrayString(uint8* data, size_t size, std::list<B1String>* strings, size_t* totalLength) const;
-    protected:
         ANALYZE_RESULT analyzeRedisSimpleStrings(uint8* data, size_t size, size_t* pos);
         ANALYZE_RESULT analyzeRedisErrors(uint8* data, size_t size, size_t* pos);
         ANALYZE_RESULT analyzeRedisIntegers(uint8* data, size_t size, size_t* pos);

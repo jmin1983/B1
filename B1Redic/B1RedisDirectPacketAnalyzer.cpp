@@ -15,7 +15,7 @@
 
 using namespace BnD;
 
-B1BasePacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::implAnalyzeData(uint8* data, size_t size, size_t* pos)
+auto B1RedisDirectPacketAnalyzer::implAnalyzeData(uint8* data, size_t size, size_t* pos) -> ANALYZE_RESULT
 {
     if (size < 3) {
         return ANALYZE_RESULT_NOT_ENOUTH_DATA;
@@ -52,7 +52,7 @@ bool B1RedisDirectPacketAnalyzer::getValueLengthFromData(uint8* data, size_t siz
     return false;
 }
 
-B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedisString(uint8* data, size_t size, B1String* string) const
+auto B1RedisDirectPacketAnalyzer::getRedisString(uint8* data, size_t size, B1String* string) const -> ANALYZE_RESULT
 {
     size_t length = 0;
     if (getValueLengthFromData(data, size, &length) != true) {
@@ -64,7 +64,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedi
     return ANALYZE_RESULT_SUCCESS;
 }
 
-B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedisBulkString(uint8* data, size_t size, B1String* string, size_t* totalLength) const
+auto B1RedisDirectPacketAnalyzer::getRedisBulkString(uint8* data, size_t size, B1String* string, size_t* totalLength) const -> ANALYZE_RESULT
 {
     size_t currentTotal = 0;
     int32 stringLength = 0; //  -1 if null.
@@ -103,7 +103,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedi
     return ANALYZE_RESULT_SUCCESS;
 }
 
-B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedisArrayString(uint8* data, size_t size, std::list<B1String>* strings, size_t* totalLength) const
+auto B1RedisDirectPacketAnalyzer::getRedisArrayString(uint8* data, size_t size, std::list<B1String>* strings, size_t* totalLength) const -> ANALYZE_RESULT
 {
     int32 arrayLength = 0;  //  -1 if null.
     {
@@ -170,7 +170,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::getRedi
     return ANALYZE_RESULT_SUCCESS;
 }
 
-B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyzeRedisSimpleStrings(uint8* data, size_t size, size_t* pos)
+auto B1RedisDirectPacketAnalyzer::analyzeRedisSimpleStrings(uint8* data, size_t size, size_t* pos) -> ANALYZE_RESULT
 {
     B1String string;
     {
@@ -184,7 +184,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyze
     return ANALYZE_RESULT_SUCCESS;
 }
 
-B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyzeRedisErrors(uint8* data, size_t size, size_t* pos)
+auto B1RedisDirectPacketAnalyzer::analyzeRedisErrors(uint8* data, size_t size, size_t* pos) -> ANALYZE_RESULT
 {
     B1String string;
     {
@@ -198,7 +198,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyze
     return ANALYZE_RESULT_SUCCESS;
 }
 
-B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyzeRedisIntegers(uint8* data, size_t size, size_t* pos)
+auto B1RedisDirectPacketAnalyzer::analyzeRedisIntegers(uint8* data, size_t size, size_t* pos) -> ANALYZE_RESULT
 {
     B1String string;
     {
@@ -212,7 +212,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyze
     return ANALYZE_RESULT_SUCCESS;
 }
 
-B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyzeRedisBulkStrings(uint8* data, size_t size, size_t* pos)
+auto B1RedisDirectPacketAnalyzer::analyzeRedisBulkStrings(uint8* data, size_t size, size_t* pos) -> ANALYZE_RESULT
 {
     B1String string;
     size_t totalLength = 0; //  must do initialization.
@@ -227,7 +227,7 @@ B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyze
     return ANALYZE_RESULT_SUCCESS;
 }
 
-B1RedisDirectPacketAnalyzer::ANALYZE_RESULT B1RedisDirectPacketAnalyzer::analyzeRedisArrays(uint8* data, size_t size, size_t* pos)
+auto B1RedisDirectPacketAnalyzer::analyzeRedisArrays(uint8* data, size_t size, size_t* pos) -> ANALYZE_RESULT
 {
     std::list<B1String> strings;
     size_t totalLength = 0; //  must do initialization.

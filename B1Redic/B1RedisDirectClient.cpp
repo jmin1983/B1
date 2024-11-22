@@ -29,7 +29,7 @@ B1RedisDirectClient::B1RedisDirectClient(B1RedisDirectClientMessageListener* mes
     , _aliveInterval(aliveInterval)
     , _listener(listener)
     , _messageListener(messageListener)
-    , _packetMaker(new B1RedisDirectPacketMaker())
+    , _packetMaker(std::make_shared<B1RedisDirectPacketMaker>())
     , _startWritingNow(false)
     , _db(0)
     , _pollingKey("")

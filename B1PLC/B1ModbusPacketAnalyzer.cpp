@@ -41,7 +41,7 @@ void B1ModbusPacketAnalyzer::onFunctionErrorOperationFailed(uint16 transactionID
     B1LOG("critical error occurred(%d): transactionID[%d], function[%d]", errorCode, transactionID, function);
 }
 
-B1BasePacketAnalyzer::ANALYZE_RESULT B1ModbusPacketAnalyzer::implAnalyzeData(uint8* data, size_t size, size_t* pos)
+auto B1ModbusPacketAnalyzer::implAnalyzeData(uint8* data, size_t size, size_t* pos) -> ANALYZE_RESULT
 {
     B1ModbusProtocol::MBAP mbap;
     const size_t headerSize = sizeof(mbap);
