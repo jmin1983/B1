@@ -50,12 +50,30 @@ namespace BnD {
                 CONSTS_DEFAULT_TEXT_BUNCH_HINT = 1024 * 512,
             };
         protected:
+            struct Data {
+                enum TYPE {
+                    TYPE_TEXT = 0,
+                    TYPE_BINARY,
+                };
+                Data(TYPE type) : _type(type) {}
+                TYPE _type;
+                bool isTextData() const { return TYPE_TEXT == _type; }
+                bool isBinaryData() const { return TYPE_BINARY == _type; }
+            };
+            struct TextData : Data {
+                TextData(B1String&& text) : Data(TYPE_TEXT), _text(std::move(text)) {}
+                B1String _text;
+            };
+            struct BinaryData : Data {
+                BinaryData(std::vector<uint8>&& binary) : Data(TYPE_BINARY) { _binary.swap(binary); }
+                std::vector<uint8> _binary;
+            };
+        protected:
             B1WebSocketReadWriteImpl* _owner;
             bool _readyToWrite;
             uint32 _textBunchHint;
             mutable B1Lock _lock;
-            std::list<std::vector<uint8> > _binaryData;
-            std::list<B1String> _textData;
+            std::list<std::shared_ptr<Data> > _data;
         protected:
             void implLooperFunc() final;
         public:
@@ -64,8 +82,6 @@ namespace BnD {
             void addWriteBinary(std::vector<uint8>&& data);
             void addWriteText(B1String&& text);
             void writeComplete() { _readyToWrite = true; }
-            bool isBinaryDataEmpty() const;
-            bool isTextDataEmpty() const;
         } _writer;
     protected:
         std::shared_ptr<B1WebSocketMessage> _webSocketMessage;
@@ -86,8 +102,6 @@ namespace BnD {
         void addWriteBinary(std::vector<uint8>&& data);
         void addWriteText(B1String&& text);
         void setTextBunchHint(uint32 value);
-        bool isBinaryDataEmpty() const;
-        bool isTextDataEmpty() const;
         class B1WebSocketImpl* webSocketImpl() const;
     };
 }   //  !BnD

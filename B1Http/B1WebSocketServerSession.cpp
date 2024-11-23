@@ -103,13 +103,3 @@ void B1WebSocketServerSession::setTextBunchHint(uint32 value)
 {
     readWriteImpl()->setTextBunchHint(value);
 }
-
-bool B1WebSocketServerSession::isBinaryDataAllWritten() const
-{
-    return readWriteImpl()->isBinaryDataEmpty();
-}
-
-bool B1WebSocketServerSession::isTextDataAllWritten() const
-{
-    return readWriteImpl()->isTextDataEmpty();
-}
