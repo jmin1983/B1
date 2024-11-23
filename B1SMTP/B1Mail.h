@@ -26,7 +26,7 @@ namespace BnD {
     public:
         struct B1Participant {
             B1Participant() {}
-            B1Participant(B1Participant&& r) : _emailAddress(std::move(r._emailAddress)), _name(std::move(r._name)) {}
+            B1Participant(B1Participant&& r) noexcept : _emailAddress(std::move(r._emailAddress)), _name(std::move(r._name)) {}
             B1Participant(B1String&& emailAddress) : _emailAddress(std::move(emailAddress)) {}
             B1Participant(B1String&& emailAddress, B1String&& name) : _emailAddress(std::move(emailAddress)), _name(std::move(name)) {}
             B1String _emailAddress;

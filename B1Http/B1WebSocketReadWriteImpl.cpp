@@ -15,6 +15,7 @@
 #include "B1WebSocketMessage.h"
 
 #include <B1Network/B1BaseSocket.h>
+#include <B1Util/B1UtilMacro.h>
 
 #include <boost/bind/bind.hpp>
 
@@ -35,24 +36,45 @@ B1WebSocketReadWriteImpl::~B1WebSocketReadWriteImpl()
     _writer.join();
 }
 
+B1WebSocketReadWriteImpl::Writer::Writer()
+    : _owner(NULL)
+    , _readyToWrite(true)
+    , _textBunchHint(CONSTS_DEFAULT_TEXT_BUNCH_HINT)
+{
+}
+
 void B1WebSocketReadWriteImpl::Writer::implLooperFunc()
 {
-    B1String textData;
+    B1String textDataBunch;
     std::vector<uint8> binaryData;
     {
         B1AutoLock al(_lock);
         if (_textData.empty() != true) {
-            textData = std::move(_textData.front());
-            _textData.pop_front();
+            textDataBunch = "[";
+            bool first = true;
+            SAFE_CONTAINER_FOREACH(_textData, itr) {
+                if (first) {
+                    first = false;
+                }
+                else {
+                    textDataBunch.append(",");
+                }
+                textDataBunch.append(*itr);
+                _textData.erase(itr);
+                if (textDataBunch.length() > _textBunchHint) {
+                    break;
+                }
+            }
+            textDataBunch.append("]");
         }
-        if (textData.isEmpty()) {
+        if (textDataBunch.isEmpty()) {
             if (_binaryData.empty() != true) {
                 binaryData = std::move(_binaryData.front());
                 _binaryData.pop_front();
             }
         }
     }
-    if (textData.isEmpty() && binaryData.empty()) {
+    if (textDataBunch.isEmpty() && binaryData.empty()) {
         B1Thread::sleep(10);
     }
     else {
@@ -63,8 +85,8 @@ void B1WebSocketReadWriteImpl::Writer::implLooperFunc()
             B1Thread::sleep(1);
         }
         _readyToWrite = false;
-        if (textData.isEmpty() != true) {
-            _owner->writeText(std::move(textData));
+        if (textDataBunch.isEmpty() != true) {
+            _owner->writeText(std::move(textDataBunch));
         }
         else if (binaryData.empty() != true) {
             _owner->writeBinary(std::move(binaryData));
@@ -203,6 +225,11 @@ void B1WebSocketReadWriteImpl::addWriteBinary(std::vector<uint8>&& data)
 void B1WebSocketReadWriteImpl::addWriteText(B1String&& text)
 {
     _writer.addWriteText(std::move(text));
+}
+
+void B1WebSocketReadWriteImpl::setTextBunchHint(uint32 value)
+{
+    _writer.setTextBunchHint(value);
 }
 
 bool B1WebSocketReadWriteImpl::isBinaryDataEmpty() const

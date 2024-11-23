@@ -35,9 +35,11 @@ namespace BnD {
         };
     protected:
         std::shared_ptr<B1SMTPClient> _smtpClient;
+        B1String _serverAddress;
         SEND_RESULT _lastResult;
     protected:
         bool sendHello();
+        bool sendMessage(const B1Mail& mail);
     public:
         bool initialize(const B1String& serverAddress, uint16 serverPort);  //  only support single session.
         void finalize();

@@ -26,8 +26,15 @@ B1MailSender::~B1MailSender()
 
 bool B1MailSender::sendHello()
 {
-    _lastResult = SEND_RESULT_FAIL_RECEIVE_HELLO;
+    if (_smtpClient->sendHello(_serverAddress) != true) {
+        _lastResult = SEND_RESULT_FAIL_RECEIVE_HELLO;
+        return false;
+    }
+    return true;
+}
 
+bool B1MailSender::sendMessage(const B1Mail& mail)
+{
     return true;
 }
 
@@ -41,6 +48,7 @@ bool B1MailSender::initialize(const B1String& serverAddress, uint16 serverPort)
         _smtpClient->finalize();
         _smtpClient.reset();
     }
+    _serverAddress = serverAddress.copy();
     return true;
 }
 
@@ -50,6 +58,7 @@ void B1MailSender::finalize()
         _smtpClient->finalize();
         _smtpClient.reset();
     }
+    _serverAddress.clear();
 }
 
 bool B1MailSender::sendMail(const std::shared_ptr<B1Mail> mail)

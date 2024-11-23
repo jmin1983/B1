@@ -99,6 +99,11 @@ void B1WebSocketServerSession::writeText(B1String&& text) const
     readWriteImpl()->addWriteText(std::move(text));
 }
 
+void B1WebSocketServerSession::setTextBunchHint(uint32 value)
+{
+    readWriteImpl()->setTextBunchHint(value);
+}
+
 bool B1WebSocketServerSession::isBinaryDataAllWritten() const
 {
     return readWriteImpl()->isBinaryDataEmpty();

@@ -48,6 +48,7 @@ namespace BnD {
         void acceptWebSocket(const B1HttpMessage& initialMessage);
         void writeBinary(std::vector<uint8>&& data) const;
         void writeText(B1String&& text) const;
+        void setTextBunchHint(uint32 value);
         bool isBinaryDataAllWritten() const;
         bool isTextDataAllWritten() const;
     };

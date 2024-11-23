@@ -44,10 +44,15 @@ namespace BnD {
     protected:
         class Writer : public B1Looper {
         public:
-            Writer() : _owner(NULL), _readyToWrite(true) {}
+            Writer();
+        protected:
+            enum CONSTS {
+                CONSTS_DEFAULT_TEXT_BUNCH_HINT = 1024 * 512,
+            };
         protected:
             B1WebSocketReadWriteImpl* _owner;
             bool _readyToWrite;
+            uint32 _textBunchHint;
             mutable B1Lock _lock;
             std::list<std::vector<uint8> > _binaryData;
             std::list<B1String> _textData;
@@ -55,6 +60,7 @@ namespace BnD {
             void implLooperFunc() final;
         public:
             void setOwner(B1WebSocketReadWriteImpl* owner) { _owner = owner; }
+            void setTextBunchHint(uint32 value) { _textBunchHint = value; }
             void addWriteBinary(std::vector<uint8>&& data);
             void addWriteText(B1String&& text);
             void writeComplete() { _readyToWrite = true; }
@@ -79,6 +85,7 @@ namespace BnD {
     public:
         void addWriteBinary(std::vector<uint8>&& data);
         void addWriteText(B1String&& text);
+        void setTextBunchHint(uint32 value);
         bool isBinaryDataEmpty() const;
         bool isTextDataEmpty() const;
         class B1WebSocketImpl* webSocketImpl() const;
