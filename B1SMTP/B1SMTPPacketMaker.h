@@ -27,7 +27,9 @@ namespace BnD {
         std::vector<uint8> makeRequestMessage(const B1String& message);
         B1String makeParticipantsString(const std::list<B1Mail::B1Participant>& participants) const;
     public:
-        std::vector<uint8> makeDataHello(const B1String& serverName, bool useAuth = false);
+        std::vector<uint8> makeDataHello(const B1String& serverName, bool useAuth);
+        std::vector<uint8> makeDataAuthLogin();
+        std::vector<uint8> makeDataBase64(const B1String& value);
         std::vector<uint8> makeDataMailFrom(const B1String& mailAddress);
         std::vector<uint8> makeDataRcptTO(const B1String& mailAddress);
         std::vector<uint8> makeDataRcptCC(const B1String& mailAddress);

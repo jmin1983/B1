@@ -23,6 +23,9 @@ using namespace BnD;
 B1SMTPClientSession::B1SMTPClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, B1SMTPPacketMaker* packetMaker)
     : B1ArrayBufferClientSession(clientSocket, listener)
     , _remoteServiceReady(false)
+    , _authReady(false)
+    , _authCompleted(false)
+    , _authOk(false)
     , _lastActionOk(false)
     , _startMailInput(false)
     , _remoteServiceClosed(false)
@@ -37,6 +40,25 @@ B1SMTPClientSession::~B1SMTPClientSession()
 void B1SMTPClientSession::implOnRecvSMTPResponseServiceReady(B1String&& message)
 {
     _remoteServiceReady = true;
+}
+
+void B1SMTPClientSession::implOnRecvSMTPResponseAuthReady(B1String&& message)
+{
+    _authReady = true;
+}
+
+void B1SMTPClientSession::implOnRecvSMTPResponseAuthComplete(B1String&& message)
+{
+    B1LOG("auth completed");
+    _authOk = true;
+    _authCompleted = true;
+}
+
+void B1SMTPClientSession::implOnRecvSMTPResponseAuthFailed(B1String&& message)
+{
+    B1LOG("auth failed");
+    _authOk = false;
+    _authCompleted = true;
 }
 
 void B1SMTPClientSession::implOnRecvSMTPResponseActionOK(B1String&& message)
@@ -72,6 +94,9 @@ void B1SMTPClientSession::implOnDisconnected(int32 reason)
 {
     B1LOG("session disconnected");
     _remoteServiceReady = false;
+    _authReady = false;
+    _authCompleted = false;
+    _authOk = false;
     _lastActionOk = false;
     _startMailInput = false;
     _remoteServiceClosed = false;
@@ -108,12 +133,35 @@ bool B1SMTPClientSession::sendAndWait(const std::vector<uint8>& data, bool* cond
     return true;
 }
 
-bool B1SMTPClientSession::sendHello(const B1String& serverName)
+bool B1SMTPClientSession::sendHello(const B1String& serverName, bool useAuth)
 {
     if (waitRemoteServiceReady() != true) {
         return false;
     }
-    return sendAndWait(_packetMaker->makeDataHello(serverName), &_lastActionOk);
+    return sendAndWait(_packetMaker->makeDataHello(serverName, useAuth), &_lastActionOk);
+}
+
+bool B1SMTPClientSession::sendAuthLogin()
+{
+    return sendAndWait(_packetMaker->makeDataAuthLogin(), &_authReady);
+}
+
+bool B1SMTPClientSession::sendUserID(const B1String& userID)
+{
+    return sendAndWait(_packetMaker->makeDataBase64(userID), &_authReady);
+}
+
+bool B1SMTPClientSession::sendUserPassword(const B1String& userPassword)
+{
+    _authCompleted = false;
+    _authOk = false;
+    if (writeData(_packetMaker->makeDataBase64(userPassword)) != true) {
+        return false;
+    }
+    if (waitResponse(_authCompleted) != true) {
+        return false;
+    }
+    return true;
 }
 
 bool B1SMTPClientSession::sendMailFrom(const B1Mail& mail)

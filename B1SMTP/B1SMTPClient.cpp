@@ -49,10 +49,28 @@ void B1SMTPClient::finalize()
     shutdown();
 }
 
-bool B1SMTPClient::sendHello(const B1String& serverName)
+bool B1SMTPClient::sendHello(const B1String& serverName, bool useAuth)
 {
     auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
-    return session ? session->sendHello(serverName) : false;
+    return session ? session->sendHello(serverName, useAuth) : false;
+}
+
+bool B1SMTPClient::sendAuthLogin()
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendAuthLogin() : false;
+}
+
+bool B1SMTPClient::sendUserID(const B1String& userID)
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendUserID(userID) : false;
+}
+
+bool B1SMTPClient::sendUserPassword(const B1String& userPassword)
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendUserPassword(userPassword) : false;
 }
 
 bool B1SMTPClient::sendMailFrom(const B1Mail& mail)
@@ -95,6 +113,12 @@ bool B1SMTPClient::sendQuit()
 {
     auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
     return session ? session->sendQuit() : false;
+}
+
+bool B1SMTPClient::isAuthed() const
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->isAuthed() : false;
 }
 
 bool B1SMTPClient::isRemoteServiceClosed() const

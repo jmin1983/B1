@@ -33,6 +33,9 @@ namespace BnD {
         };
     private:
         bool _remoteServiceReady;
+        bool _authReady;
+        bool _authCompleted;
+        bool _authOk;
         bool _lastActionOk;
         bool _startMailInput;
         bool _remoteServiceClosed;
@@ -40,6 +43,9 @@ namespace BnD {
         B1SMTPPacketMaker* _packetMaker;
     protected:  //  B1SMTPPacketAnalyzer
         virtual void implOnRecvSMTPResponseServiceReady(B1String&& message) override;
+        virtual void implOnRecvSMTPResponseAuthReady(B1String&& message) override;
+        virtual void implOnRecvSMTPResponseAuthComplete(B1String&& message) override;
+        virtual void implOnRecvSMTPResponseAuthFailed(B1String&& message) override;
         virtual void implOnRecvSMTPResponseActionOK(B1String&& message) override;
         virtual void implOnRecvSMTPResponseStartMailInput(B1String&& message) override;
         virtual void implOnRecvSMTPResponseServiceClosing(B1String&& message) override;
@@ -52,7 +58,10 @@ namespace BnD {
         bool waitRemoteServiceReady() const;        //  return false if timedout.
         bool sendAndWait(const std::vector<uint8>& data, bool* condition) const;
     public:
-        bool sendHello(const B1String& serverName);
+        bool sendHello(const B1String& serverName, bool useAuth);
+        bool sendAuthLogin();
+        bool sendUserID(const B1String& userID);
+        bool sendUserPassword(const B1String& userPassword);
         bool sendMailFrom(const B1Mail& mail);
         bool sendRcptTO(const B1Mail& mail);
         bool sendRcptCC(const B1Mail& mail);
@@ -60,6 +69,7 @@ namespace BnD {
         bool sendStartMailInput();
         bool sendContents(const B1Mail& mail);
         bool sendQuit();
+        bool isAuthed() const { return _authOk; }
         bool isRemoteServiceClosed() const { return _remoteServiceClosed; }
     };
 }   //  !BnD

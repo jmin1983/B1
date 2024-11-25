@@ -32,7 +32,10 @@ namespace BnD {
     public:
         bool initialize(const B1String& address, uint16 port);  //  only support single session.
         void finalize();
-        bool sendHello(const B1String& serverName);
+        bool sendHello(const B1String& serverName, bool useAuth);
+        bool sendAuthLogin();
+        bool sendUserID(const B1String& userID);
+        bool sendUserPassword(const B1String& userPassword);
         bool sendMailFrom(const B1Mail& mail);
         bool sendRcptTO(const B1Mail& mail);
         bool sendRcptCC(const B1Mail& mail);
@@ -40,6 +43,7 @@ namespace BnD {
         bool sendStartMailInput();
         bool sendContents(const B1Mail& mail);
         bool sendQuit();
+        bool isAuthed() const;
         bool isRemoteServiceClosed() const;
     };
 }   //  !BnD

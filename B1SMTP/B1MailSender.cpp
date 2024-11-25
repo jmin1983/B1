@@ -37,6 +37,17 @@ bool B1MailSender::initialize(const B1String& serverAddress, uint16 serverPort)
         _smtpClient.reset();
     }
     _serverAddress = serverAddress.copy();
+    _lastResult = SEND_RESULT_FAIL;
+    return true;
+}
+
+bool B1MailSender::initialize(const B1String& serverAddress, uint16 serverPort, B1String&& userID, B1String&& userPassword)
+{
+    if (initialize(serverAddress, serverPort) != true) {
+        return false;
+    }
+    _userID = std::move(userID);
+    _userPassword = std::move(userPassword);
     return true;
 }
 
@@ -46,14 +57,35 @@ void B1MailSender::finalize()
         _smtpClient->finalize();
         _smtpClient.reset();
     }
+    _userPassword.clear();
+    _userID.clear();
     _serverAddress.clear();
+    _lastResult = SEND_RESULT_FAIL;
 }
 
 bool B1MailSender::sendMail(const B1Mail& mail)
 {
-    if (_smtpClient->sendHello(_serverAddress) != true) {
+    if (_smtpClient->sendHello(_serverAddress, useAuth()) != true) {
         _lastResult = SEND_RESULT_FAIL_SEND_HELLO;
         return false;
+    }
+    if (useAuth()) {
+        if (_smtpClient->sendAuthLogin() != true) {
+            _lastResult = SEND_RESULT_FAIL_SEND_AUTH;
+            return false;
+        }
+        if (_smtpClient->sendUserID(_userID) != true) {
+            _lastResult = SEND_RESULT_FAIL_SEND_USER_ID;
+            return false;
+        }
+        if (_smtpClient->sendUserPassword(_userPassword) != true) {
+            _lastResult = SEND_RESULT_FAIL_SEND_USER_PASSWORD;
+            return false;
+        }
+        if (_smtpClient->isAuthed() != true) {
+            _lastResult = SEND_RESULT_FAIL_AUTH;
+            return false;
+        }
     }
     if (_smtpClient->sendMailFrom(mail) != true) {
         _lastResult = SEND_RESULT_FAIL_SEND_FAIL_FROM;
@@ -84,14 +116,14 @@ bool B1MailSender::sendMail(const B1Mail& mail)
         return false;
     }
     const size_t waitCount = 10;
-    bool finished = false;
+    bool quitSucceed = false;
     for (size_t i = 0; i < waitCount; ++i) {
         if (_smtpClient->isRemoteServiceClosed()) {
-            finished = true;
+            quitSucceed = true;
             break;
         }
         B1Thread::sleep(10);
     }
-    _lastResult = finished ? SEND_RESULT_SUCCEED : SEND_RESULT_FAIL_BUT_COMPLETE;
+    _lastResult = quitSucceed ? SEND_RESULT_SUCCEED : SEND_RESULT_QUIT_BUT_COMPLETE;
     return true;
 }

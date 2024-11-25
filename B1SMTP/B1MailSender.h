@@ -25,7 +25,11 @@ namespace BnD {
         virtual ~B1MailSender();
     public:
         enum SEND_RESULT {
-            SEND_RESULT_FAIL_BUT_COMPLETE = -10,
+            SEND_RESULT_FAIL_AUTH = -104,
+            SEND_RESULT_FAIL_SEND_USER_PASSWORD = -103,
+            SEND_RESULT_FAIL_SEND_USER_ID = -102,
+            SEND_RESULT_FAIL_SEND_AUTH = -101,
+
             SEND_RESULT_FAIL_QUIT = -9,
             SEND_RESULT_FAIL_SEND_CONTENTS = -8,
             SEND_RESULT_FAIL_SEND_START_MAIL_INPUT = -7,
@@ -36,13 +40,19 @@ namespace BnD {
             SEND_RESULT_FAIL_SEND_HELLO = -2,
             SEND_RESULT_FAIL = -1,
             SEND_RESULT_SUCCEED = 0,
+            SEND_RESULT_QUIT_BUT_COMPLETE = 1,
         };
     protected:
+        SEND_RESULT _lastResult;
         std::shared_ptr<B1SMTPClient> _smtpClient;
         B1String _serverAddress;
-        SEND_RESULT _lastResult;
+        B1String _userID;
+        B1String _userPassword;
+    protected:
+        bool useAuth() const { return _userID.isEmpty() != true; }
     public:
         bool initialize(const B1String& serverAddress, uint16 serverPort);  //  only support single session.
+        bool initialize(const B1String& serverAddress, uint16 serverPort, B1String&& userID, B1String&& userPassword);  //  only support single session.
         void finalize();
         bool sendMail(const B1Mail& mail);
         SEND_RESULT lastResult() const { return _lastResult; }

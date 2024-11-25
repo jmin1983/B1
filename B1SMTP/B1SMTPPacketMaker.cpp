@@ -12,6 +12,8 @@
 #include "B1SMTP.h"
 #include "B1SMTPPacketMaker.h"
 
+#include <B1Crypto/B1Encryptor.h>
+
 using namespace BnD;
 
 B1SMTPPacketMaker::B1SMTPPacketMaker()
@@ -55,37 +57,49 @@ std::vector<uint8> B1SMTPPacketMaker::makeDataHello(const B1String& serverName, 
 {
     B1String message;
     if (useAuth) {
-        message.format("EHLO %s\r\n", serverName.cString());
+        message.format("EHLO %s", serverName.cString());
     }
     else {
-        message.format("HELO %s\r\n", serverName.cString());
+        message.format("HELO %s", serverName.cString());
     }
     return makeRequestMessage(message);
 }
 
+std::vector<uint8> B1SMTPPacketMaker::makeDataAuthLogin()
+{
+    return makeRequestMessage("AUTH LOGIN");
+}
+
+std::vector<uint8> B1SMTPPacketMaker::makeDataBase64(const B1String& value)
+{
+    B1String encodedResult;
+    B1Encryptor::encodeBase64(std::vector<uint8>(value.cString(), value.cString() + value.length()), &encodedResult);
+    return makeRequestMessage(encodedResult);
+}
+
 std::vector<uint8> B1SMTPPacketMaker::makeDataMailFrom(const B1String& mailAddress)
 {
-    return makeRequestMessage("MAIL FROM:" + mailAddress + "\r\n");
+    return makeRequestMessage("MAIL FROM:" + mailAddress);
 }
 
 std::vector<uint8> B1SMTPPacketMaker::makeDataRcptTO(const B1String& mailAddress)
 {
-    return makeRequestMessage("RCPT TO:" + mailAddress + "\r\n");
+    return makeRequestMessage("RCPT TO:" + mailAddress);
 }
 
 std::vector<uint8> B1SMTPPacketMaker::makeDataRcptCC(const B1String& mailAddress)
 {
-    return makeRequestMessage("RCPT CC:" + mailAddress + "\r\n");
+    return makeRequestMessage("RCPT CC:" + mailAddress);
 }
 
 std::vector<uint8> B1SMTPPacketMaker::makeDataRcptBCC(const B1String& mailAddress)
 {
-    return makeRequestMessage("RCPT BCC:" + mailAddress + "\r\n");
+    return makeRequestMessage("RCPT BCC:" + mailAddress);
 }
 
 std::vector<uint8> B1SMTPPacketMaker::makeDataStartMailInput()
 {
-    return makeRequestMessage("DATA\r\n");
+    return makeRequestMessage("DATA");
 }
 
 std::vector<uint8> B1SMTPPacketMaker::makeDataContents(const B1Mail& mail)
@@ -104,11 +118,11 @@ std::vector<uint8> B1SMTPPacketMaker::makeDataContents(const B1Mail& mail)
     }
     message.appendf("Subject: %s\r\n\r\n", mail.subject().cString());
     message.appendf("%s\r\n", mail.contents().cString());
-    message.append("\r\n.\r\n");
+    message.append(".");
     return makeRequestMessage(message);
 }
 
 std::vector<uint8> B1SMTPPacketMaker::makeDataQuit()
 {
-    return makeRequestMessage("QUIT\r\n");
+    return makeRequestMessage("QUIT");
 }
