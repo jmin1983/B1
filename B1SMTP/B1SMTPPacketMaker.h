@@ -16,6 +16,8 @@
 #pragma once
 #endif
 
+#include <B1SMTP/B1Mail.h>
+
 namespace BnD {
     class B1SMTPPacketMaker {
     public:
@@ -23,8 +25,16 @@ namespace BnD {
         virtual ~B1SMTPPacketMaker();
     protected:
         std::vector<uint8> makeRequestMessage(const B1String& message);
+        B1String makeParticipantsString(const std::list<B1Mail::B1Participant>& participants) const;
     public:
         std::vector<uint8> makeDataHello(const B1String& serverName, bool useAuth = false);
+        std::vector<uint8> makeDataMailFrom(const B1String& mailAddress);
+        std::vector<uint8> makeDataRcptTO(const B1String& mailAddress);
+        std::vector<uint8> makeDataRcptCC(const B1String& mailAddress);
+        std::vector<uint8> makeDataRcptBCC(const B1String& mailAddress);
+        std::vector<uint8> makeDataStartMailInput();
+        std::vector<uint8> makeDataContents(const B1Mail& mail);
+        std::vector<uint8> makeDataQuit();
     };
 }   //  !BnD
 

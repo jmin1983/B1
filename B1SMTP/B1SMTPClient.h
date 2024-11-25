@@ -19,6 +19,7 @@
 #include <B1Network/B1BaseClient.h>
 
 namespace BnD {
+    class B1Mail;
     class B1SMTPPacketMaker;
     class B1SMTPClient : protected B1BaseClient {
     public:
@@ -32,6 +33,14 @@ namespace BnD {
         bool initialize(const B1String& address, uint16 port);  //  only support single session.
         void finalize();
         bool sendHello(const B1String& serverName);
+        bool sendMailFrom(const B1Mail& mail);
+        bool sendRcptTO(const B1Mail& mail);
+        bool sendRcptCC(const B1Mail& mail);
+        bool sendRcptBCC(const B1Mail& mail);
+        bool sendStartMailInput();
+        bool sendContents(const B1Mail& mail);
+        bool sendQuit();
+        bool isRemoteServiceClosed() const;
     };
 }   //  !BnD
 

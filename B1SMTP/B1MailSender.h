@@ -25,11 +25,15 @@ namespace BnD {
         virtual ~B1MailSender();
     public:
         enum SEND_RESULT {
-            SEND_RESULT_FAIL_TO_SEND_MESSAGE = -6,
-            SEND_RESULT_FAIL_TO_SEND_CMD_FROM = -5,
-            SEND_RESULT_FAIL_TO_SEND_CMD_RCPT = -4,
-            SEND_RESULT_FAIL_TO_SEND_CMD_DATA = -3,
-            SEND_RESULT_FAIL_RECEIVE_HELLO = -2,
+            SEND_RESULT_FAIL_BUT_COMPLETE = -10,
+            SEND_RESULT_FAIL_QUIT = -9,
+            SEND_RESULT_FAIL_SEND_CONTENTS = -8,
+            SEND_RESULT_FAIL_SEND_START_MAIL_INPUT = -7,
+            SEND_RESULT_FAIL_SEND_RCPT_BCC = -6,
+            SEND_RESULT_FAIL_SEND_RCPT_CC = -5,
+            SEND_RESULT_FAIL_SEND_RCPT_TO = -4,
+            SEND_RESULT_FAIL_SEND_FAIL_FROM = -3,
+            SEND_RESULT_FAIL_SEND_HELLO = -2,
             SEND_RESULT_FAIL = -1,
             SEND_RESULT_SUCCEED = 0,
         };
@@ -37,15 +41,10 @@ namespace BnD {
         std::shared_ptr<B1SMTPClient> _smtpClient;
         B1String _serverAddress;
         SEND_RESULT _lastResult;
-    protected:
-        bool sendHello();
-        bool sendMessage(const B1Mail& mail);
     public:
         bool initialize(const B1String& serverAddress, uint16 serverPort);  //  only support single session.
         void finalize();
-        bool sendMail(const std::shared_ptr<B1Mail> mail);
-        bool sendMail(const std::vector<std::shared_ptr<B1Mail> >& mails);
-
+        bool sendMail(const B1Mail& mail);
         SEND_RESULT lastResult() const { return _lastResult; }
     };
 }   //  !BnD

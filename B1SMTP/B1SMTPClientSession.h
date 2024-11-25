@@ -34,18 +34,33 @@ namespace BnD {
     private:
         bool _remoteServiceReady;
         bool _lastActionOk;
+        bool _startMailInput;
+        bool _remoteServiceClosed;
     protected:
         B1SMTPPacketMaker* _packetMaker;
     protected:  //  B1SMTPPacketAnalyzer
         virtual void implOnRecvSMTPResponseServiceReady(B1String&& message) override;
         virtual void implOnRecvSMTPResponseActionOK(B1String&& message) override;
+        virtual void implOnRecvSMTPResponseStartMailInput(B1String&& message) override;
+        virtual void implOnRecvSMTPResponseServiceClosing(B1String&& message) override;
     protected:  //  B1ArrayBufferClientSession
         void onReadComplete(uint8* data, size_t dataSize) final;
         virtual void implOnConnect() override;
         virtual void implOnDisconnected(int32 reason) override;
+    protected:
+        bool waitResponse(const bool& value) const; //  return false if timedout.
+        bool waitRemoteServiceReady() const;        //  return false if timedout.
+        bool sendAndWait(const std::vector<uint8>& data, bool* condition) const;
     public:
         bool sendHello(const B1String& serverName);
-        bool sendMessage(const B1Mail& mail);
+        bool sendMailFrom(const B1Mail& mail);
+        bool sendRcptTO(const B1Mail& mail);
+        bool sendRcptCC(const B1Mail& mail);
+        bool sendRcptBCC(const B1Mail& mail);
+        bool sendStartMailInput();
+        bool sendContents(const B1Mail& mail);
+        bool sendQuit();
+        bool isRemoteServiceClosed() const { return _remoteServiceClosed; }
     };
 }   //  !BnD
 

@@ -54,3 +54,51 @@ bool B1SMTPClient::sendHello(const B1String& serverName)
     auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
     return session ? session->sendHello(serverName) : false;
 }
+
+bool B1SMTPClient::sendMailFrom(const B1Mail& mail)
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendMailFrom(mail) : false;
+}
+
+bool B1SMTPClient::sendRcptTO(const B1Mail& mail)
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendRcptTO(mail) : false;
+}
+
+bool B1SMTPClient::sendRcptCC(const B1Mail& mail)
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendRcptCC(mail) : false;
+}
+
+bool B1SMTPClient::sendRcptBCC(const B1Mail& mail)
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendRcptBCC(mail) : false;
+}
+
+bool B1SMTPClient::sendStartMailInput()
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendStartMailInput() : false;
+}
+
+bool B1SMTPClient::sendContents(const B1Mail& mail)
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendContents(mail) : false;
+}
+
+bool B1SMTPClient::sendQuit()
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->sendQuit() : false;
+}
+
+bool B1SMTPClient::isRemoteServiceClosed() const
+{
+    auto session = sessionManager()->getUniqueSession<B1SMTPClientSession>();
+    return session ? session->isRemoteServiceClosed() : false;
+}

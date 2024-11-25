@@ -13,6 +13,8 @@
 #include "B1MailSender.h"
 #include "B1SMTPClient.h"
 
+#include <B1Base/B1Thread.h>
+
 using namespace BnD;
 
 B1MailSender::B1MailSender()
@@ -22,20 +24,6 @@ B1MailSender::B1MailSender()
 
 B1MailSender::~B1MailSender()
 {
-}
-
-bool B1MailSender::sendHello()
-{
-    if (_smtpClient->sendHello(_serverAddress) != true) {
-        _lastResult = SEND_RESULT_FAIL_RECEIVE_HELLO;
-        return false;
-    }
-    return true;
-}
-
-bool B1MailSender::sendMessage(const B1Mail& mail)
-{
-    return true;
 }
 
 bool B1MailSender::initialize(const B1String& serverAddress, uint16 serverPort)
@@ -61,16 +49,49 @@ void B1MailSender::finalize()
     _serverAddress.clear();
 }
 
-bool B1MailSender::sendMail(const std::shared_ptr<B1Mail> mail)
+bool B1MailSender::sendMail(const B1Mail& mail)
 {
-    if (sendHello() != true) {
+    if (_smtpClient->sendHello(_serverAddress) != true) {
+        _lastResult = SEND_RESULT_FAIL_SEND_HELLO;
         return false;
     }
-    _lastResult = SEND_RESULT_SUCCEED;
-    return true;
-}
-
-bool B1MailSender::sendMail(const std::vector<std::shared_ptr<B1Mail> >& mails)
-{
+    if (_smtpClient->sendMailFrom(mail) != true) {
+        _lastResult = SEND_RESULT_FAIL_SEND_FAIL_FROM;
+        return false;
+    }
+    if (_smtpClient->sendRcptTO(mail) != true) {
+        _lastResult = SEND_RESULT_FAIL_SEND_RCPT_TO;
+        return false;
+    }
+    if (_smtpClient->sendRcptCC(mail) != true) {
+        _lastResult = SEND_RESULT_FAIL_SEND_RCPT_CC;
+        return false;
+    }
+    if (_smtpClient->sendRcptBCC(mail) != true) {
+        _lastResult = SEND_RESULT_FAIL_SEND_RCPT_BCC;
+        return false;
+    }
+    if (_smtpClient->sendStartMailInput() != true) {
+        _lastResult = SEND_RESULT_FAIL_SEND_START_MAIL_INPUT;
+        return false;
+    }
+    if (_smtpClient->sendContents(mail) != true) {
+        _lastResult = SEND_RESULT_FAIL_SEND_CONTENTS;
+        return false;
+    }
+    if (_smtpClient->sendQuit() != true) {
+        _lastResult = SEND_RESULT_FAIL_QUIT;
+        return false;
+    }
+    const size_t waitCount = 10;
+    bool finished = false;
+    for (size_t i = 0; i < waitCount; ++i) {
+        if (_smtpClient->isRemoteServiceClosed()) {
+            finished = true;
+            break;
+        }
+        B1Thread::sleep(10);
+    }
+    _lastResult = finished ? SEND_RESULT_SUCCEED : SEND_RESULT_FAIL_BUT_COMPLETE;
     return true;
 }

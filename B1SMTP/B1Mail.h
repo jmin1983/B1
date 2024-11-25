@@ -31,8 +31,8 @@ namespace BnD {
             B1Participant(B1String&& emailAddress, B1String&& name) : _emailAddress(std::move(emailAddress)), _name(std::move(name)) {}
             B1String _emailAddress;
             B1String _name;
-            const B1String& emailAddress() { return _emailAddress; }
-            const B1String& name() { return _name; }
+            const B1String& emailAddress() const { return _emailAddress; }
+            const B1String& name() const { return _name; }
             void setEmailAddress(B1String&& value) { _emailAddress = std::move(value); }
             void setName(B1String&& value) { _name = std::move(value); }
         };

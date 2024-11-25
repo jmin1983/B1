@@ -24,6 +24,8 @@ B1SMTPClientSession::B1SMTPClientSession(B1ClientSocket* clientSocket, B1BaseCli
     : B1ArrayBufferClientSession(clientSocket, listener)
     , _remoteServiceReady(false)
     , _lastActionOk(false)
+    , _startMailInput(false)
+    , _remoteServiceClosed(false)
     , _packetMaker(packetMaker)
 {
 }
@@ -40,6 +42,16 @@ void B1SMTPClientSession::implOnRecvSMTPResponseServiceReady(B1String&& message)
 void B1SMTPClientSession::implOnRecvSMTPResponseActionOK(B1String&& message)
 {
     _lastActionOk = true;
+}
+
+void B1SMTPClientSession::implOnRecvSMTPResponseStartMailInput(B1String&& message)
+{
+    _startMailInput = true;
+}
+
+void B1SMTPClientSession::implOnRecvSMTPResponseServiceClosing(B1String&& message)
+{
+    _remoteServiceClosed = true;
 }
 
 void B1SMTPClientSession::onReadComplete(uint8* data, size_t dataSize)
@@ -61,40 +73,95 @@ void B1SMTPClientSession::implOnDisconnected(int32 reason)
     B1LOG("session disconnected");
     _remoteServiceReady = false;
     _lastActionOk = false;
+    _startMailInput = false;
+    _remoteServiceClosed = false;
     B1ArrayBufferClientSession::implOnDisconnected(reason);
+}
+
+bool B1SMTPClientSession::waitResponse(const bool& value) const
+{
+    auto now = B1TickUtil::currentTick();
+    while (value != true) {
+        if (B1TickUtil::diffTick(now, B1TickUtil::currentTick()) > CONSTS_RESPONSE_TIME_OUT) {
+            B1LOG("remote response timedout");
+            return false;
+        }
+        B1Thread::sleep(10);
+    }
+    return true;
+}
+
+bool B1SMTPClientSession::waitRemoteServiceReady() const
+{
+    return waitResponse(_remoteServiceReady);
+}
+
+bool B1SMTPClientSession::sendAndWait(const std::vector<uint8>& data, bool* condition) const
+{
+    *condition = false;
+    if (writeData(data) != true) {
+        return false;
+    }
+    if (waitResponse(*condition) != true) {
+        return false;
+    }
+    return true;
 }
 
 bool B1SMTPClientSession::sendHello(const B1String& serverName)
 {
-    {
-        auto now = B1TickUtil::currentTick();
-        while (_remoteServiceReady != true) {
-            if (B1TickUtil::diffTick(now, B1TickUtil::currentTick()) > CONSTS_RESPONSE_TIME_OUT) {
-                B1LOG("remote service ready timedout");
-                return false;
-            }
-            B1Thread::sleep(10);
-        }
-    }
-    _lastActionOk = false;
-    auto data = _packetMaker->makeDataHello(serverName);
-    if (writeData(data) != true) {
+    if (waitRemoteServiceReady() != true) {
         return false;
     }
-    {
-        auto now = B1TickUtil::currentTick();
-        while (_lastActionOk != true) {
-            if (B1TickUtil::diffTick(now, B1TickUtil::currentTick()) > CONSTS_RESPONSE_TIME_OUT) {
-                B1LOG("remote response timedout");
-                return false;
-            }
-            B1Thread::sleep(10);
+    return sendAndWait(_packetMaker->makeDataHello(serverName), &_lastActionOk);
+}
+
+bool B1SMTPClientSession::sendMailFrom(const B1Mail& mail)
+{
+    return sendAndWait(_packetMaker->makeDataMailFrom(mail.sender().emailAddress()), &_lastActionOk);
+}
+
+bool B1SMTPClientSession::sendRcptTO(const B1Mail& mail)
+{
+    for (const auto& receiver : mail.receivers()) {
+        if (sendAndWait(_packetMaker->makeDataRcptTO(receiver.emailAddress()), &_lastActionOk) != true) {
+            return false;
         }
     }
     return true;
 }
 
-bool B1SMTPClientSession::sendMessage(const B1Mail& mail)
+bool B1SMTPClientSession::sendRcptCC(const B1Mail& mail)
 {
+    for (const auto& cc : mail.ccs()) {
+        if (sendAndWait(_packetMaker->makeDataRcptCC(cc.emailAddress()), &_lastActionOk) != true) {
+            return false;
+        }
+    }
     return true;
+}
+
+bool B1SMTPClientSession::sendRcptBCC(const B1Mail& mail)
+{
+    for (const auto& bcc : mail.bccs()) {
+        if (sendAndWait(_packetMaker->makeDataRcptBCC(bcc.emailAddress()), &_lastActionOk) != true) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool B1SMTPClientSession::sendStartMailInput()
+{
+    return sendAndWait(_packetMaker->makeDataStartMailInput(), &_startMailInput);
+}
+
+bool B1SMTPClientSession::sendContents(const B1Mail& mail)
+{
+    return sendAndWait(_packetMaker->makeDataContents(mail), &_lastActionOk);
+}
+
+bool B1SMTPClientSession::sendQuit()
+{
+    return writeData(_packetMaker->makeDataQuit());
 }
