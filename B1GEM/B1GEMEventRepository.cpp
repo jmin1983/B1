@@ -102,7 +102,7 @@ bool B1GEMEventRepository::getAvailableCEIDs(const std::vector<B1SECS2DataCEID>&
             }
             else {
                 result->clear();
-                B1LOG("No CEID found: [%s]", itr->first->toString().cString());
+                B1LOG("No CEID found: [%s]", ceID->toString().cString());
                 assert(false);
                 return false;
             }
