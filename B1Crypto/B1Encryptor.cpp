@@ -79,7 +79,7 @@ bool B1Encryptor::encryptAES256(const B1String& key, const B1String& source, std
         return false;
     }
     int32 lengthTotal = lengthUpdate + lengthFinal;
-    if (encrypted.size() < lengthTotal) {
+    if (static_cast<int32>(encrypted.size()) < lengthTotal) {
         assert(false);
         return false;
     }
@@ -105,7 +105,7 @@ bool B1Encryptor::decryptAES256(const B1String& key, const std::vector<uint8>& s
         return false;
     }
     int32 lengthTotal = lengthUpdate + lengthFinal;
-    if (decrypted.size() < lengthTotal) {
+    if (static_cast<int32>(decrypted.size()) < lengthTotal) {
         assert(false);
         return false;
     }

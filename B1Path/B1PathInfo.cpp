@@ -63,10 +63,11 @@ int32 B1PathInfo::currentZoneID() const
 bool B1PathInfo::getJunctionZoneIDsIfJunction(std::vector<int32>* result) const
 {
     auto itr = _junctionIndex.find(_currentIndex);
-    if (itr == _junctionIndex.end())
+    if (itr == _junctionIndex.end()) {
         return false;
+    }
     for (++itr; itr != _junctionIndex.end(); ++itr) {
-        if (_zoneIDs.size() > *itr) {
+        if (static_cast<int32>(_zoneIDs.size()) > *itr) {
             result->push_back(_zoneIDs[*itr]);
         }
     }
@@ -86,7 +87,7 @@ void B1PathInfo::removeBeforeCurrentIndex()
         return;
     }
     int32 diff = currentIndex();
-    if (diff >= _zoneIDs.size()) {
+    if (diff >= static_cast<int32>(_zoneIDs.size())) {
         assert(false);
         return;
     }

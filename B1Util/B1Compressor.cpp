@@ -40,7 +40,7 @@ auto B1Compressor::compress(const std::vector<uint8>& data, const size_t bufferS
             assert(false);
             return std::vector<uint8>();
         }
-        int32 reamins = static_cast<int32>(data.size() - dataPos);
+        size_t reamins = data.size() - dataPos;
         size_t currentDataSize = bufferSize < reamins ? bufferSize : reamins;
         zStream.avail_in = (uInt)currentDataSize;
         zStream.next_in = (Bytef*)&data[dataPos];
@@ -90,7 +90,7 @@ auto B1Compressor::decompress(const std::vector<uint8>& data, const size_t buffe
             assert(false);
             return std::vector<uint8>();
         }
-        int32 reamins = static_cast<int32>(data.size() - dataPos);
+        size_t reamins = data.size() - dataPos;
         size_t currentDataSize = bufferSize < reamins ? bufferSize : reamins;
         zStream.avail_in = (uInt)currentDataSize;
         zStream.next_in = (Bytef*)&data[dataPos];
