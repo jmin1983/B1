@@ -73,7 +73,10 @@ bool B1ClientSocket::connectAsync()
         char port[10] = {0};
         sprintf(port, "%d", _port);
         auto result = resolver.resolve(_address.cString(), port);
-        asioSocket()->async_connect(result->endpoint(), boost::bind(&B1ClientSocket::connectComplete, this, boost::asio::placeholders::error));
+        if (result.empty()) {
+            return false;
+        }
+        asioSocket()->async_connect(result.begin()->endpoint(), boost::bind(&B1ClientSocket::connectComplete, this, boost::asio::placeholders::error));
         _ioLooper->resume();
     }
     catch (...) {
