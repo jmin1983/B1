@@ -58,7 +58,7 @@ void B1BaseSessionManager::implLooperFunc()
 
 int32 B1BaseSessionManager::addSession(std::shared_ptr<B1BaseSocket> baseSocket, std::shared_ptr<B1BaseSession> session, int32 requestedHandleID)
 {
-    if (socket == NULL || session == NULL) {
+    if (NULL == session) {
         assert(false);
         return -1;
     }

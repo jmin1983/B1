@@ -28,7 +28,7 @@ namespace BnD {
         virtual B1String sslCert() = 0;
         virtual B1String sslKey() = 0;
         virtual B1String sslDh() = 0;
-        virtual B1WebSocketServerSession* createWebSocketServerSession(B1ServerSocket* serverSocket);
+        virtual B1WebSocketServerSession* createWebSocketServerSession(B1ServerSocket* serverSocket) override;
     protected:
         virtual B1BaseServerSession* createSession(B1ServerSocket* serverSocket) override;
     protected:

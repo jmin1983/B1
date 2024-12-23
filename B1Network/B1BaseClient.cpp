@@ -39,7 +39,7 @@ void B1BaseClient::onClientSessionClosed(B1ClientSocket* clientSocket)
 
 B1ClientSocket* B1BaseClient::connect(B1String&& address, uint16 port, void* param, int32 requestedHandleID)
 {
-    auto socket = std::shared_ptr<B1ClientSocket>(new B1ClientSocket());
+    auto socket = std::make_shared<B1ClientSocket>();
     auto session = std::shared_ptr<B1BaseClientSession>(createSession(socket.get(), param));
     if (session->initializeSession() != true) {
         B1LOG("initializeSession failed");
