@@ -15,12 +15,13 @@
 #include "B1RedisDirectClientMessageListener.h"
 #include "B1RedisDirectPacketMaker.h"
 
-#include <B1Base/B1Lock.h>
+#include <B1Base/B1Thread.h>
 
 using namespace BnD;
 
 B1RedisDirectClientPollingSession::B1RedisDirectClientPollingSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, B1RedisDirectClient* owner)
     : B1RedisDirectClientReadSession(clientSocket, listener, owner)
+    , _polling(false)
     , _startPolling(false)
 {
 }
@@ -35,11 +36,12 @@ void B1RedisDirectClientPollingSession::implProcessConnected(bool firstConnected
         B1RedisDirectClientReadSession::implProcessConnected(firstConnectedProcess);
         return;
     }
+    _polling = true;
     while (true) {
         B1String message;
         if (lindex(owner()->pollingKey(), 0, &message) != true) {
             disconnect();
-            return;
+            break;
         }
         if (message.isEmpty()) {
             break;
@@ -49,9 +51,10 @@ void B1RedisDirectClientPollingSession::implProcessConnected(bool firstConnected
         }
         if (lpop(owner()->pollingKey()) != true) {
             disconnect();
-            return;
+            break;
         }
     }
+    _polling = false;
 }
 
 bool B1RedisDirectClientPollingSession::lindex(const B1String& key, int32 index, B1String* out)
@@ -106,4 +109,18 @@ bool B1RedisDirectClientPollingSession::lpop(const B1String& key)
     _lock->unlock();
     //  should check "OK" ?
     return true;
+}
+
+void B1RedisDirectClientPollingSession::stopPolling()
+{
+    _startPolling = false;
+    const int32 maxTrys = 10;
+    for (int32 i = 0; i < maxTrys; ++i) {
+        if (_polling) {
+            B1Thread::sleep(1000);
+        }
+        else {
+            break;
+        }
+    }
 }

@@ -77,6 +77,7 @@ namespace BnD {
         bool initializeReadOnly(const B1String& address, uint16 port, int32 db, const uint32 connectTimeout = 4 * 1000);
         void finalize();
         bool startPolling();
+        void stopPolling();
         void startWriting();
         void setAdjustSeconds(int32 seconds);
         bool isReadSessionConnected() const;

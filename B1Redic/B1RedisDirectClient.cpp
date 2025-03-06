@@ -197,6 +197,13 @@ bool B1RedisDirectClient::startPolling()
     }
 }
 
+void B1RedisDirectClient::stopPolling()
+{
+    if (auto pollingSession = dynamic_cast<B1RedisDirectClientPollingSession*>(_readSession)) {
+        pollingSession->stopPolling();
+    }
+}
+
 void B1RedisDirectClient::startWriting()
 {
     if (_writeSession) {

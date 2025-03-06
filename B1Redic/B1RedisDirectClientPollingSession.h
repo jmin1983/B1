@@ -23,6 +23,8 @@ namespace BnD {
     public:
         B1RedisDirectClientPollingSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, B1RedisDirectClient* owner);
         virtual ~B1RedisDirectClientPollingSession();
+    private:
+        bool _polling;
     protected:
         bool _startPolling;
     protected:
@@ -32,6 +34,7 @@ namespace BnD {
         bool lpop(const B1String& key);
     public:
         void startPolling() { _startPolling = true; }
+        void stopPolling();
     };
 }   //  !BnD
 

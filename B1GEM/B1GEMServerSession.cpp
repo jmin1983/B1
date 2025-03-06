@@ -115,7 +115,7 @@ void B1GEMServerSession::onRecvMessageS1F13(uint16 sessionID, bool wait, const s
 
 void B1GEMServerSession::onRecvMessageS1F14(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack)
 {
-    auto bin = static_cast<B1SECS2DataBIN*>(commack.get()->clone());
+    std::shared_ptr<B1SECS2DataBIN> bin(static_cast<B1SECS2DataBIN*>(commack.get()->clone()));
     if (bin->data()[0] == 1) {
         disconnect();
     }
