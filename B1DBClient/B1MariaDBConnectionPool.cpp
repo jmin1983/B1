@@ -15,8 +15,8 @@
 
 #include <B1Base/B1Lock.h>
 #include <B1Base/B1Thread.h>
-
 #include <B1Network/B1IOContext.h>
+#include <B1Util/B1UtilMacro.h>
 
 using namespace BnD;
 
@@ -109,13 +109,10 @@ void B1MariaDBConnectionPool::finalize()
         for (int32 i = 0; i < trys; ++i) {
             {
                 B1AutoLock al(*_lock);
-                for (auto itr = _handles.cbegin(); itr != _handles.end();) {
+                SAFE_CONTAINER_FOREACH(_handles, itr) {
                     if (itr->second != true) {
                         itr->first->finalize();
-                        itr = _handles.erase(itr);
-                    }
-                    else {
-                        ++itr;
+                        _handles.erase(itr);
                     }
                 }
                 if (_handles.empty()) {
@@ -134,16 +131,13 @@ void B1MariaDBConnectionPool::checkConnections()
     int32 deadHandleCount = 0;
     {
         B1AutoLock al(*_lock);
-        for (auto itr = _handles.cbegin(); itr != _handles.end();) {
+        SAFE_CONTAINER_FOREACH(_handles, itr) {
             if (itr->second != true) {
                 if (itr->first->isOpened() != true) {
                     ++deadHandleCount;
                     itr->first->finalize();
-                    itr = _handles.erase(itr);
+                    _handles.erase(itr);
                 }
-            }
-            else {
-                ++itr;
             }
         }
     }

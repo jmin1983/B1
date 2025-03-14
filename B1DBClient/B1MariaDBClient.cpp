@@ -48,10 +48,12 @@ bool B1MariaDBClient::execute(B1MariaDBHandle* handle, const B1String& sql, B1Ma
     catch (const boost::mysql::error_with_diagnostics& err) {
         B1LOG("boost_my_sql_execute error: code[%d], server_msg[%s], client_msg[%s], what[%s], sql[%s]",
               err.code().value(), std::string(err.get_diagnostics().server_message()).c_str(), std::string(err.get_diagnostics().client_message()).c_str(), err.what(), sql.cString());
+            handle->finalize();
         return false;
     }
     catch (...) {
         B1LOG("unknown execute error in boost_my_sql: sql[%s]", sql.cString());
+        handle->finalize();
         return false;
     }
     return true;
