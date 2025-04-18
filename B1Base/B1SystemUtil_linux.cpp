@@ -35,6 +35,7 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <fcntl.h>
 #include <fstream>
 
 using namespace BnD;
@@ -454,6 +455,20 @@ bool B1SystemUtil::rebootSystem()
 #else
     return false;
 #endif
+}
+
+bool B1SystemUtil::dropCaches()
+{
+    bool result = false;
+    sync();
+    int fd = open("/proc/sys/vm/drop_caches", O_WRONLY);
+    if (fd > -1) {
+        if (write(fd, "3", sizeof(char)) > -1) {
+            result = true;
+        }
+        close(fd);
+    }
+    return result;
 }
 
 bool B1SystemUtil::getLocalNetworkAddresses(std::list<B1String>* addresses)

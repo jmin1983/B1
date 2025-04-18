@@ -356,6 +356,11 @@ bool B1SystemUtil::rebootSystem()
     return true;
 }
 
+bool B1SystemUtil::dropCaches()
+{
+    return true;
+}
+
 bool B1SystemUtil::getLocalNetworkAddresses(std::list<B1String>* addresses)
 {
     addresses->clear();
