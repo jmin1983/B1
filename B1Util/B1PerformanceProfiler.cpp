@@ -14,6 +14,7 @@
 
 #if defined(_WIN32)
 #include <Windows.h>
+#include <Psapi.h>
 #pragma comment (lib, "Pdh.lib")
 #else
 #include <sys/types.h>
@@ -26,7 +27,11 @@ using namespace BnD;
 B1PerformanceProfiler::B1PerformanceProfiler()
     : _cpuUsage(0)
     , _memUsage(0)
+    , _memCurrentProcessUsage(0)
     , _memTotal(0)
+    , _vmemUsage(0)
+    , _vmemCurrentProcessUsage(0)
+    , _vmemTotal(0)
 #if defined(_WIN32)
     , _cpuQuery(NULL)
     , _cpuTotal(NULL)
@@ -41,6 +46,36 @@ B1PerformanceProfiler::B1PerformanceProfiler()
 
 B1PerformanceProfiler::~B1PerformanceProfiler()
 {
+}
+
+int64 B1PerformanceProfiler::readCurrentProcessStatus(const char* keyword) const
+{
+    FILE* file = fopen("/proc/self/status", "r");
+    if (NULL == file) {
+        return 0;
+    }
+    int64 result = 0;
+    char line[128] = {0};
+    while (fgets(line, 128, file) != NULL) {
+        if (strncmp(line, keyword, strlen(keyword)) == 0) {
+            result = parseMemoryLineForLinux(line);
+            break;
+        }
+    }
+    fclose(file);
+    return result;
+}
+
+int64 B1PerformanceProfiler::parseMemoryLineForLinux(char* line) const
+{
+    // This assumes that a digit will be found and the line ends in " Kb".
+    auto i = strlen(line);
+    const char* p = line;
+    while (*p < '0' || *p > '9') {
+        p++;
+    }
+    line[i - 3] = '\0';
+    return atoll(p);
 }
 
 float64 B1PerformanceProfiler::getUsageCPU()
@@ -85,21 +120,42 @@ float64 B1PerformanceProfiler::getUsageCPU()
 #endif
 }
 
-int64 B1PerformanceProfiler::getUsageMemory()
+bool B1PerformanceProfiler::getUsageMemory(int64* memoryUsage, int64* vmemoryUsage)
 {
 #if defined(_WIN32)
     MEMORYSTATUSEX memInfo;
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
     if (::GlobalMemoryStatusEx(&memInfo) != TRUE) {
-        return -1;
+        return false;
     }
-    return (memInfo.ullTotalPhys - memInfo.ullAvailPhys) / 1024;
+    *memoryUsage = (memInfo.ullTotalPhys - memInfo.ullAvailPhys) / 1024;
+    *vmemoryUsage = (memInfo.ullTotalPageFile - memInfo.ullAvailPageFile) / 1024;
 #else
     struct sysinfo memInfo;
     sysinfo(&memInfo);
     int64 physMemUsed = memInfo.totalram - memInfo.freeram;
-    return (physMemUsed * memInfo.mem_unit) / 1024; //  Multiply in next statement to avoid int overflow on right hand side.
+    *memoryUsage = (physMemUsed * memInfo.mem_unit) / 1024; //  Multiply in next statement to avoid int overflow on right hand side.
+    int64 virtualMemUsed = memInfo.totalram - memInfo.freeram;
+    virtualMemUsed += memInfo.totalswap - memInfo.freeswap;
+    *vmemoryUsage = (virtualMemUsed *= memInfo.mem_unit) / 1024;
 #endif
+    return true;
+}
+
+bool B1PerformanceProfiler::getUsageMemoryCurrentProcess(int64* memoryUsage, int64* vmemoryUsage)
+{
+#if defined(_WIN32)
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    if (::GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)) != TRUE) {
+        return false;
+    }
+    *memoryUsage = pmc.WorkingSetSize / 1024;
+    *vmemoryUsage = pmc.PrivateUsage / 1024;
+#else
+    *memoryUsage = readCurrentProcessStatus("VmRSS:");
+    *vmemoryUsage = readCurrentProcessStatus("VmSize:");
+#endif
+    return true;
 }
 
 bool B1PerformanceProfiler::initialize()
@@ -112,6 +168,7 @@ bool B1PerformanceProfiler::initialize()
             return false;
         }
         _memTotal = memInfo.ullTotalPhys / 1024;
+        _vmemTotal = memInfo.ullTotalPageFile / 1024;
     }
     {
         ::PdhOpenQueryA(NULL, NULL, &_cpuQuery);
@@ -132,8 +189,11 @@ bool B1PerformanceProfiler::initialize()
     {
         struct sysinfo memInfo;
         sysinfo(&memInfo);
-        _memTotal = memInfo.totalram;
+        _memTotal = memInfo.totalram;   //  to avoid overflow.
         _memTotal = (_memTotal * memInfo.mem_unit) / 1024;  //  Multiply in next statement to avoid int overflow on right hand side.
+        _vmemTotal = memInfo.totalram;  //  to avoid overflow.
+        _vmemTotal += memInfo.totalswap;
+        _vmemTotal = (_vmemTotal * memInfo.mem_unit) / 1024;
     }
 #endif
     return true;
@@ -150,5 +210,26 @@ void B1PerformanceProfiler::finalize()
 void B1PerformanceProfiler::process()
 {
     _cpuUsage = getUsageCPU();
-    _memUsage = getUsageMemory();
+    {
+        int64 memoryUsage = 0, vmemoryUsage = 0;
+        if (getUsageMemory(&memoryUsage, &vmemoryUsage)) {
+            _memUsage = memoryUsage;
+            _vmemUsage = vmemoryUsage;
+        }
+        else {
+            _memUsage = 0;
+            _vmemUsage = 0;
+        }
+    }
+    {
+        int64 memoryUsage = 0, vmemoryUsage = 0;
+        if (getUsageMemoryCurrentProcess(&memoryUsage, &vmemoryUsage)) {
+            _memCurrentProcessUsage = memoryUsage;
+            _vmemCurrentProcessUsage = vmemoryUsage;
+        }
+        else {
+            _memCurrentProcessUsage = 0;
+            _vmemCurrentProcessUsage = 0;
+        }
+    }
 }

@@ -48,6 +48,7 @@ BnD::B1String BnD::b1log_cl(const std::string& className, const char* format, ..
 BnD::b1log_callback_t g_callback = NULL;
 void* g_callbackParam = NULL;
 BnD::B1FileLog* g_fileLogger = NULL;
+BnD::int32 g_serviceID = 0;
 BnD::uint32 g_pid_for_file_logging = BnD::B1SystemUtil::getCurrentProcessID();
 
 bool BnD::testB1FileLog()
@@ -58,7 +59,8 @@ bool BnD::testB1FileLog()
 void BnD::b1log(const B1String& string)
 {
     B1String timedLog;
-    timedLog.format("[%s][%u][%u] %s\n", B1Time::currentTimeInMicroseconds().cString(), g_pid_for_file_logging, B1SystemUtil::getCurrentThreadID(), string.cString());
+    timedLog.format("[%s][%d][%u][%u] %s\n",
+        B1Time::currentTimeInMicroseconds().cString(), g_serviceID, g_pid_for_file_logging, B1SystemUtil::getCurrentThreadID(), string.cString());
     if (g_fileLogger) {
         g_fileLogger->write(g_callback ? timedLog.copy() : std::move(timedLog));
     }
@@ -75,9 +77,10 @@ void BnD::b1log(const B1String& string)
     }
 }
 
-void BnD::setLogger(B1FileLog* fileLogger)
+void BnD::setLogger(B1FileLog* fileLogger, int32 serviceID)
 {
     g_fileLogger = fileLogger;
+    g_serviceID = serviceID;
 }
 
 void BnD::setLoggerCallback(b1log_callback_t callback, void* param)

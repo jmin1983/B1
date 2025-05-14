@@ -27,8 +27,12 @@ namespace BnD {
         virtual ~B1PerformanceProfiler();
     protected:
         float64 _cpuUsage;
-        int64 _memUsage;    //  KB
-        int64 _memTotal;    //  KB
+        int64 _memUsage;                // KB.
+        int64 _memCurrentProcessUsage;  // KB.
+        int64 _memTotal;                // KB.
+        int64 _vmemUsage;               // KB.
+        int64 _vmemCurrentProcessUsage; // KB.
+        int64 _vmemTotal;               // KB.
     private:
 #if defined(_WIN32)
         PDH_HQUERY _cpuQuery;
@@ -39,9 +43,13 @@ namespace BnD {
         uint64 _cpuLastTotalSys;
         uint64 _cpuLastTotalIdle;
 #endif
+    private:
+        int64 readCurrentProcessStatus(const char* keyword) const;  //  return status value.
+        int64 parseMemoryLineForLinux(char* line) const;    //  return memory_usage.
     protected:
         float64 getUsageCPU();
-        int64 getUsageMemory();
+        bool getUsageMemory(int64* memoryUsage, int64* vmemoryUsage);
+        bool getUsageMemoryCurrentProcess(int64* memoryUsage, int64* vmemoryUsage);
     public:
         bool initialize();
         void finalize();
@@ -49,7 +57,11 @@ namespace BnD {
 
         float64 cpuUsage() const { return _cpuUsage; }
         int64 memUsage() const { return _memUsage; }
+        int64 memCurrentProcessUsage() const { return _memCurrentProcessUsage; }
         int64 memTotal() const { return _memTotal; }
+        int64 vmemUsage() const { return _vmemUsage; }
+        int64 vmemCurrentProcessUsage() const { return _vmemCurrentProcessUsage; }
+        int64 vmemTotal() const { return _vmemTotal; }
     };
 }   //  !BnD
 
