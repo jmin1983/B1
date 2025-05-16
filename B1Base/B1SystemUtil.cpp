@@ -30,3 +30,18 @@ bool B1SystemUtil::fileLastModifiedTime(const B1String& path, int64* modifiedTim
     *modifiedTime = buffer.st_mtime;
     return true;
 }
+
+bool B1SystemUtil::getHostName(B1String* name)
+{
+    char hostName[128] = {0};
+    if (::gethostname(hostName, sizeof(hostName)) != 0) {
+        return false;
+    }
+    try {
+        name->from(hostName);
+    }
+    catch (...) {
+        return false;
+    }
+    return true;
+}
