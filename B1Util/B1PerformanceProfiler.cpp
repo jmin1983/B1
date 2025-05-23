@@ -26,6 +26,8 @@ using namespace BnD;
 
 B1PerformanceProfiler::B1PerformanceProfiler()
     : _cpuUsage(0)
+    , _cpuTemperature(0)
+    , _memAvailable(0)
     , _memUsage(0)
     , _memCurrentProcessUsage(0)
     , _memTotal(0)
@@ -48,9 +50,9 @@ B1PerformanceProfiler::~B1PerformanceProfiler()
 {
 }
 
-int64 B1PerformanceProfiler::readCurrentProcessStatus(const char* keyword) const
+int64 B1PerformanceProfiler::readCurrentSystemStatus(const char* filePath, const char* keyword) const
 {
-    FILE* file = fopen("/proc/self/status", "r");
+    FILE* file = fopen(filePath, "r");
     if (NULL == file) {
         return 0;
     }
@@ -120,7 +122,24 @@ float64 B1PerformanceProfiler::getUsageCPU()
 #endif
 }
 
-bool B1PerformanceProfiler::getUsageMemory(int64* memoryUsage, int64* vmemoryUsage)
+float64 B1PerformanceProfiler::getTemperatureCPU()
+{
+#if defined(_WIN32a)
+    return 0;   //  not implemented.
+#else
+    int32 temp = 0;
+    FILE* fp = fopen("/sys/class/thermal/thermal_zone0/temp", "r");
+    if (fp) {
+        if (fscanf(fp, "%d", &temp) > 0) {
+            //  noop.
+        }
+        fclose(fp);
+    }
+    return static_cast<float64>(temp) / 1000;
+#endif
+}
+
+bool B1PerformanceProfiler::getUsageMemory(int64* memAvailable, int64* memoryUsage, int64* vmemoryUsage)
 {
 #if defined(_WIN32)
     MEMORYSTATUSEX memInfo;
@@ -128,9 +147,12 @@ bool B1PerformanceProfiler::getUsageMemory(int64* memoryUsage, int64* vmemoryUsa
     if (::GlobalMemoryStatusEx(&memInfo) != TRUE) {
         return false;
     }
+    *memAvailable = memInfo.ullAvailPageFile;
     *memoryUsage = (memInfo.ullTotalPhys - memInfo.ullAvailPhys) / 1024;
     *vmemoryUsage = (memInfo.ullTotalPageFile - memInfo.ullAvailPageFile) / 1024;
 #else
+    const char* filePath = "/proc/meminfo";
+    *memAvailable = readCurrentSystemStatus(filePath, "MemAvailable:");
     struct sysinfo memInfo;
     sysinfo(&memInfo);
     int64 physMemUsed = memInfo.totalram - memInfo.freeram;
@@ -152,8 +174,9 @@ bool B1PerformanceProfiler::getUsageMemoryCurrentProcess(int64* memoryUsage, int
     *memoryUsage = pmc.WorkingSetSize / 1024;
     *vmemoryUsage = pmc.PrivateUsage / 1024;
 #else
-    *memoryUsage = readCurrentProcessStatus("VmRSS:");
-    *vmemoryUsage = readCurrentProcessStatus("VmSize:");
+    const char* filePath = "/proc/self/status";
+    *memoryUsage = readCurrentSystemStatus(filePath, "VmRSS:");
+    *vmemoryUsage = readCurrentSystemStatus(filePath, "VmSize:");
 #endif
     return true;
 }
@@ -202,21 +225,25 @@ bool B1PerformanceProfiler::initialize()
 void B1PerformanceProfiler::finalize()
 {
 #if defined(_WIN32)
-    if (_cpuQuery)
+    if (_cpuQuery) {
         ::PdhCloseQuery(_cpuQuery);
+    }
 #endif
 }
 
 void B1PerformanceProfiler::process()
 {
     _cpuUsage = getUsageCPU();
+    _cpuTemperature = getTemperatureCPU();
     {
-        int64 memoryUsage = 0, vmemoryUsage = 0;
-        if (getUsageMemory(&memoryUsage, &vmemoryUsage)) {
+        int64 memAvailable = 0, memoryUsage = 0, vmemoryUsage = 0;
+        if (getUsageMemory(&memAvailable, &memoryUsage, &vmemoryUsage)) {
+            _memAvailable = memAvailable;
             _memUsage = memoryUsage;
             _vmemUsage = vmemoryUsage;
         }
         else {
+            _memAvailable = 0;
             _memUsage = 0;
             _vmemUsage = 0;
         }

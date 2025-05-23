@@ -27,6 +27,8 @@ namespace BnD {
         virtual ~B1PerformanceProfiler();
     protected:
         float64 _cpuUsage;
+        float64 _cpuTemperature;        // celcius. not available in Windows.
+        int64 _memAvailable;            // KB.
         int64 _memUsage;                // KB.
         int64 _memCurrentProcessUsage;  // KB.
         int64 _memTotal;                // KB.
@@ -44,11 +46,12 @@ namespace BnD {
         uint64 _cpuLastTotalIdle;
 #endif
     private:
-        int64 readCurrentProcessStatus(const char* keyword) const;  //  return status value.
+        int64 readCurrentSystemStatus(const char* filePath, const char* keyword) const;  //  return status value.
         int64 parseMemoryLineForLinux(char* line) const;    //  return memory_usage.
     protected:
         float64 getUsageCPU();
-        bool getUsageMemory(int64* memoryUsage, int64* vmemoryUsage);
+        float64 getTemperatureCPU();
+        bool getUsageMemory(int64* memAvailable, int64* memoryUsage, int64* vmemoryUsage);
         bool getUsageMemoryCurrentProcess(int64* memoryUsage, int64* vmemoryUsage);
     public:
         bool initialize();
@@ -56,6 +59,8 @@ namespace BnD {
         void process();
 
         float64 cpuUsage() const { return _cpuUsage; }
+        float64 cpuTemperature() const { return _cpuTemperature; }
+        int64 memAvailable() const { return _memAvailable; }
         int64 memUsage() const { return _memUsage; }
         int64 memCurrentProcessUsage() const { return _memCurrentProcessUsage; }
         int64 memTotal() const { return _memTotal; }
