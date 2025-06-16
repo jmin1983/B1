@@ -26,10 +26,10 @@ namespace BnD {
     class B1Time : public B1Object {
     public:
         B1Time();
-        B1Time(const B1Time &t);
+        B1Time(const B1Time& t);
         B1Time(int32 year, int32 month, int32 day, int32 hour = 0, int32 minute = 0, int32 second = 0);
         explicit B1Time(time_t64 t);
-        explicit B1Time(const struct tm &lt);
+        explicit B1Time(const struct tm& lt);
         virtual ~B1Time();
         enum {
             MIN_YEAR = 1970,
@@ -62,11 +62,11 @@ namespace BnD {
         static int64 _adjustCurrentSeconds;
         static int32 _adjustCurrentMicroSeconds;
     protected:
-        bool localTime(time_t64 t, struct tm *lt) const;
-        time_t64 mkTime(struct tm *lt) const;
+        bool localTime(time_t64 t, struct tm* lt) const;
+        time_t64 mkTime(struct tm* lt) const;
     protected:
-        void archiveTo(B1Archive *archive) const final;
-        void unarchiveFrom(const B1Archive &archive) final;
+        void archiveTo(B1Archive* archive) const final;
+        void unarchiveFrom(const B1Archive& archive) final;
     public:
         bool isValid() const;
         bool isValid(int32 year, int32 month, int32 day, int32 hour, int32 minute, int32 second) const;
@@ -80,11 +80,11 @@ namespace BnD {
 
         void makeInvalid();
         void set(int32 year, int32 month, int32 day, int32 hour = 0, int32 minute = 0, int32 second = 0);
-        void set(const B1Time &t) { _value = t._value; }
+        void set(const B1Time& t) { _value = t._value; }
         time_t64 to_time_t() const;
         struct tm to_struct_tm() const;
         void from_time_t(time_t64 t);
-        void from_struct_tm(const struct tm &t);
+        void from_struct_tm(const struct tm& t);
         uint32 toUint32() const { return _value; }
         void fromUint32(uint32 i) { _value = i; }
 
@@ -105,21 +105,21 @@ namespace BnD {
         static bool getSystemTime(int64* second, int32* microSecond = NULL);
         static void setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds);
         static void setCurrentTimeZone(const B1String& timezone);       //  not supported in Windows.
-        static void setCurrentTime(const B1Time &t);                    //  not supported in Windows.
+        static void setCurrentTime(const B1Time& t);                    //  not supported in Windows.
         static bool setCurrentTime(const B1String& millisecondsString); //  not supported in Windows.
     public:
-        B1Time& operator=(const B1Time &t) { set(t); return *this; }
-        bool operator==(const B1Time &t) const { return _value == t._value; }
-        bool operator!=(const B1Time &t) const { return _value != t._value; }
-        bool operator<=(const B1Time &t) const { return _value <= t._value; }
-        bool operator< (const B1Time &t) const { return _value < t._value; }
-        bool operator>=(const B1Time &t) const { return _value >= t._value; }
-        bool operator> (const B1Time &t) const { return _value > t._value; }
+        B1Time& operator=(const B1Time& t) { set(t); return *this; }
+        bool operator==(const B1Time& t) const { return _value == t._value; }
+        bool operator!=(const B1Time& t) const { return _value != t._value; }
+        bool operator<=(const B1Time& t) const { return _value <= t._value; }
+        bool operator< (const B1Time& t) const { return _value < t._value; }
+        bool operator>=(const B1Time& t) const { return _value >= t._value; }
+        bool operator> (const B1Time& t) const { return _value > t._value; }
     };
 
-    bool isSameDate(const B1Time &t1, const B1Time &t2);
-    bool isSameHour(const B1Time &t1, const B1Time &t2);
-    bool isSameMinute(const B1Time &t1, const B1Time &t2);
+    bool isSameDate(const B1Time& t1, const B1Time& t2);
+    bool isSameHour(const B1Time& t1, const B1Time& t2);
+    bool isSameMinute(const B1Time& t1, const B1Time& t2);
 }   //  !BnD
 
 #endif  // !_B1BASE_TIME_H

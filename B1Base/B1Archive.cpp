@@ -83,7 +83,21 @@ void B1Archive::writeData(const B1String& key, const B1Object& value)
 {
     B1Archive archive;
     value.archiveTo(&archive);
-    _rootNode->get().add_child(key.to_string(), archive._rootNode->get());
+    if (key.isEmpty()) {
+        for (const auto& v : archive._rootNode->get()) {
+            _rootNode->get().put(v.first, v.second.data());
+        }
+    }
+    else {
+        if (auto child = _rootNode->get().get_child_optional(key.to_string())) {
+            for (const auto& v : archive._rootNode->get()) {
+                child->put(v.first, v.second.data());
+            }
+        }
+        else {
+            _rootNode->get().add_child(key.to_string(), archive._rootNode->get());
+        }
+    }
 }
 
 bool B1Archive::readData(const B1String& key, B1Object* value) const

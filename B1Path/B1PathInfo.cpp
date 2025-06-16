@@ -27,14 +27,14 @@ B1PathInfo::~B1PathInfo()
 {
 }
 
-void B1PathInfo::archiveTo(B1Archive *archive) const
+void B1PathInfo::archiveTo(B1Archive* archive) const
 {
     writeDataToArchive("ZoneIDs", _zoneIDs, archive);
     writeDataToArchive("JunctionIndex", std::vector<uint32>(_junctionIndex.begin(), _junctionIndex.end()), archive);
     writeDataToArchive("CurrentIndex", _currentIndex, archive);
 }
 
-void B1PathInfo::unarchiveFrom(const B1Archive &archive)
+void B1PathInfo::unarchiveFrom(const B1Archive& archive)
 {
     readDataFromArchive("ZoneIDs", archive, &_zoneIDs);
     std::vector<uint32> junctionIndex;
@@ -48,7 +48,7 @@ void B1PathInfo::addZoneID(int32 zoneID)
     _zoneIDs.push_back(zoneID);
 }
 
-void B1PathInfo::addZoneIDs(const std::vector<int32> &zoneIDs)
+void B1PathInfo::addZoneIDs(const std::vector<int32>& zoneIDs)
 {
     _zoneIDs.insert(_zoneIDs.end(), zoneIDs.begin(), zoneIDs.end());
 }
@@ -106,7 +106,7 @@ void B1PathInfo::removeBeforeCurrentIndex()
     setCurrentIndex(0);
 }
 
-void B1PathInfo::getCurrentZoneIDs(std::vector<int32> *zoneIDs, uint32 indexCount) const
+void B1PathInfo::getCurrentZoneIDs(std::vector<int32>* zoneIDs, uint32 indexCount) const
 {
     zoneIDs->reserve(indexCount);
     for (uint32 i = _currentIndex; i < _currentIndex + indexCount; ++i) {
@@ -117,11 +117,12 @@ void B1PathInfo::getCurrentZoneIDs(std::vector<int32> *zoneIDs, uint32 indexCoun
     }
 }
 
-bool B1PathInfo::getZoneID(int32 *zoneID, int32 offset) const
+bool B1PathInfo::getZoneID(int32* zoneID, int32 offset) const
 {
     int32 index = _currentIndex + offset;
-    if (index < 0 || static_cast<int32>(_zoneIDs.size()) <= index)
+    if (index < 0 || static_cast<int32>(_zoneIDs.size()) <= index) {
         return false;
+    }
     *zoneID = _zoneIDs[index];
     return true;
 }
@@ -142,11 +143,13 @@ bool B1PathInfo::isEndZone() const
 
 int32 B1PathInfo::lastJunctionZoneID() const
 {
-    if (_junctionIndex.empty())
+    if (_junctionIndex.empty()) {
         return -1;
+    }
     BOOST_REVERSE_FOREACH(uint32 junctionIndex, _junctionIndex) {
-        if (static_cast<uint32>(_zoneIDs.size()) > junctionIndex)
+        if (static_cast<uint32>(_zoneIDs.size()) > junctionIndex) {
             return _zoneIDs[junctionIndex];
+        }
     }
     return -1;
 }

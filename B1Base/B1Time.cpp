@@ -30,7 +30,7 @@ B1Time::B1Time()
     makeInvalid();
 }
 
-B1Time::B1Time(const B1Time &t)
+B1Time::B1Time(const B1Time& t)
 {
     set(t);
 }
@@ -45,7 +45,7 @@ B1Time::B1Time(time_t64 t)
     from_time_t(t);
 }
 
-B1Time::B1Time(const struct tm &lt)
+B1Time::B1Time(const struct tm& lt)
 {
     from_struct_tm(lt);
 }
@@ -54,7 +54,7 @@ B1Time::~B1Time()
 {
 }
 
-bool B1Time::localTime(time_t64 t, struct tm *lt) const
+bool B1Time::localTime(time_t64 t, struct tm* lt) const
 {
 #if defined(_WIN32)
     struct tm* p = ::_localtime64(&t);
@@ -65,7 +65,7 @@ bool B1Time::localTime(time_t64 t, struct tm *lt) const
 #endif
 }
 
-time_t64 B1Time::mkTime(struct tm *lt) const
+time_t64 B1Time::mkTime(struct tm* lt) const
 {
 #if defined(_WIN32)
     return ::_mktime64(lt);
@@ -74,12 +74,12 @@ time_t64 B1Time::mkTime(struct tm *lt) const
 #endif
 }
 
-void B1Time::archiveTo(B1Archive *archive) const
+void B1Time::archiveTo(B1Archive* archive) const
 {
     writeDataToArchive("Time", to_time_t(), archive);
 }
 
-void B1Time::unarchiveFrom(const B1Archive &archive)
+void B1Time::unarchiveFrom(const B1Archive& archive)
 {
     int64 t = 0;
     readDataFromArchive("Time", archive, &t);
@@ -217,7 +217,7 @@ int gettimeofday(struct timeval* tv, struct timezone* tz = NULL)
         temp /= 10;     //  convert into microseconds.
         temp -= delta;  //  converting file time to unix epoch.
         tv->tv_sec = (long)(temp / 1000000UL);
-        tv->tv_usec = (long)(temp  % 1000000UL);
+        tv->tv_usec = (long)(temp % 1000000UL);
     }
     return 0;
 }
@@ -392,7 +392,7 @@ void B1Time::setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds)
     }
 }
 
-void B1Time::setCurrentTime(const B1Time &t)
+void B1Time::setCurrentTime(const B1Time& t)
 {
 #if defined(_WIN32)
     assert(false);  //  not supported.
