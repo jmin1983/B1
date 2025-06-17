@@ -33,6 +33,8 @@ namespace BnD {
     protected:
         virtual bool implReadDBResult(const boost::mysql::rows_view& rows) = 0;
     protected:
+        int32 toInt32(const boost::mysql::field_view& row) const;
+        int64 toInt64(const boost::mysql::field_view& row) const;
         B1String toString(const boost::mysql::field_view& row) const;
         bool getSingleRowResult(const boost::mysql::rows_view& rows, std::vector<B1String>* items, size_t expectedSize = 0) const;
         bool getResult(const boost::mysql::rows_view& rows, std::vector<std::vector<B1String> >* items, size_t expectedSize = 0) const;

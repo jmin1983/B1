@@ -22,6 +22,16 @@ B1MariaDBResult::~B1MariaDBResult()
 {
 }
 
+int32 B1MariaDBResult::toInt32(const boost::mysql::field_view& row) const
+{
+    return row.is_int64() ? static_cast<int32>(row.as_int64()) : 0;
+}
+
+int64 B1MariaDBResult::toInt64(const boost::mysql::field_view& row) const
+{
+    return row.is_int64() ? row.as_int64() : 0;
+}
+
 B1String B1MariaDBResult::toString(const boost::mysql::field_view& row) const
 {
     if (row.is_string()) {
