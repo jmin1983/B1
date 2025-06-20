@@ -25,14 +25,14 @@
 
 namespace BnD {
     template <typename T>
-    B1Archive::B1Archive(const T &t)
+    B1Archive::B1Archive(const T& t)
         : _rootNode(new B1ArchiveNode())
     {
         _rootNode->_ptree = t;
     }
 
     template<typename T>
-    void B1Archive::writeObjectArray(const B1String &key, const std::vector<T> &value)
+    void B1Archive::writeObjectArray(const B1String& key, const std::vector<T>& value)
     {
         boost::property_tree::ptree child;
         for (const B1Object& v : value) {
@@ -44,7 +44,7 @@ namespace BnD {
     }
 
     template<typename T>
-    void B1Archive::readObjectArray(const B1String &key, std::vector<T> *value) const
+    void B1Archive::readObjectArray(const B1String& key, std::vector<T>* value) const
     {
         value->clear();
         try {

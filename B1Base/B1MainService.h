@@ -20,7 +20,7 @@
 #include <B1Base/B1String.h>
 
 #include <map>
- 
+
 namespace BnD {
     class B1MainService {
     public:
@@ -44,7 +44,7 @@ namespace BnD {
         MAIN_SERVICE_STATUS _mainServiceStatus;
         B1Condition _mainCondition;
     protected:
-        virtual bool implStart() { return true;  }
+        virtual bool implStart() { return true; }
         virtual bool implWorking() { return true; } //  return false to stop B1MainService
         virtual void implStop() {}
         virtual std::map<B1String, B1String> makeVersionInfoMap() const;

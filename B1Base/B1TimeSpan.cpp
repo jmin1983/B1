@@ -53,24 +53,24 @@ void B1TimeSpan::set(int32 days, int32 hours, int32 minutes, int32 seconds)
     assert(-24 < hours && hours < 24);
     assert(-60 < minutes && minutes < 60);
     assert(-60 < seconds && seconds < 60);
-    _days    = days;
-    _hours   = hours;
+    _days = days;
+    _hours = hours;
     _minutes = minutes;
     _seconds = seconds;
 }
 
 void B1TimeSpan::set(int32 totalSeconds)
 {
-    _days    = totalSeconds / (60 * 60 * 24);
-    _hours   = (totalSeconds / (60 * 60)) % 24;
+    _days = totalSeconds / (60 * 60 * 24);
+    _hours = (totalSeconds / (60 * 60)) % 24;
     _minutes = (totalSeconds / 60) % 60;
     _seconds = totalSeconds % 60;
 }
 
 void B1TimeSpan::set(const B1TimeSpan& ts)
 {
-    _days    = ts._days;
-    _hours   = ts._hours;
+    _days = ts._days;
+    _hours = ts._hours;
     _minutes = ts._minutes;
     _seconds = ts._seconds;
 }

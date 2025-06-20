@@ -15,7 +15,7 @@
 
 using namespace BnD;
 
-B1String B1StringUtil::lastPathComponent(const B1String &path)
+B1String B1StringUtil::lastPathComponent(const B1String& path)
 {
     uint32 i = path.findLastOf("/\\");
     if (i == B1String::NPOS) {
@@ -35,7 +35,7 @@ B1String B1StringUtil::lastPathComponent(const B1String &path)
     }
 }
 
-void B1StringUtil::removeLastPathComponent(B1String *path)
+void B1StringUtil::removeLastPathComponent(B1String* path)
 {
     removeLastPathSeparator(path);
     B1String s = lastPathComponent(*path);
@@ -45,7 +45,7 @@ void B1StringUtil::removeLastPathComponent(B1String *path)
     }
 }
 
-void B1StringUtil::removeLastPathSeparator(B1String *path)
+void B1StringUtil::removeLastPathSeparator(B1String* path)
 {
     uint32 i = path->findLastOf("/\\");
     if (i != B1String::NPOS) {

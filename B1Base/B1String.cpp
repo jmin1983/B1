@@ -265,100 +265,50 @@ void B1String::resize(uint32 size)
 
 int8 B1String::toInt8() const
 {
-    try {
-        return _string.empty() ? 0 : boost::numeric_cast<int8>(boost::lexical_cast<int32>(_string));
-    }
-    catch (...) {
-        return 0;
-    }
+    return boost::numeric_cast<int8>(boost::lexical_cast<int32>(_string));
 }
 
 uint8 B1String::toUint8() const
 {
-    try {
-        return _string.empty() ? 0 : boost::numeric_cast<uint8>(boost::lexical_cast<uint32>(_string));
-    }
-    catch (...) {
-        return 0;
-    }
+    return boost::numeric_cast<uint8>(boost::lexical_cast<uint32>(_string));
 }
 
 int16 B1String::toInt16() const
 {
-    try {
-        return _string.empty() ? 0 : boost::lexical_cast<int16>(_string);
-    }
-    catch (...) {
-        return 0;
-    }
+    return boost::lexical_cast<int16>(_string);
 }
 
 uint16 B1String::toUint16() const
 {
-    try {
-        return _string.empty() ? 0 : boost::lexical_cast<uint16>(_string);
-    }
-    catch (...) {
-        return 0;
-    }
+    return boost::lexical_cast<uint16>(_string);
 }
 
 int32 B1String::toInt32() const
 {
-    try {
-        return _string.empty() ? 0 : boost::lexical_cast<int32>(_string);
-    }
-    catch (...) {
-        return 0;
-    }
+    return boost::lexical_cast<int32>(_string);
 }
 
 uint32 B1String::toUint32() const
 {
-    try {
-        return _string.empty() ? 0 : boost::lexical_cast<uint32>(_string);
-    }
-    catch (...) {
-        return 0;
-    }
+    return boost::lexical_cast<uint32>(_string);
 }
 
 int64 B1String::toInt64() const
 {
-    try {
-        return _string.empty() ? 0 : boost::lexical_cast<int64>(_string);
-    }
-    catch (...) {
-        return 0;
-    }
+    return boost::lexical_cast<int64>(_string);
 }
 
 uint64 B1String::toUint64() const
 {
-    try {
-        return _string.empty() ? 0 : boost::lexical_cast<uint64>(_string);
-    }
-    catch (...) {
-        return 0;
-    }
+    return boost::lexical_cast<uint64>(_string);
 }
 
 float32 B1String::toFloat32() const
 {
-    try {
-        return _string.empty() ? .0f : boost::lexical_cast<float32>(_string);
-    }
-    catch (...) {
-        return .0f;
-    }
+    return boost::lexical_cast<float32>(_string);
 }
 
 float64 B1String::toFloat64() const
 {
-    try {
-        return _string.empty() ? .0 : boost::lexical_cast<float64>(_string);
-    }
-    catch (...) {
-        return .0;
-    }
+    return boost::lexical_cast<float64>(_string);
 }

@@ -81,7 +81,7 @@ namespace BnD {
         float64 toFloat64() const;
 
         template<class OutputIterator>
-        OutputIterator toknize(const B1String &delimiter, OutputIterator out) const;
+        OutputIterator toknize(const B1String& delimiter, OutputIterator out) const;
 
         B1String& operator=(const B1String& s) = delete;
         B1String& operator=(B1String&& s) noexcept { _string.assign(std::move(s._string)); return *this; }
@@ -109,13 +109,13 @@ namespace BnD {
         friend bool operator>=(const char* cs, const B1String& s) { return cs >= s._string; }
         friend bool operator> (const char* cs, const B1String& s) { return cs > s._string; }
     };
-    
+
     template<class OutputIterator>
-    OutputIterator B1String::toknize(const B1String &delimiter, OutputIterator out) const
+    OutputIterator B1String::toknize(const B1String& delimiter, OutputIterator out) const
     {
         std::vector<char> temp(_string.length() + 1, 0);
         memcpy(&temp[0], _string.c_str(), _string.length());
-        char *tok = strtok(&temp[0], delimiter.cString());
+        char* tok = strtok(&temp[0], delimiter.cString());
         while (tok != NULL) {
             *out++ = tok;
             tok = strtok(NULL, delimiter.cString());

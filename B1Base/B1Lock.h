@@ -18,8 +18,6 @@
 
 #include <B1Base/B1Mutex.h>
 
-#include <boost/noncopyable.hpp>
-
 namespace BnD {
     class B1Lockable {
     public:
@@ -29,8 +27,11 @@ namespace BnD {
     };
 
     template<typename T>
-    class B1BaseLock : public B1Lockable
-                     , private boost::noncopyable {
+    class B1BaseLock : public B1Lockable {
+    public:
+        B1BaseLock() {}
+        B1BaseLock(const B1BaseLock&) = delete;
+        B1BaseLock& operator=(const B1BaseLock& s) = delete;
     protected:
         mutable T _mutex;
     public:
@@ -45,10 +46,12 @@ namespace BnD {
     class B1Lock : public B1BaseLock<B1Mutex> {};
     class B1RecursiveLock : public B1BaseLock<B1RecursiveMutex> {};
 
-    class B1AutoLock : private boost::noncopyable {
+    class B1AutoLock {
     public:
         explicit B1AutoLock(B1Lockable& lock) : _lock(lock) { _lock.lock(); }
+        B1AutoLock(const B1AutoLock&) = delete;
         ~B1AutoLock() { _lock.unlock(); }
+        B1AutoLock& operator=(const B1AutoLock& s) = delete;
     private:
         B1Lockable& _lock;
     };

@@ -46,8 +46,8 @@ namespace BnD {
         B1Condition _logWait;
         B1RecursiveLock _logLock;
     private:
-        void writeLogToFile(const std::list<B1String> &logs);
-        void getDeprecatedFiles(std::list<B1String> *deprecatedFiles);
+        void writeLogToFile(const std::list<B1String>& logs);
+        void getDeprecatedFiles(std::list<B1String>* deprecatedFiles);
     protected:
         void implLooperFunc() final;
     public:

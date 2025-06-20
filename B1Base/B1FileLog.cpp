@@ -41,7 +41,7 @@ B1FileLog::~B1FileLog()
     stop();
 }
 
-void B1FileLog::writeLogToFile(const std::list<B1String> &logs)
+void B1FileLog::writeLogToFile(const std::list<B1String>& logs)
 {
     const B1Time current = B1Time::currentTime();
     int32 currentDay = current.day();
@@ -76,7 +76,7 @@ void B1FileLog::writeLogToFile(const std::list<B1String> &logs)
     fflush(_fp);
 }
 
-void B1FileLog::getDeprecatedFiles(std::list<B1String> *deprecatedFiles)
+void B1FileLog::getDeprecatedFiles(std::list<B1String>* deprecatedFiles)
 {
     std::list<B1String> files;
     int32 total = B1SystemUtil::findFiles(_dirPath, _fileExtension, &files);

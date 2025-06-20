@@ -64,8 +64,7 @@ bool B1Condition::wait(uint32 timeoutMillisec)
                 ::TranslateMessage(&msg);
                 ::DispatchMessage(&msg);
             }
-            ret = ::MsgWaitForMultipleObjects(1, &_handle,
-                                              FALSE, waiting, QS_ALLINPUT);
+            ret = ::MsgWaitForMultipleObjects(1, &_handle, FALSE, waiting, QS_ALLINPUT);
         } while (ret != WAIT_OBJECT_0 && ret != WAIT_TIMEOUT);
         signaled = (ret == WAIT_OBJECT_0);
 #else
