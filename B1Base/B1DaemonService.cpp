@@ -14,6 +14,10 @@
 #include "B1Daemon.h"
 #include "B1Thread.h"
 
+#if !defined(_WIN32)
+#include <unistd.h>
+#endif
+
 using namespace BnD;
 
 B1DaemonService::B1DaemonService(int32 serviceID, int32 version, B1String&& buildDate, B1String&& serviceName, B1String&& systemName)
