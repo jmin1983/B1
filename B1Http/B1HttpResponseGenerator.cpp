@@ -14,6 +14,8 @@
 #include "B1HttpMessage.h"
 #include "B1HttpResponseAPIGenerator.h"
 
+#include <B1Base/B1StringUtil.h>
+
 #include <boost/bind/bind.hpp>
 
 namespace Beast = boost::beast;
@@ -76,7 +78,13 @@ BeastHttp::message_generator B1HttpResponseGenerator::makeResponseContents(const
     body.open(path.cString(), Beast::file_mode::scan, ec);
     if (ec) {
         if (Beast::errc::no_such_file_or_directory == ec) {         // Handle the case where the file doesn't exist.
-            return makeResponseNotFound(message);
+            B1StringUtil::removeLastPathComponent(&path);
+            path.append("/index.html");
+            Beast::error_code ece;
+            body.open(path.cString(), Beast::file_mode::scan, ece);
+            if (ece) {
+                return makeResponseNotFound(message);
+            }
         }
         else {
             return makeResponseServerError(message, ec.message());  // Handle an unknown error.
