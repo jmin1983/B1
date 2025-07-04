@@ -53,6 +53,12 @@ void B1BaseSessionManager::implLooperFunc()
         removeSession._session->cleanupSession();
         onSessionRemoved(handleID);
     }
+    {
+        B1AutoLock al(_sessionsLock);
+        for (const auto& removeSession : removeSessions) {
+            _handleIDMap.erase(removeSession._handleID);
+        }
+    }
     B1Thread::sleep(_workingInerval);
 }
 
@@ -116,7 +122,6 @@ void B1BaseSessionManager::reserveRemoveSession(B1BaseSocket* baseSocket)
         return;
     }
     _reservedRemoveSessions.push_back(itr->second);
-    _handleIDMap.erase(itr->second._handleID);
     _sessions.erase(itr);
 }
 
