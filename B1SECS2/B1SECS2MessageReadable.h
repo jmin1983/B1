@@ -21,7 +21,7 @@
 #include <B1SECS2/B1SECS2Message.h>
 
 namespace BnD {
-    class B1SECS2MessageReadable :public B1SECS2Message {
+    class B1SECS2MessageReadable : public B1SECS2Message {
     public:
         B1SECS2MessageReadable(bool wait, uint8 stream, uint8 function, B1String&& messageName, const uint8* data, uint32 dataLength, const B1SECS2DataManager* dataManager);
         virtual ~B1SECS2MessageReadable();

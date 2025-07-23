@@ -22,7 +22,7 @@
 
 namespace BnD {
     class B1SECS2Data;
-    class B1SECS2MessageWritable :public B1SECS2Message {
+    class B1SECS2MessageWritable : public B1SECS2Message {
     public:
         B1SECS2MessageWritable(bool wait, uint8 stream, uint8 function, B1String&& messageName);
         virtual ~B1SECS2MessageWritable();
