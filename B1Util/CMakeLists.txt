@@ -30,4 +30,6 @@ target_include_directories(B1Util
 
 if(WIN32)
 	target_compile_definitions(B1Util PRIVATE _CRT_SECURE_NO_WARNINGS)
+else()
+	target_link_libraries(B1Util PUBLIC systemd)
 endif()
