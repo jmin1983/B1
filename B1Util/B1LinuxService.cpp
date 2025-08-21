@@ -36,11 +36,21 @@ struct sd_bus_data {
 
 bool B1LinuxService::startService(const B1String& serviceName)
 {
+    {
+        bool alreadyActive = false;
+        if (getServiceActive(serviceName, &alreadyActive) != true) {
+            return false;
+        }
+        if (alreadyActive) {
+            b1log("already started: serviceName[%s]", serviceName.cString());
+            return true;
+        }
+    }
     sd_bus_data bus_data;
 
     int r = sd_bus_open_system(&bus_data._bus);
     if (r < 0) {
-        b1log("unable to start_service. failed to connect to system bus: %s", strerror(-r));
+        b1log("unable to start_service[%s]. failed to connect to system bus: %s", serviceName.cString(), strerror(-r));
         return false;
     }
 
@@ -55,7 +65,7 @@ bool B1LinuxService::startService(const B1String& serviceName)
         serviceName.cString(),               // unit name
         "replace");                          // mode (e.g., "replace", "fail", "isolate")
     if (r < 0) {
-        b1log("unable to start_service. failed to call StartUnit: %s", bus_data._error.message);
+        b1log("unable to start_service[%s]. failed to call StartUnit: %s", serviceName.cString(), bus_data._error.message);
         return false;
     }
     return true;
@@ -67,7 +77,7 @@ bool B1LinuxService::stopService(const B1String& serviceName)
 
     int r = sd_bus_open_system(&bus_data._bus);
     if (r < 0) {
-        b1log("unable to stop_service. failed to connect to system bus: %s", strerror(-r));
+        b1log("unable to stop_service[%s]. failed to connect to system bus: %s", serviceName.cString(), strerror(-r));
         return false;
     }
 
@@ -82,7 +92,7 @@ bool B1LinuxService::stopService(const B1String& serviceName)
         serviceName.cString(),
         "replace");
     if (r < 0) {
-        b1log("unable to stop_service. failed to call StopUnit: %s", bus_data._error.message);
+        b1log("unable to stop_service[%s]. failed to call StopUnit: %s", serviceName.cString(), bus_data._error.message);
         return false;
     }
     return true;
@@ -94,7 +104,7 @@ bool B1LinuxService::getServiceActive(const B1String& serviceName, bool* isActiv
 
     int r = sd_bus_open_system(&bus_data._bus);
     if (r < 0) {
-        b1log("unable to get_service_active. failed to connect to system bus: %s", strerror(-r));
+        b1log("unable to get_service_active[%s]. failed to connect to system bus: %s", serviceName.cString(), strerror(-r));
         return false;
     }
 
@@ -119,7 +129,7 @@ bool B1LinuxService::getServiceActive(const B1String& serviceName, bool* isActiv
     B1String result(msg);
     free(msg);
     if (r < 0) {
-        b1log("unable to get_service_state. failed to connect to system bus: %s", strerror(-r));
+        b1log("unable to get_service_state[%s]. failed to connect to system bus: %s", serviceName.cString(), strerror(-r));
         return false;
     }
     if (result == "active") {
