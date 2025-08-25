@@ -43,21 +43,25 @@ std::map<B1String, B1String> B1MainService::makeVersionInfoMap() const
     values.insert(std::make_pair("BuildNum", softwareRev()));
     values.insert(std::make_pair("BuildDate", softwareDate()));
     values.insert(std::make_pair("StartTime", B1Time::currentTimeInMilliseconds(true)));
-    B1String addressesString;
-    {
-        std::list<B1String> addresses;
-        B1SystemUtil::getLocalNetworkAddresses(&addresses);
-        for (const auto& address : addresses) {
-            if (addressesString.isEmpty() != true) {
-                addressesString.append(" / ");
-            }
-            addressesString += address;
-        }
-    }
+    B1String addressesString = getNetworkAddressesString();
     if (addressesString.isEmpty() != true) {
         values.insert(std::make_pair("Addresses", addressesString));
     }
     return values;
+}
+
+B1String B1MainService::getNetworkAddressesString() const
+{
+    B1String addressesString;
+    std::list<B1String> addresses;
+    B1SystemUtil::getLocalNetworkAddresses(&addresses);
+    for (const auto& address : addresses) {
+        if (addressesString.isEmpty() != true) {
+            addressesString.append(" / ");
+        }
+        addressesString += address;
+    }
+    return addressesString;
 }
 
 bool B1MainService::start()
