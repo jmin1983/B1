@@ -235,6 +235,12 @@ uint32 B1String::find(const B1String& s, uint32 index) const
     return (std::string::npos == i) ? B1String::NPOS : static_cast<uint32>(i);
 }
 
+uint32 B1String::findFirstOf(const B1String& s, uint32 index) const
+{
+    std::string::size_type i = _string.find_first_of(s._string, index);
+    return (i == std::string::npos) ? B1String::NPOS : static_cast<uint32>(i);
+}
+
 uint32 B1String::findLastOf(const B1String& s, uint32 index) const
 {
     std::string::size_type i = _string.find_last_of(s._string, index);

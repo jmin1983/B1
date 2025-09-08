@@ -20,6 +20,7 @@
 
 namespace BnD {
     namespace B1StringUtil {
+        B1String nextPathComponent(const B1String& path, uint32 step);  //  step == 1 means first component.
         B1String lastPathComponent(const B1String& path);
         void removeLastPathComponent(B1String* path);
         void removeLastPathSeparator(B1String* path);

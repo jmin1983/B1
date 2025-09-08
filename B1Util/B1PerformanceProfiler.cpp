@@ -18,6 +18,7 @@
 #pragma comment (lib, "Pdh.lib")
 #else
 #include <sys/types.h>
+#include <sys/statvfs.h>
 #include <sys/sysinfo.h>
 #include <stdio.h>
 #endif
@@ -25,15 +26,10 @@
 using namespace BnD;
 
 B1PerformanceProfiler::B1PerformanceProfiler()
-    : _cpuUsage(0)
-    , _cpuTemperature(0)
+    : _cpu()
     , _memAvailable(0)
-    , _memUsage(0)
-    , _memCurrentProcessUsage(0)
-    , _memTotal(0)
-    , _vmemUsage(0)
-    , _vmemCurrentProcessUsage(0)
-    , _vmemTotal(0)
+    , _mem()
+    , _vmem()
 #if defined(_WIN32)
     , _cpuQuery(NULL)
     , _cpuTotal(NULL)
@@ -106,7 +102,7 @@ float64 B1PerformanceProfiler::getUsageCPU()
     }
     float64 result = 0;
     if (cpuTotalUser < _cpuLastTotalUser || cpuTotalUserLow < _cpuLastTotalUserLow || cpuTotalSys < _cpuLastTotalSys || cpuTotalIdle < _cpuLastTotalIdle) {
-        result = _cpuUsage; //  Overflow detection. Just skip this value.
+        result = _cpu._usage; //  Overflow detection. Just skip this value.
     }
     else {
         float64 total = (cpuTotalUser - _cpuLastTotalUser) + (cpuTotalUserLow - _cpuLastTotalUserLow) + (cpuTotalSys - _cpuLastTotalSys);
@@ -190,8 +186,8 @@ bool B1PerformanceProfiler::initialize()
         if (GlobalMemoryStatusEx(&memInfo) != TRUE) {
             return false;
         }
-        _memTotal = memInfo.ullTotalPhys / 1024;
-        _vmemTotal = memInfo.ullTotalPageFile / 1024;
+        _mem._total = memInfo.ullTotalPhys / 1024;
+        _vmem._total = memInfo.ullTotalPageFile / 1024;
     }
     {
         ::PdhOpenQueryA(NULL, NULL, &_cpuQuery);
@@ -212,11 +208,11 @@ bool B1PerformanceProfiler::initialize()
     {
         struct sysinfo memInfo;
         sysinfo(&memInfo);
-        _memTotal = memInfo.totalram;   //  to avoid overflow.
-        _memTotal = (_memTotal * memInfo.mem_unit) / 1024;  //  Multiply in next statement to avoid int overflow on right hand side.
-        _vmemTotal = memInfo.totalram;  //  to avoid overflow.
-        _vmemTotal += memInfo.totalswap;
-        _vmemTotal = (_vmemTotal * memInfo.mem_unit) / 1024;
+        _mem._total = memInfo.totalram;   //  to avoid overflow.
+        _mem._total = (_mem._total * memInfo.mem_unit) / 1024;  //  Multiply in next statement to avoid int overflow on right hand side.
+        _vmem._total = memInfo.totalram;  //  to avoid overflow.
+        _vmem._total += memInfo.totalswap;
+        _vmem._total = (_vmem._total * memInfo.mem_unit) / 1024;
     }
 #endif
     return true;
@@ -233,30 +229,77 @@ void B1PerformanceProfiler::finalize()
 
 void B1PerformanceProfiler::process()
 {
-    _cpuUsage = getUsageCPU();
-    _cpuTemperature = getTemperatureCPU();
+    _cpu._usage = getUsageCPU();
+    _cpu._temperature = getTemperatureCPU();
     {
         int64 memAvailable = 0, memoryUsage = 0, vmemoryUsage = 0;
         if (getUsageMemory(&memAvailable, &memoryUsage, &vmemoryUsage)) {
             _memAvailable = memAvailable;
-            _memUsage = memoryUsage;
-            _vmemUsage = vmemoryUsage;
+            _mem._usage = memoryUsage;
+            _vmem._usage = vmemoryUsage;
         }
         else {
             _memAvailable = 0;
-            _memUsage = 0;
-            _vmemUsage = 0;
+            _mem._usage = 0;
+            _vmem._usage = 0;
         }
     }
     {
         int64 memoryUsage = 0, vmemoryUsage = 0;
         if (getUsageMemoryCurrentProcess(&memoryUsage, &vmemoryUsage)) {
-            _memCurrentProcessUsage = memoryUsage;
-            _vmemCurrentProcessUsage = vmemoryUsage;
+            _mem._currentProcessUsage = memoryUsage;
+            _vmem._currentProcessUsage = vmemoryUsage;
         }
         else {
-            _memCurrentProcessUsage = 0;
-            _vmemCurrentProcessUsage = 0;
+            _mem._currentProcessUsage = 0;
+            _vmem._currentProcessUsage = 0;
         }
     }
+}
+
+std::pair<int64, float64> B1PerformanceProfiler::getDiskUsage(const B1String& path) const
+{
+    int64 capacity = 0;         //  KB
+    int64 freeSpace = 0;        //  KB
+    int64 availableSpace = 0;   //  KB
+#if defined(_WIN32)
+    ULARGE_INTEGER totalNumberOfBytes;
+    ULARGE_INTEGER totalNumberOfFreeBytes;
+    ULARGE_INTEGER freeBytesAvailableToCaller;
+    if (GetDiskFreeSpaceExA(path.cString(), &freeBytesAvailableToCaller, &totalNumberOfBytes, &totalNumberOfFreeBytes)) {
+        capacity = totalNumberOfBytes.QuadPart;
+        availableSpace = freeBytesAvailableToCaller.QuadPart;
+        freeSpace = totalNumberOfFreeBytes.QuadPart;
+    }
+#else
+    struct statvfs fiData;
+    if ((statvfs(path.cString(), &fiData)) < 0) {
+        //  noop.
+    }
+    else {
+        capacity = (int64)fiData.f_blocks * fiData.f_frsize;
+        freeSpace = (int64)fiData.f_bfree * fiData.f_frsize;
+        availableSpace = (int64)fiData.f_bavail * fiData.f_frsize;
+    }
+#endif
+
+    std::pair<int64, float64> usage;    //  pair<capacity, used_percent>
+    if (capacity > 0 && freeSpace > 0 && availableSpace > 0) {
+        const int64 privilegedOnlySpace = freeSpace - availableSpace;
+        const int64 unusedSpace = freeSpace - privilegedOnlySpace;
+        const int64 totalSpace = capacity - privilegedOnlySpace;
+        const int64 usedSpace = totalSpace - unusedSpace;
+        usage.first = capacity;
+        if (unusedSpace > 0 && usedSpace > 0 && totalSpace > 0) {
+            usage.second = 100. * usedSpace / totalSpace;
+        }
+        else {
+            usage.second = 100;
+        }
+    }
+    else {
+        usage.first = capacity;
+        usage.second = 100;
+    }
+    return usage;
 }

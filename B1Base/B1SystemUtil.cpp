@@ -31,6 +31,13 @@ bool B1SystemUtil::fileLastModifiedTime(const B1String& path, int64* modifiedTim
     return true;
 }
 
+B1String B1SystemUtil::getCurrentDirectory()
+{
+    B1String path = getModuleFileName();
+    B1StringUtil::removeLastPathComponent(&path);
+    return path;
+}
+
 bool B1SystemUtil::getHostName(B1String* name)
 {
     char hostName[128] = {0};

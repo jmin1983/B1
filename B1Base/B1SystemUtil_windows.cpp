@@ -195,13 +195,6 @@ B1String B1SystemUtil::getFileNameOnly()
     return B1StringUtil::lastPathComponent(getModuleFileName());
 }
 
-B1String B1SystemUtil::getCurrentDirectory()
-{
-    B1String path = getModuleFileName();
-    B1StringUtil::removeLastPathComponent(&path);
-    return path;
-}
-
 B1String B1SystemUtil::getSystemID()
 {
     HW_PROFILE_INFOA info;

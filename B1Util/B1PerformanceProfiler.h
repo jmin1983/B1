@@ -20,21 +20,33 @@
 #include <Pdh.h>
 #endif
 
+#include <map>
+#include <set>
+
 namespace BnD {
     class B1PerformanceProfiler {
     public:
         B1PerformanceProfiler();
         virtual ~B1PerformanceProfiler();
     protected:
-        float64 _cpuUsage;
-        float64 _cpuTemperature;        // celcius. not available in Windows.
-        int64 _memAvailable;            // KB.
-        int64 _memUsage;                // KB.
-        int64 _memCurrentProcessUsage;  // KB.
-        int64 _memTotal;                // KB.
-        int64 _vmemUsage;               // KB.
-        int64 _vmemCurrentProcessUsage; // KB.
-        int64 _vmemTotal;               // KB.
+        struct CPU {
+            CPU() : _usage(0), _temperature(0) {}
+            float64 _usage;
+            float64 _temperature;
+        };
+        struct MEMORY {
+            MEMORY() : _usage(0), _currentProcessUsage(0), _total(0) {}
+            int64 _usage;               // KB.
+            int64 _currentProcessUsage; // KB.
+            int64 _total;               // KB.
+        };
+        struct PHYSICAL_MEMORY : MEMORY {};
+        struct VIRTUAL_MEMORY : MEMORY {};
+    protected:
+        CPU _cpu;
+        int64 _memAvailable;    // KB.
+        PHYSICAL_MEMORY _mem;
+        VIRTUAL_MEMORY _vmem;
     private:
 #if defined(_WIN32)
         PDH_HQUERY _cpuQuery;
@@ -57,16 +69,17 @@ namespace BnD {
         bool initialize();
         void finalize();
         void process();
+        std::pair<int64, float64> getDiskUsage(const B1String& path) const; //  return pair<capacity, used_percent>
 
-        float64 cpuUsage() const { return _cpuUsage; }
-        float64 cpuTemperature() const { return _cpuTemperature; }
+        float64 cpuUsage() const { return _cpu._usage; }
+        float64 cpuTemperature() const { return _cpu._temperature; }
         int64 memAvailable() const { return _memAvailable; }
-        int64 memUsage() const { return _memUsage; }
-        int64 memCurrentProcessUsage() const { return _memCurrentProcessUsage; }
-        int64 memTotal() const { return _memTotal; }
-        int64 vmemUsage() const { return _vmemUsage; }
-        int64 vmemCurrentProcessUsage() const { return _vmemCurrentProcessUsage; }
-        int64 vmemTotal() const { return _vmemTotal; }
+        int64 memUsage() const { return _mem._usage; }
+        int64 memCurrentProcessUsage() const { return _mem._currentProcessUsage; }
+        int64 memTotal() const { return _mem._total; }
+        int64 vmemUsage() const { return _vmem._usage; }
+        int64 vmemCurrentProcessUsage() const { return _vmem._currentProcessUsage; }
+        int64 vmemTotal() const { return _vmem._total; }
     };
 }   //  !BnD
 

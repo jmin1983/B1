@@ -15,6 +15,31 @@
 
 using namespace BnD;
 
+B1String B1StringUtil::nextPathComponent(const B1String& path, uint32 step)
+{
+    uint32 posBegin = 0, posEnd = 0;
+    for (uint32 s = 0; s < step; ++s) {
+        uint32 i = path.findFirstOf("/\\", posBegin);
+        if (i == B1String::NPOS) {
+            posEnd = i;
+            break;
+        }
+        if (i < path.length() - 1) {
+            if (s + 1 == step) {
+                posEnd = i;
+                break;
+            }
+            else {
+                posBegin = i + 1;
+            }
+        }
+        else {
+            break;
+        }
+    }
+    return path.substring(posBegin, posEnd - posBegin);
+}
+
 B1String B1StringUtil::lastPathComponent(const B1String& path)
 {
     uint32 i = path.findLastOf("/\\");
