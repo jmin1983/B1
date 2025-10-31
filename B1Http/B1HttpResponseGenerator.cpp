@@ -31,7 +31,7 @@ B1HttpResponseGenerator::~B1HttpResponseGenerator()
 {
 }
 
-BeastHttp::message_generator B1HttpResponseGenerator::makeResponseBadRequest(const B1HttpMessage& message, const B1String& why)
+BeastHttp::message_generator B1HttpResponseGenerator::makeResponseBadRequest(const B1HttpServerMessage& message, const B1String& why)
 {
     BeastHttp::response<BeastHttp::string_body> response(BeastHttp::status::bad_request, message.request().version());
     response.set(BeastHttp::field::server, BOOST_BEAST_VERSION_STRING);
@@ -42,7 +42,7 @@ BeastHttp::message_generator B1HttpResponseGenerator::makeResponseBadRequest(con
     return response;
 }
 
-BeastHttp::message_generator B1HttpResponseGenerator::makeResponseNotFound(const B1HttpMessage& message)
+BeastHttp::message_generator B1HttpResponseGenerator::makeResponseNotFound(const B1HttpServerMessage& message)
 {
     BeastHttp::response<BeastHttp::string_body> response(BeastHttp::status::not_found, message.request().version());
     response.set(BeastHttp::field::server, BOOST_BEAST_VERSION_STRING);
@@ -53,7 +53,7 @@ BeastHttp::message_generator B1HttpResponseGenerator::makeResponseNotFound(const
     return response;
 }
 
-BeastHttp::message_generator B1HttpResponseGenerator::makeResponseServerError(const B1HttpMessage& message, const B1String& what)
+BeastHttp::message_generator B1HttpResponseGenerator::makeResponseServerError(const B1HttpServerMessage& message, const B1String& what)
 {
     BeastHttp::response<BeastHttp::string_body> response(BeastHttp::status::internal_server_error, message.request().version());
     response.set(BeastHttp::field::server, BOOST_BEAST_VERSION_STRING);
@@ -64,7 +64,7 @@ BeastHttp::message_generator B1HttpResponseGenerator::makeResponseServerError(co
     return response;
 }
 
-BeastHttp::message_generator B1HttpResponseGenerator::makeResponseContents(const B1HttpMessage& message, const B1String& contentsRootPath)
+BeastHttp::message_generator B1HttpResponseGenerator::makeResponseContents(const B1HttpServerMessage& message, const B1String& contentsRootPath)
 {
     // Build the path to the requested file.
     auto path = getRequestedContentsFullPath(contentsRootPath, message.request().target());
@@ -114,7 +114,7 @@ BeastHttp::message_generator B1HttpResponseGenerator::makeResponseContents(const
     }
 }
 
-BeastHttp::message_generator B1HttpResponseGenerator::makeResponseAPI(const B1HttpMessage& message, const B1String& apiName)
+BeastHttp::message_generator B1HttpResponseGenerator::makeResponseAPI(const B1HttpServerMessage& message, const B1String& apiName)
 {
     auto apiGenerator = B1HttpResponseAPIGenerator::createAPIGenerator(apiName);
     if (NULL == apiGenerator) {
@@ -203,7 +203,7 @@ B1String B1HttpResponseGenerator::getRequestedContentsFullPath(const B1String& c
     return result;
 }
 
-BeastHttp::message_generator B1HttpResponseGenerator::makeResponse(const B1HttpMessage& message, const B1String& contentsRootPath)
+BeastHttp::message_generator B1HttpResponseGenerator::makeResponse(const B1HttpServerMessage& message, const B1String& contentsRootPath)
 {
     if (message.request().method() != BeastHttp::verb::get &&
         message.request().method() != BeastHttp::verb::head) {

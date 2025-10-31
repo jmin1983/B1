@@ -16,7 +16,6 @@ using namespace BnD;
 
 B1HttpMessage::B1HttpMessage()
     : _buffer()
-    , _request()
 {
 }
 
@@ -24,7 +23,17 @@ B1HttpMessage::~B1HttpMessage()
 {
 }
 
-void B1HttpMessage::clearRequest()
+void B1HttpClientMessage::clearRequest()
+{
+    _request = {};
+}
+
+void B1HttpClientMessage::clearResponse()
+{
+    _response = {};
+}
+
+void B1HttpServerMessage::clearRequest()
 {
     _request = {};
 }

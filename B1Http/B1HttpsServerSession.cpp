@@ -11,7 +11,7 @@
 
 #include "B1Http.h"
 #include "B1HttpsServerSession.h"
-#include "B1HttpsReadWriteImpl.h"
+#include "B1HttpsServerReadWriteImpl.h"
 #include "B1HttpMessage.h"
 #include "B1HttpResponseGenerator.h"
 #include "B1SecureSocketImpl.h"
@@ -31,10 +31,10 @@ B1HttpsServerSession::~B1HttpsServerSession()
 
 auto B1HttpsServerSession::createReadWriteImpl() -> B1BaseReadWriteImpl*
 {
-    return new B1HttpsReadWriteImpl(_sslContext, this);
+    return new B1HttpsServerReadWriteImpl(_sslContext, this);
 }
 
-auto B1HttpsServerSession::readWriteImpl() const -> B1HttpsReadWriteImpl*
+auto B1HttpsServerSession::readWriteImpl() const -> B1HttpsServerReadWriteImpl*
 {
-    return static_cast<B1HttpsReadWriteImpl*>(B1BaseServerSession::readWriteImpl());
+    return static_cast<B1HttpsServerReadWriteImpl*>(B1BaseServerSession::readWriteImpl());
 }

@@ -20,8 +20,10 @@ namespace BnD {
     class B1Lock;
     class B1BaseSocketImpl {
     public:
-        B1BaseSocketImpl() {}
+        B1BaseSocketImpl();
         virtual ~B1BaseSocketImpl() {}
+    private:
+        std::shared_ptr<B1Lock> _closeLock;
     protected:
         virtual void implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) = 0;
         virtual auto implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> = 0;
@@ -30,25 +32,24 @@ namespace BnD {
         virtual uint16 implPeerPort() const = 0;
         virtual uint16 implLocalPort() const = 0;
         virtual bool implIsOpen() const = 0;
-        virtual bool implIsClosed() const = 0;
+        virtual boost::asio::ip::tcp::socket* implGetASIOSocket() const = 0;
     public:
         void updateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) { implUpdateSocket(pAsioSocket); }
         auto rollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> { return implRollbackSocket(); }
-        void close() { implClose(); }
+        void close();
         B1String peerAddress() const { return implPeerAddress(); }
         uint16 peerPort() const { return implPeerPort(); }
         uint16 localPort() const { return implLocalPort(); }
         bool isOpen() const { return implIsOpen(); }
-        bool isClosed() const { return implIsClosed(); }
+        boost::asio::ip::tcp::socket* getASIOSocket() const { return implGetASIOSocket(); }
     };
 
     class B1ASIOSocketImpl : public B1BaseSocketImpl {
     public:
         B1ASIOSocketImpl();
-        virtual ~B1ASIOSocketImpl() {}
     protected:
         boost::asio::ip::tcp::socket* _asioSocket;
-        std::shared_ptr<B1Lock> _closeLock;
+        
     protected:
         void implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) final;
         auto implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> final;
@@ -57,9 +58,7 @@ namespace BnD {
         uint16 implPeerPort() const final;
         uint16 implLocalPort() const final;
         bool implIsOpen() const final;
-        bool implIsClosed() const final;
-    public:
-        boost::asio::ip::tcp::socket* asioSocket() const { return _asioSocket; }
+        boost::asio::ip::tcp::socket* implGetASIOSocket() const final { return _asioSocket; }
     };
 }   //  !BnD
 

@@ -205,7 +205,7 @@ int32 B1BaseSession::currentConnectionStatus() const
 void B1BaseSession::setDisconnectedIfSessionClosed()
 {
     if (isDisconnecting()) {
-        if (_readWriteImpl && _readWriteImpl->isClosed()) {
+        if (_readWriteImpl && _readWriteImpl->isOpen() != true) {
             setSessionStatusDisconnected();
         }
     }

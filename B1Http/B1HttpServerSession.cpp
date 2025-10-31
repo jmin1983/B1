@@ -30,7 +30,7 @@ B1HttpServerSession::~B1HttpServerSession()
 {
 }
 
-void B1HttpServerSession::onReadComplete(const B1HttpMessage& httpMessage)
+void B1HttpServerSession::onReadComplete(const B1HttpServerMessage& httpMessage)
 {
     if (boost::beast::websocket::is_upgrade(httpMessage.request())) {
         _httpServerSessionListener->onHttpServerSessionUpgradeRequested(serverSocket(), httpMessage);
@@ -63,10 +63,10 @@ void B1HttpServerSession::onWriteFailed(int32 reason)
 
 auto B1HttpServerSession::createReadWriteImpl() -> B1BaseReadWriteImpl*
 {
-    return new B1HttpReadWriteImpl(this);
+    return new B1HttpServerReadWriteImpl(this);
 }
 
-auto B1HttpServerSession::readWriteImpl() const -> B1HttpReadWriteImpl*
+auto B1HttpServerSession::readWriteImpl() const -> B1HttpServerReadWriteImpl*
 {
-    return static_cast<B1HttpReadWriteImpl*>(B1BaseServerSession::readWriteImpl());
+    return static_cast<B1HttpServerReadWriteImpl*>(B1BaseServerSession::readWriteImpl());
 }

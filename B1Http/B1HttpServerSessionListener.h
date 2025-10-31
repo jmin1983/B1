@@ -17,11 +17,11 @@
 #endif
 
 namespace BnD {
-    class B1HttpMessage;
+    class B1HttpServerMessage;
     class B1ServerSocket;
     class B1HttpServerSessionListener {
     public:
-        virtual void onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSocket, const B1HttpMessage& httpMessage) {}
+        virtual void onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSocket, const B1HttpServerMessage& httpMessage) {}
     };
 }   //  !BnD
 

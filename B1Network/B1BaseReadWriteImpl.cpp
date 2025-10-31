@@ -119,8 +119,3 @@ bool B1BaseReadWriteImpl::isOpen() const
 {
     return _baseSocketImpl ? _baseSocketImpl->isOpen() : false;
 }
-
-bool B1BaseReadWriteImpl::isClosed() const
-{
-    return _baseSocketImpl ? _baseSocketImpl->isClosed() : true;
-}

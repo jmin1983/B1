@@ -40,9 +40,9 @@ auto B1ArrayBufferReadWriteImpl::asioSocketImpl() const -> B1ASIOSocketImpl*
 
 bool B1ArrayBufferReadWriteImpl::implRead()
 {
-    asioSocketImpl()->asioSocket()->async_read_some(boost::asio::buffer(_recvBuffer),
-                                                    boost::bind(&B1ArrayBufferReadWriteImpl::readComplete, this,
-                                                                boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    asioSocketImpl()->getASIOSocket()->async_read_some(boost::asio::buffer(_recvBuffer),
+                                                       boost::bind(&B1ArrayBufferReadWriteImpl::readComplete, this,
+                                                                   boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
     return true;
 }
 
@@ -89,11 +89,11 @@ auto B1ArrayBufferReadWriteImpl::listener() const -> B1ArrayBufferReadWriteImplL
 
 void B1ArrayBufferReadWriteImpl::writeData(const uint8* data, size_t size)
 {
-    if (asioSocketImpl()->asioSocket()->is_open() != true) {
+    if (asioSocketImpl()->getASIOSocket()->is_open() != true) {
         B1LOG("socket is not opened!");
         //assert(false);
     }
-    boost::asio::async_write(*asioSocketImpl()->asioSocket(), boost::asio::buffer(data, size),
+    boost::asio::async_write(*asioSocketImpl()->getASIOSocket(), boost::asio::buffer(data, size),
                              boost::bind(&B1ArrayBufferReadWriteImpl::writeComplete, this,
                                          boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }

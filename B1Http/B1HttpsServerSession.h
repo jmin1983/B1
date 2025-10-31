@@ -30,7 +30,7 @@ namespace BnD {
     protected:  //  B1BaseServerSession
         B1BaseReadWriteImpl* createReadWriteImpl() final;
     protected:
-        class B1HttpsReadWriteImpl* readWriteImpl() const;
+        class B1HttpsServerReadWriteImpl* readWriteImpl() const;
     };
 }   //  !BnD
 

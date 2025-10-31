@@ -26,11 +26,11 @@ bool B1MariaDBHandle::initialize(bool useSSL)
     }
     _context.reset(new B1IOContext(1));
     if (useSSL) {
-        _sslContext.reset(new B1SSLContext(false));
-        _sslConnection.reset(new boost::mysql::tcp_ssl_connection(_context->nativeContext()->get_executor(), *_sslContext->nativeContext()));
+        _sslContext = std::make_shared<B1SSLContext>(false);
+        _sslConnection = std::make_shared<boost::mysql::tcp_ssl_connection>(_context->nativeContext()->get_executor(), *_sslContext->nativeContext());
     }
     else {
-        _connection.reset(new boost::mysql::tcp_connection(*_context->nativeContext()));
+        _connection = std::make_shared<boost::mysql::tcp_connection>(*_context->nativeContext());
     }
     return true;
 }

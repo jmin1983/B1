@@ -30,7 +30,7 @@ void B1BaseSocket::resetSocket(const B1IOContext* context)
 {
     try {
         if (context) {
-            _asioSocket.reset(new boost::asio::ip::tcp::socket(*context->nativeContext()));
+            _asioSocket = std::make_shared<boost::asio::ip::tcp::socket>(*context->nativeContext());
         }
         else {
             _asioSocket.reset();
@@ -95,15 +95,29 @@ void B1BaseSocket::resetImpl()
     }
 }
 
+boost::asio::ip::tcp::socket* B1BaseSocket::asioSocket() const
+{
+    if (_asioSocket) {
+        return _asioSocket.get();
+    }
+    else if (_impl) {
+        return _impl->getASIOSocket();
+    }
+    return NULL;
+}
+
 void B1BaseSocket::cleanUp()
 {
-    if (_asioSocket && _asioSocket->is_open()) {
-        B1LOG("asio still open! -> close");
-        try {
-            _asioSocket->close();
+    resetImpl();
+    if (_asioSocket) {
+        if (_asioSocket->is_open()) {
+            B1LOG("asio still open! -> close");
+            try {
+                _asioSocket->close();
+            }
+            catch (...) {
+            }
         }
-        catch (...) {
-        }
+        _asioSocket.reset();
     }
-    _asioSocket.reset();
 }

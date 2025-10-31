@@ -19,13 +19,12 @@
 #include <B1Http/B1WebSocketServerSession.h>
 
 namespace BnD {
-    class B1HttpMessage;
     class B1SecureWebSocketServerSession : public B1WebSocketServerSession {
     public:
         B1SecureWebSocketServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener);
         virtual ~B1SecureWebSocketServerSession();
     protected:
-        void implAcceptWebSocket(const B1HttpMessage& initialMessage) final;
+        void implAcceptWebSocket(const B1HttpServerMessage& initialMessage) final;
     protected:  //  B1BaseServerSession
         B1BaseReadWriteImpl* createReadWriteImpl() final;
     protected:

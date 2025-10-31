@@ -56,7 +56,6 @@ namespace BnD {
         uint16 peerPort() const;
         uint16 localPort() const;
         bool isOpen() const;
-        bool isClosed() const;
         B1BaseSocketImpl* baseSocketImpl() const { return _baseSocketImpl.get(); }
     };
 }   //  !BnD

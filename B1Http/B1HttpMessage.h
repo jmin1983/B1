@@ -18,14 +18,33 @@
 
 namespace BnD {
     class B1HttpMessage {
-    public:
+    protected:
         B1HttpMessage();
+    public:
         virtual ~B1HttpMessage();
     protected:
         boost::beast::flat_buffer _buffer;
-        boost::beast::http::request<boost::beast::http::string_body> _request;
     public:
         boost::beast::flat_buffer& buffer() { return _buffer; }
+    };
+
+    class B1HttpClientMessage : public B1HttpMessage {
+    protected:
+        boost::beast::http::request<boost::beast::http::empty_body> _request;
+        boost::beast::http::response<boost::beast::http::string_body> _response;
+    public:
+              boost::beast::http::request<boost::beast::http::empty_body>& request()       { return _request; }
+        const boost::beast::http::request<boost::beast::http::empty_body>& request() const { return _request; }
+              boost::beast::http::response<boost::beast::http::string_body>& response()       { return _response; }
+        const boost::beast::http::response<boost::beast::http::string_body>& response() const { return _response; }
+        void clearRequest();
+        void clearResponse();
+    };
+
+    class B1HttpServerMessage : public B1HttpMessage {
+    protected:
+        boost::beast::http::request<boost::beast::http::string_body> _request;
+    public:
               boost::beast::http::request<boost::beast::http::string_body>& request()       { return _request; }
         const boost::beast::http::request<boost::beast::http::string_body>& request() const { return _request; }
         void clearRequest();

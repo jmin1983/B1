@@ -60,7 +60,7 @@ bool B1Acceptor::initialize(uint16 port, B1AcceptorListener* listener)
     if (_acceptor != NULL) {
         return false;
     }
-    _acceptor.reset(new boost::asio::ip::tcp::acceptor(*_context->nativeContext(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)));
+    _acceptor = std::make_shared<boost::asio::ip::tcp::acceptor>(*_context->nativeContext(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port));
     _closed = false;
     _listener = listener;
     accept();

@@ -17,10 +17,20 @@
 
 using namespace BnD;
 
+B1BaseSocketImpl::B1BaseSocketImpl()
+    : _closeLock(std::make_shared<B1Lock>())
+{
+}
+
+void B1BaseSocketImpl::close()
+{
+    B1AutoLock al(*_closeLock);
+    implClose();
+}
+
 B1ASIOSocketImpl::B1ASIOSocketImpl()
     : B1BaseSocketImpl()
     , _asioSocket(NULL)
-    , _closeLock(std::make_shared<B1Lock>())
 {
 }
 
@@ -37,7 +47,6 @@ auto B1ASIOSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip::
 
 void B1ASIOSocketImpl::implClose()
 {
-    B1AutoLock al(*_closeLock);
     if (_asioSocket && _asioSocket->is_open()) {
         try {
             _asioSocket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
@@ -96,9 +105,4 @@ bool B1ASIOSocketImpl::implIsOpen() const
     catch (...) {
     }
     return false;
-}
-
-bool B1ASIOSocketImpl::implIsClosed() const
-{
-    return _asioSocket ? _asioSocket->is_open() != true : true;
 }

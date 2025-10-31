@@ -31,7 +31,7 @@ void B1WebSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::soc
         assert(false);
         return;
     }
-    _webSocketStream.reset(new boost::beast::websocket::stream<boost::beast::tcp_stream>(std::move(*asioSocket)));
+    _webSocketStream = std::make_shared<boost::beast::websocket::stream<boost::beast::tcp_stream> >(std::move(*asioSocket));
     pAsioSocket->reset();
 }
 
@@ -40,7 +40,7 @@ auto B1WebSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip::t
     if (_webSocketStream == NULL) {
         return NULL;
     }
-    std::shared_ptr<boost::asio::ip::tcp::socket> asioSocket(new boost::asio::ip::tcp::socket(std::move(boost::beast::get_lowest_layer(*_webSocketStream).socket())));
+    auto asioSocket = std::make_shared<boost::asio::ip::tcp::socket>(std::move(boost::beast::get_lowest_layer(*_webSocketStream).socket()));
     _webSocketStream.reset();
     return asioSocket;
 }
@@ -48,8 +48,15 @@ auto B1WebSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip::t
 void B1WebSocketImpl::implClose()
 {
     if (_webSocketStream) {
-        if (boost::beast::get_lowest_layer(*_webSocketStream).socket().is_open()) {
+        try {
+            boost::beast::get_lowest_layer(*_webSocketStream).socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        }
+        catch (...) {
+        }
+        try {
             boost::beast::get_lowest_layer(*_webSocketStream).socket().close();
+        }
+        catch (...) {
         }
     }
 }
@@ -92,10 +99,11 @@ uint16 B1WebSocketImpl::implLocalPort() const
 
 bool B1WebSocketImpl::implIsOpen() const
 {
-    return _webSocketStream && _webSocketStream->is_open();
+    //return _webSocketStream && _webSocketStream->is_open();   //  this means hand_shake is completed, not socket is_opened.
+    return _webSocketStream && boost::beast::get_lowest_layer(*_webSocketStream).socket().is_open();
 }
 
-bool B1WebSocketImpl::implIsClosed() const
+boost::asio::ip::tcp::socket* B1WebSocketImpl::implGetASIOSocket() const
 {
-    return _webSocketStream ? _webSocketStream->is_open() != true : true;
+    return _webSocketStream ? &boost::beast::get_lowest_layer(*_webSocketStream).socket() : NULL;
 }

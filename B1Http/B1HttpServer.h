@@ -23,7 +23,6 @@
 
 namespace BnD {
     class B1BaseSession;
-    class B1HttpMessage;
     class B1WebSocketServerSession;
     class B1HttpServer : protected B1HttpServerSessionListener
                        , public B1BaseServer {
@@ -34,7 +33,7 @@ namespace BnD {
     protected:
         virtual B1WebSocketServerSession* createWebSocketServerSession(B1ServerSocket* serverSocket);
     protected:
-        void onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSocket, const B1HttpMessage& httpMessage) final;
+        void onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSocket, const B1HttpServerMessage& httpMessage) final;
     protected:
         virtual B1BaseSessionManager* createSessionManager() override;
         virtual B1BaseServerSession* createSession(B1ServerSocket* serverSocket) override;

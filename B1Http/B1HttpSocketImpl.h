@@ -1,5 +1,5 @@
 //
-// B1WebSocketImpl.h
+// B1HttpSocketImpl.h
 //
 // Library: B1Http
 // Package: Http
@@ -9,8 +9,8 @@
 // Feel free to use, for any purpose.
 //
 
-#ifndef _B1HTTP_WEB_SOCKET_IMPL_H
-#define _B1HTTP_WEB_SOCKET_IMPL_H
+#ifndef _B1HTTP_HTTP_SOCKET_IMPL_H
+#define _B1HTTP_HTTP_SOCKET_IMPL_H
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -19,12 +19,12 @@
 #include <B1Network/B1BaseSocketImpl.h>
 
 namespace BnD {
-    class B1WebSocketImpl : public B1BaseSocketImpl {
+    class B1HttpSocketImpl : public B1BaseSocketImpl {
     public:
-        B1WebSocketImpl();
-        virtual ~B1WebSocketImpl();
+        B1HttpSocketImpl();
+        virtual ~B1HttpSocketImpl();
     protected:
-        std::shared_ptr<boost::beast::websocket::stream<boost::beast::tcp_stream> > _webSocketStream;
+        std::shared_ptr<boost::beast::tcp_stream> _stream;
     protected:
         void implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) final;
         auto implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> final;
@@ -35,9 +35,9 @@ namespace BnD {
         bool implIsOpen() const final;
         boost::asio::ip::tcp::socket* implGetASIOSocket() const final;
     public:
-              boost::beast::websocket::stream<boost::beast::tcp_stream>* webSocketStream()       { return _webSocketStream.get(); }
-        const boost::beast::websocket::stream<boost::beast::tcp_stream>* webSocketStream() const { return _webSocketStream.get(); }
+              boost::beast::tcp_stream* stream()       { return _stream.get(); }
+        const boost::beast::tcp_stream* stream() const { return _stream.get(); }
     };
 }   //  !BnD
 
-#endif  // !_B1HTTP_WEB_SOCKET_IMPL_H
+#endif  // !_B1HTTP_HTTP_SOCKET_IMPL_H

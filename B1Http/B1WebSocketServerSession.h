@@ -26,7 +26,7 @@ namespace boost {
 };
 
 namespace BnD {
-    class B1HttpMessage;
+    class B1HttpServerMessage;
     class B1WebSocketServerSession : protected B1WebSocketReadWriteImplListener
                                    , public B1BaseServerSession {
     public:
@@ -34,7 +34,7 @@ namespace BnD {
         virtual ~B1WebSocketServerSession();
     protected:
         virtual void onWebSocketAccepted() {}
-        virtual void implAcceptWebSocket(const B1HttpMessage& initialMessage);
+        virtual void implAcceptWebSocket(const B1HttpServerMessage& initialMessage);
     protected:  //  B1WebSocketReadWriteImplListener
         void onReadFailed(int32 reason) final;
         void onWriteFailed(int32 reason) final;
@@ -45,7 +45,7 @@ namespace BnD {
     protected:
         void acceptComplete(const boost::system::error_code& error);
     public:
-        void acceptWebSocket(const B1HttpMessage& initialMessage);
+        void acceptWebSocket(const B1HttpServerMessage& initialMessage);
         void writeBinary(std::vector<uint8>&& data) const;
         void writeText(B1String&& text) const;
         void setTextBunchHint(uint32 value);

@@ -34,7 +34,9 @@ void B1SecureWebSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tc
         assert(false);
         return;
     }
-    _secureWebSocketStream.reset(new boost::beast::websocket::stream<boost::beast::ssl_stream<boost::beast::tcp_stream> >(std::move(*asioSocket), *_sslContext.nativeContext()));
+    _secureWebSocketStream = std::make_shared<boost::beast::websocket::stream<boost::beast::ssl_stream<boost::beast::tcp_stream> > >(
+        std::move(*asioSocket), *_sslContext.nativeContext()
+    );
     pAsioSocket->reset();
 }
 
@@ -43,7 +45,7 @@ auto B1SecureWebSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio:
     if (_secureWebSocketStream == NULL) {
         return std::shared_ptr<boost::asio::ip::tcp::socket>();
     }
-    std::shared_ptr<boost::asio::ip::tcp::socket> asioSocket(new boost::asio::ip::tcp::socket(std::move(boost::beast::get_lowest_layer(*_secureWebSocketStream).socket())));
+    auto asioSocket = std::make_shared<boost::asio::ip::tcp::socket>(std::move(boost::beast::get_lowest_layer(*_secureWebSocketStream).socket()));
     _secureWebSocketStream.reset();
     return asioSocket;
 }
@@ -51,8 +53,15 @@ auto B1SecureWebSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio:
 void B1SecureWebSocketImpl::implClose()
 {
     if (_secureWebSocketStream) {
-        if (boost::beast::get_lowest_layer(*_secureWebSocketStream).socket().is_open()) {
+        try {
+            boost::beast::get_lowest_layer(*_secureWebSocketStream).socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        }
+        catch (...) {
+        }
+        try {
             boost::beast::get_lowest_layer(*_secureWebSocketStream).socket().close();
+        }
+        catch (...) {
         }
     }
 }
@@ -98,7 +107,7 @@ bool B1SecureWebSocketImpl::implIsOpen() const
     return _secureWebSocketStream && boost::beast::get_lowest_layer(*_secureWebSocketStream).socket().is_open();
 }
 
-bool B1SecureWebSocketImpl::implIsClosed() const
+boost::asio::ip::tcp::socket* B1SecureWebSocketImpl::implGetASIOSocket() const
 {
-    return _secureWebSocketStream ? _secureWebSocketStream->is_open() != true : true;
+    return _secureWebSocketStream ? &boost::beast::get_lowest_layer(*_secureWebSocketStream).socket() : NULL;
 }

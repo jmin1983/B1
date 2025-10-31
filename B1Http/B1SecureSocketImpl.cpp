@@ -36,7 +36,7 @@ void B1SecureSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::
         assert(false);
         return;
     }
-    _secureStream.reset(new boost::beast::ssl_stream<boost::beast::tcp_stream>(std::move(*asioSocket), *_sslContext.nativeContext()));
+    _secureStream = std::make_shared<boost::beast::ssl_stream<boost::beast::tcp_stream> >(std::move(*asioSocket), *_sslContext.nativeContext());
     pAsioSocket->reset();
 }
 
@@ -45,7 +45,7 @@ auto B1SecureSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip
     if (_secureStream == NULL) {
         return std::shared_ptr<boost::asio::ip::tcp::socket>();
     }
-    std::shared_ptr<boost::asio::ip::tcp::socket> asioSocket(new boost::asio::ip::tcp::socket(std::move(boost::beast::get_lowest_layer(*_secureStream).socket())));
+    auto asioSocket = std::make_shared<boost::asio::ip::tcp::socket>(std::move(boost::beast::get_lowest_layer(*_secureStream).socket()));
     _secureStream.reset();
     return asioSocket;
 }
@@ -53,8 +53,15 @@ auto B1SecureSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip
 void B1SecureSocketImpl::implClose()
 {
     if (_secureStream) {
-        if (boost::beast::get_lowest_layer(*_secureStream).socket().is_open()) {
+        try {
+            boost::beast::get_lowest_layer(*_secureStream).socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        }
+        catch (...) {
+        }
+        try {
             boost::beast::get_lowest_layer(*_secureStream).socket().close();
+        }
+        catch (...) {
         }
     }
 }
@@ -100,7 +107,7 @@ bool B1SecureSocketImpl::implIsOpen() const
     return _secureStream && boost::beast::get_lowest_layer(*_secureStream).socket().is_open();
 }
 
-bool B1SecureSocketImpl::implIsClosed() const
+boost::asio::ip::tcp::socket* B1SecureSocketImpl::implGetASIOSocket() const
 {
-    return _secureStream ? boost::beast::get_lowest_layer(*_secureStream).socket().is_open() != true : true;
+    return _secureStream ? &boost::beast::get_lowest_layer(*_secureStream).socket() : NULL;
 }

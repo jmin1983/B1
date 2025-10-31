@@ -17,23 +17,23 @@
 #endif
 
 namespace BnD {
-    class B1HttpMessage;
+    class B1HttpServerMessage;
     class B1HttpResponseAPIGenerator;
     class B1HttpResponseGenerator {
     public:
         B1HttpResponseGenerator();
         virtual ~B1HttpResponseGenerator();
     protected:
-        boost::beast::http::message_generator makeResponseBadRequest(const B1HttpMessage& message, const B1String& why);
-        boost::beast::http::message_generator makeResponseNotFound(const B1HttpMessage& message);
-        boost::beast::http::message_generator makeResponseServerError(const B1HttpMessage& message, const B1String& what);
-        boost::beast::http::message_generator makeResponseContents(const B1HttpMessage& message, const B1String& contentsRootPath);
-        boost::beast::http::message_generator makeResponseAPI(const B1HttpMessage& message, const B1String& apiName);
+        boost::beast::http::message_generator makeResponseBadRequest(const B1HttpServerMessage& message, const B1String& why);
+        boost::beast::http::message_generator makeResponseNotFound(const B1HttpServerMessage& message);
+        boost::beast::http::message_generator makeResponseServerError(const B1HttpServerMessage& message, const B1String& what);
+        boost::beast::http::message_generator makeResponseContents(const B1HttpServerMessage& message, const B1String& contentsRootPath);
+        boost::beast::http::message_generator makeResponseAPI(const B1HttpServerMessage& message, const B1String& apiName);
         boost::beast::string_view getMimeType(boost::beast::string_view path);
         B1String getRequestedAPIName(const boost::beast::string_view& target) const;   //  return empty if not a API.
         B1String getRequestedContentsFullPath(const B1String& contentsRootPath, const boost::beast::string_view& target);
     public:
-        boost::beast::http::message_generator makeResponse(const B1HttpMessage& message, const B1String& contentsRootPath);
+        boost::beast::http::message_generator makeResponse(const B1HttpServerMessage& message, const B1String& contentsRootPath);
     };
 }   //  !BnD
 

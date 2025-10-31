@@ -30,12 +30,12 @@ B1WebSocketServerSession::~B1WebSocketServerSession()
 {
 }
 
-void B1WebSocketServerSession::implAcceptWebSocket(const B1HttpMessage& initialMessage)
+void B1WebSocketServerSession::implAcceptWebSocket(const B1HttpServerMessage& initialMessage)
 {
     // Turn off the timeout on the tcp_stream, because the websocket stream has its own timeout system.
     boost::beast::get_lowest_layer(*readWriteImpl()->webSocketImpl()->webSocketStream()).expires_never();
 
-    // Set suggested timeout settings for the websocket
+    // Set suggested timeout settings for the websocket.
     readWriteImpl()->webSocketImpl()->webSocketStream()->set_option(
         boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
 
@@ -84,7 +84,7 @@ void B1WebSocketServerSession::acceptComplete(const boost::system::error_code& e
     }
 }
 
-void B1WebSocketServerSession::acceptWebSocket(const B1HttpMessage& initialMessage)
+void B1WebSocketServerSession::acceptWebSocket(const B1HttpServerMessage& initialMessage)
 {
     implAcceptWebSocket(initialMessage);
 }

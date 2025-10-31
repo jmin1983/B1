@@ -1,5 +1,5 @@
 //
-// B1HttpsReadWriteImpl.h
+// B1HttpsServerReadWriteImpl.h
 //
 // Library: B1Http
 // Package: Https
@@ -16,13 +16,13 @@
 #pragma once
 #endif
 
-#include <B1Http/B1HttpReadWriteImpl.h>
+#include <B1Http/B1HttpServerReadWriteImpl.h>
 
 namespace BnD {
     class B1SSLContext;
-    class B1HttpsReadWriteImpl : public B1HttpReadWriteImpl {
+    class B1HttpsServerReadWriteImpl : public B1HttpServerReadWriteImpl {
     public:
-        B1HttpsReadWriteImpl(const B1SSLContext& sslContext, class B1HttpReadWriteImplListener* listener);
+        B1HttpsServerReadWriteImpl(const B1SSLContext& sslContext, class B1HttpServerReadWriteImplListener* listener);
     protected:
         const B1SSLContext& _sslContext;
     protected:

@@ -17,13 +17,12 @@
 #endif
 
 #include <B1Network/B1BaseServerSession.h>
-#include <B1Http/B1HttpReadWriteImpl.h>
+#include <B1Http/B1HttpServerReadWriteImpl.h>
 
 namespace BnD {
-    class B1HttpMessage;
     class B1HttpResponseGenerator;
     class B1HttpServerSessionListener;
-    class B1HttpServerSession : protected B1HttpReadWriteImplListener
+    class B1HttpServerSession : protected B1HttpServerReadWriteImplListener
                               , public B1BaseServerSession {
     public:
         B1HttpServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* baseServerSessionListener,
@@ -34,15 +33,15 @@ namespace BnD {
     protected:
         const B1String& _contentsRootPath;
         std::shared_ptr<B1HttpResponseGenerator> _responseGenerator;
-    protected:  //  B1HttpReadWriteImplListener
-        virtual void onReadComplete(const B1HttpMessage& httpMessage) override;
+    protected:  //  B1HttpServerReadWriteImplListener
+        virtual void onReadComplete(const B1HttpServerMessage& httpMessage) override;
         void onWriteComplete(bool keepAlive, size_t dataSize) final;
         void onReadFailed(int32 reason) final;
         void onWriteFailed(int32 reason) final;
     protected:  //  B1BaseServerSession
         virtual B1BaseReadWriteImpl* createReadWriteImpl() override;
     protected:
-        B1HttpReadWriteImpl* readWriteImpl() const;
+        B1HttpServerReadWriteImpl* readWriteImpl() const;
     };
 }   //  !BnD
 

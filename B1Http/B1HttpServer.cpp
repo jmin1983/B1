@@ -33,7 +33,7 @@ B1WebSocketServerSession* B1HttpServer::createWebSocketServerSession(B1ServerSoc
     return new B1WebSocketServerSession(serverSocket, this);
 }
 
-void B1HttpServer::onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSocket, const B1HttpMessage& httpMessage)
+void B1HttpServer::onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSocket, const B1HttpServerMessage& httpMessage)
 {
     auto baseSocket = B1NetworkTypeConverter::toBaseSocket(serverSocket);
     auto baseSession = sessionManager()->getBaseSession(baseSocket);

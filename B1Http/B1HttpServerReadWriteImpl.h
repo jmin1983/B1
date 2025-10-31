@@ -1,5 +1,5 @@
 //
-// B1HttpReadWriteImpl.h
+// B1HttpServerReadWriteImpl.h
 //
 // Library: B1Http
 // Package: Http
@@ -9,8 +9,8 @@
 // Feel free to use, for any purpose.
 //
 
-#ifndef _B1HTTP_HTTP_READ_WRITE_IMPL_H
-#define _B1HTTP_HTTP_READ_WRITE_IMPL_H
+#ifndef _B1HTTP_HTTP_SERVER_READ_WRITE_IMPL_H
+#define _B1HTTP_HTTP_SERVER_READ_WRITE_IMPL_H
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -30,18 +30,18 @@ namespace boost {
 };
 
 namespace BnD {
-    class B1HttpMessage;
-    class B1HttpReadWriteImplListener : public B1BaseReadWriteImplListener {
+    class B1HttpServerMessage;
+    class B1HttpServerReadWriteImplListener : public B1BaseReadWriteImplListener {
     public:
-        virtual void onReadComplete(const B1HttpMessage& httpMessage) {}
+        virtual void onReadComplete(const B1HttpServerMessage& httpMessage) {}
         virtual void onWriteComplete(bool keepAlive, size_t dataSize) {}
     };
 
-    class B1HttpReadWriteImpl : public B1BaseReadWriteImpl {
+    class B1HttpServerReadWriteImpl : public B1BaseReadWriteImpl {
     public:
-        B1HttpReadWriteImpl(B1HttpReadWriteImplListener* listener);
+        B1HttpServerReadWriteImpl(B1HttpServerReadWriteImplListener* listener);
     protected:
-        std::shared_ptr<B1HttpMessage> _httpMessage;
+        std::shared_ptr<B1HttpServerMessage> _httpMessage;
     private:
         class B1ASIOSocketImpl* asioSocketImpl() const;
     protected:
@@ -52,10 +52,10 @@ namespace BnD {
         virtual bool implRead() override;
         bool implOnReadComplete(size_t receivedBytes) final;    //  return false if there are no more data to read.
     protected:
-        B1HttpReadWriteImplListener* listener() const;
+        B1HttpServerReadWriteImplListener* listener() const;
     public:
         void writeResponse(boost::beast::http::message_generator&& response);
     };
 }   //  !BnD
 
-#endif  // !_B1HTTP_HTTP_READ_WRITE_IMPL_H
+#endif  // !_B1HTTP_HTTP_SERVER_READ_WRITE_IMPL_H

@@ -37,7 +37,7 @@ namespace BnD {
         uint16 implPeerPort() const final;
         uint16 implLocalPort() const final;
         bool implIsOpen() const final;
-        bool implIsClosed() const final;
+        boost::asio::ip::tcp::socket* implGetASIOSocket() const final;
     public:
               boost::beast::websocket::stream<boost::beast::ssl_stream<boost::beast::tcp_stream> >* secureWebSocketStream()       { return _secureWebSocketStream.get(); }
         const boost::beast::websocket::stream<boost::beast::ssl_stream<boost::beast::tcp_stream> >* secureWebSocketStream() const { return _secureWebSocketStream.get(); }

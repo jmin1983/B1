@@ -37,7 +37,7 @@ namespace BnD {
         void setImpl(B1BaseSocketImpl* impl);
         void resetImpl();
     public:
-        boost::asio::ip::tcp::socket* asioSocket() const { return _asioSocket.get(); }  //  for convenience use only.
+        boost::asio::ip::tcp::socket* asioSocket() const;
         void cleanUp();
     };
 }   //  !BnD

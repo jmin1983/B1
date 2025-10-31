@@ -28,7 +28,7 @@ B1SecureWebSocketServerSession::~B1SecureWebSocketServerSession()
 {
 }
 
-void B1SecureWebSocketServerSession::implAcceptWebSocket(const B1HttpMessage& initialMessage)
+void B1SecureWebSocketServerSession::implAcceptWebSocket(const B1HttpServerMessage& initialMessage)
 {
     // Turn off the timeout on the tcp_stream, because the websocket stream has its own timeout system.
     boost::beast::get_lowest_layer(*readWriteImpl()->secureWebSocketImpl()->secureWebSocketStream()).expires_never();
