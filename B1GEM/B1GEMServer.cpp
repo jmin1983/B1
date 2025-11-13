@@ -2,7 +2,7 @@
 // B1GEMServer.cpp
 //
 // Library: B1GEM
-// Package: B1GEM
+// Package: Server
 // Module:  B1GEM
 //
 // Written by jmin1983@gmail.com

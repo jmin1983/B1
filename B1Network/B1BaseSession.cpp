@@ -126,11 +126,12 @@ bool B1BaseSession::initializeSession()
         return false;
     }
     _baseSocket->setImpl(_readWriteImpl->baseSocketImpl());
-    return true;
+    return implInitializeSession();
 }
 
 void B1BaseSession::finalizeSession()
 {
+    implFinalizeSession();
     if (_readWriteImpl) {
         _baseSocket->resetImpl();
         _readWriteImpl->finalize();

@@ -20,7 +20,7 @@ void B1SECS2ServerSession::onRecvMessageS1F1(uint16 sessionID, bool wait, const 
     sendMessageS1F0(sessionID, systemBytes);
 }
 
-void B1SECS2ServerSession::onRecvMessageS1F2(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes)
+void B1SECS2ServerSession::onRecvMessageS1F2(uint16 sessionID, const std::vector<uint8>& systemBytes)
 {
     assert(false);
     sendMessageS1F0(sessionID, systemBytes);
@@ -44,7 +44,7 @@ void B1SECS2ServerSession::onRecvMessageS1F13(uint16 sessionID, bool wait, const
     sendMessageS1F0(sessionID, systemBytes);
 }
 
-void B1SECS2ServerSession::onRecvMessageS1F14(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack)
+void B1SECS2ServerSession::onRecvMessageS1F14(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack)
 {
     assert(false);
     sendMessageS1F0(sessionID, systemBytes);
@@ -139,7 +139,7 @@ void B1SECS2ServerSession::onRecvMessageS2F49(uint16 sessionID, bool wait, const
     sendMessageS2F0(sessionID, systemBytes);
 }
 
-void B1SECS2ServerSession::onRecvMessageS5F2(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC5& ackc5)
+void B1SECS2ServerSession::onRecvMessageS5F2(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC5& ackc5)
 {
     assert(false);
     sendMessageS5F0(sessionID, systemBytes);
@@ -163,7 +163,7 @@ void B1SECS2ServerSession::onRecvMessageS5F7(uint16 sessionID, bool wait, const 
     sendMessageS5F0(sessionID, systemBytes);
 }
 
-void B1SECS2ServerSession::onRecvMessageS6F12(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC6& ackc6)
+void B1SECS2ServerSession::onRecvMessageS6F12(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC6& ackc6)
 {
     assert(false);
     sendMessageS6F0(sessionID, systemBytes);

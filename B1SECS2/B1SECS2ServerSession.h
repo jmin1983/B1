@@ -17,6 +17,7 @@
 #endif
  
 #include <B1Network/B1ArrayBufferServerSession.h>
+#include <B1SECS2/B1HSMSMessage.h>
 #include <B1SECS2/B1SECS2Consts.h>
 #include <B1SECS2/B1SECS2DataManager.h>
 #include <B1Util/B1TimeChecker.h>
@@ -28,25 +29,6 @@ namespace BnD {
     public:
         B1SECS2ServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener, uint16 secs2SessionID, B1SECS2Server* owner);
         virtual ~B1SECS2ServerSession();
-    protected:
-        enum TIME_OUT {
-            TIME_OUT_T3 = 45 * 1000,    //  T3(Reply Timeout) range:1~120sec, default:45sec
-            TIME_OUT_T6 = 5 * 1000,     //  T5(Connect Separation Timeout) range:1~240sec, default:5sec
-            TIME_OUT_T7 = 10 * 1000,    //  T7(NOT SELECTED Timeout) range:1~240sec, default:10sec
-            TIME_OUT_T8 = 5 * 1000,     //  T8(Network Intercharacter Timeout) range:1~120sec, default:5sec
-        };
-        struct HSMSMessage {
-            HSMSMessage() : _recved(0), _length(0), _data() {}
-            uint32 _recved;
-            uint32 _length;
-            std::vector<uint8> _data;   //  10 byte header included
-            void reset()
-            {
-                _recved = 0;
-                _length = 0;
-                _data.clear();
-            }
-        };
     private:
         int32 _initialSystemByte;
     protected:
@@ -56,7 +38,7 @@ namespace BnD {
         B1TimeChecker _t7Checker;
         B1TimeChecker _t8Checker;
         bool _selected; //  is HSMS.
-        HSMSMessage _lastMessage;
+        B1HSMSMessage _lastMessage;
     private:
         void recvHSMSMessage(const std::vector<uint8>& data);   //  10 byte header included
         void recvHSMSControl(uint16 sessionID, const std::vector<uint8>& systemBytes, B1SECS2Consts::CONTROL_MESSAGE controlMessage);
@@ -163,11 +145,11 @@ namespace BnD {
         virtual bool onRecvHSMSData(uint8 stream, uint8 function) { return true; }  //  return false to send F0
         virtual void onRecvMessageS1F0(uint16 sessionID, const std::vector<uint8>& systemBytes) {}
         virtual void onRecvMessageS1F1(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes);
-        virtual void onRecvMessageS1F2(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes);
+        virtual void onRecvMessageS1F2(uint16 sessionID, const std::vector<uint8>& systemBytes);
         virtual void onRecvMessageS1F3(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const std::vector<B1SECS2DataSVID>& svIDs);
         virtual void onRecvMessageS1F11(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const std::vector<B1SECS2DataSVID>& svIDs);
         virtual void onRecvMessageS1F13(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes);
-        virtual void onRecvMessageS1F14(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack);
+        virtual void onRecvMessageS1F14(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack);
         virtual void onRecvMessageS1F15(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes);
         virtual void onRecvMessageS1F17(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes);
         virtual void onRecvMessageS1F21(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const std::vector<B1SECS2DataVID>& vIDs);
@@ -189,12 +171,12 @@ namespace BnD {
         virtual void onRecvMessageS2F49(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes,
                                         const B1SECS2DataDATAID& dataID, const B1SECS2DataRCMD& rcmd, const std::map<B1SECS2DataCPNAME, B1SECS2DataCEPVAL>& cps);
         virtual void onRecvMessageS5F0(uint16 sessionID, const std::vector<uint8>& systemBytes) {}
-        virtual void onRecvMessageS5F2(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC5& ackc5);
+        virtual void onRecvMessageS5F2(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC5& ackc5);
         virtual void onRecvMessageS5F3(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataALED& alED, const B1SECS2DataALID& alID);
         virtual void onRecvMessageS5F5(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataALID& alID);
         virtual void onRecvMessageS5F7(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes);
         virtual void onRecvMessageS6F0(uint16 sessionID, const std::vector<uint8>& systemBytes) {}
-        virtual void onRecvMessageS6F12(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC6& ackc6);
+        virtual void onRecvMessageS6F12(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC6& ackc6);
         virtual void onRecvMessageS6F15(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataCEID& ceID);
         virtual void onRecvMessageS6F19(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataRPTID& rptID);
         virtual void onRecvMessageS64F0(uint16 sessionID, const std::vector<uint8>& systemBytes) {}

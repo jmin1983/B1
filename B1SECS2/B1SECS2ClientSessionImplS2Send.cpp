@@ -11,6 +11,10 @@
 
 #include "B1SECS2.h"
 #include "B1SECS2ClientSession.h"
+#include "B1SECS2MessageS2F13Writable.h"
+#include "B1SECS2MessageS2F15Writable.h"
+#include "B1SECS2MessageS2F17Writable.h"
+#include "B1SECS2MessageS2F29Writable.h"
 #include "B1SECS2MessageS2F31Writable.h"
 #include "B1SECS2MessageS2F33Writable.h"
 #include "B1SECS2MessageS2F35Writable.h"
@@ -19,6 +23,46 @@
 #include "B1SECS2MessageS2F49Writable.h"
 
 using namespace BnD;
+
+bool B1SECS2ClientSession::sendMessageS2F13(const std::list<B1SECS2DataECID>& ecIDs)
+{
+    B1SECS2MessageS2F13Writable message(ecIDs);
+    if (message.writeData() != true) {
+        return false;
+    }
+    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    return true;
+}
+
+bool B1SECS2ClientSession::sendMessageS2F15(const std::map<B1SECS2DataECID, B1SECS2DataECV>& ecvs)
+{
+    B1SECS2MessageS2F15Writable message(ecvs);
+    if (message.writeData() != true) {
+        return false;
+    }
+    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    return true;
+}
+
+bool B1SECS2ClientSession::sendMessageS2F17()
+{
+    B1SECS2MessageS2F17Writable message;
+    if (message.writeData() != true) {
+        return false;
+    }
+    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    return true;
+}
+
+bool B1SECS2ClientSession::sendMessageS2F29(const std::list<B1SECS2DataECID>& ecIDs)
+{
+    B1SECS2MessageS2F29Writable message(ecIDs);
+    if (message.writeData() != true) {
+        return false;
+    }
+    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    return true;
+}
 
 bool B1SECS2ClientSession::sendMessageS2F31(const B1SECS2DataTIME& time)
 {

@@ -31,7 +31,7 @@ void B1SECS2ClientSession::recvMessageS2F32(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS2F32(sessionID, wait, systemBytes, message.tiAck());
+    onRecvMessageS2F32(sessionID, systemBytes, message.tiAck());
 }
 
 void B1SECS2ClientSession::recvMessageS2F34(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
@@ -40,7 +40,7 @@ void B1SECS2ClientSession::recvMessageS2F34(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS2F34(sessionID, wait, systemBytes, message.drAck());
+    onRecvMessageS2F34(sessionID, systemBytes, message.drAck());
 }
 void B1SECS2ClientSession::recvMessageS2F36(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
@@ -48,7 +48,7 @@ void B1SECS2ClientSession::recvMessageS2F36(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS2F36(sessionID, wait, systemBytes, message.lrAck());
+    onRecvMessageS2F36(sessionID, systemBytes, message.lrAck());
 }
 void B1SECS2ClientSession::recvMessageS2F38(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
@@ -56,7 +56,7 @@ void B1SECS2ClientSession::recvMessageS2F38(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS2F38(sessionID, wait, systemBytes, message.erAck());
+    onRecvMessageS2F38(sessionID, systemBytes, message.erAck());
 }
 
 void B1SECS2ClientSession::recvMessageS2F42(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
@@ -65,7 +65,7 @@ void B1SECS2ClientSession::recvMessageS2F42(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS2F42(sessionID, wait, systemBytes, message.hcAck(), message.cps());
+    onRecvMessageS2F42(sessionID, systemBytes, message.hcAck(), message.cps());
 }
 
 void B1SECS2ClientSession::recvMessageS2F50(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
@@ -74,5 +74,5 @@ void B1SECS2ClientSession::recvMessageS2F50(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS2F50(sessionID, wait, systemBytes, message.hcAck(), message.cps());
+    onRecvMessageS2F50(sessionID, systemBytes, message.hcAck(), message.cps());
 }

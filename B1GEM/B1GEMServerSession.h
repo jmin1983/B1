@@ -2,7 +2,7 @@
 // B1GEMServerSession.h
 //
 // Library: B1GEM
-// Package: B1GEM
+// Package: Server
 // Module:  B1GEM
 //
 // Written by jmin1983@gmail.com
@@ -35,11 +35,11 @@ namespace BnD {
         virtual bool onRecvHSMSData(uint8 stream, uint8 function) override;
         virtual void onRecvMessageS1F0(uint16 sessionID, const std::vector<uint8>& systemBytes) override;
         virtual void onRecvMessageS1F1(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes) override;
-        virtual void onRecvMessageS1F2(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes) override;
+        virtual void onRecvMessageS1F2(uint16 sessionID, const std::vector<uint8>& systemBytes) override;
         virtual void onRecvMessageS1F3(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const std::vector<B1SECS2DataSVID>& svIDs) override;
         virtual void onRecvMessageS1F11(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const std::vector<B1SECS2DataSVID>& svIDs) override;
                 void onRecvMessageS1F13(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes) final;
-        virtual void onRecvMessageS1F14(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack) override;
+        virtual void onRecvMessageS1F14(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack) override;
                 void onRecvMessageS1F15(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes) final;
                 void onRecvMessageS1F17(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes) final;
         virtual void onRecvMessageS2F13(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const std::vector<B1SECS2DataECID>& ecIDs) override;
@@ -51,7 +51,7 @@ namespace BnD {
                                         const B1SECS2DataDATAID& dataID, const std::map<B1SECS2DataRPTID, std::vector<B1SECS2DataVID> >& reportData) override;
         virtual void onRecvMessageS2F35(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes,
                                         const B1SECS2DataDATAID& dataID, const std::map<B1SECS2DataCEID, std::vector<B1SECS2DataRPTID> >& linkEventData) override;
-        virtual void onRecvMessageS6F12(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC6& ackc6) override {}
+        virtual void onRecvMessageS6F12(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC6& ackc6) override {}
         virtual void onRecvMessageS6F15(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataCEID& ceID) override;
     protected:
         virtual bool isAlarmEnabled(const B1SECS2DataALID& alID) const { return true; }

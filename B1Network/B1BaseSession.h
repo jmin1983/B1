@@ -47,6 +47,8 @@ namespace BnD {
         void setSessionStatusDisconnected();
     protected:
         virtual B1BaseReadWriteImpl* createReadWriteImpl() = 0;
+        virtual bool implInitializeSession() { return true; }
+        virtual void implFinalizeSession() {}
         virtual void implOnConnect() {}                 //  called from network thread(DO NOT BLOCK). Connect not completed yet(do not call send, etc, ...).
         virtual void implOnDisconnected(int32 reason) {}//  called from network thread(DO NOT BLOCK). Disconnect already completed(do not call send, etc, ...).
         virtual void implDisconnect();

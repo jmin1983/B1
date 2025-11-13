@@ -21,5 +21,5 @@ void B1SECS2ClientSession::recvMessageS64F2(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS64F2(sessionID, wait, systemBytes, message.hcAck(), message.cps());
+    onRecvMessageS64F2(sessionID, systemBytes, message.hcAck(), message.cps());
 }

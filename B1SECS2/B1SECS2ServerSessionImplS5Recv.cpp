@@ -32,7 +32,7 @@ void B1SECS2ServerSession::recvMessageS5F2(uint16 sessionID, bool wait, const st
         sendMessageS5F0(sessionID, systemBytes);
         return;
     }
-    onRecvMessageS5F2(sessionID, wait, systemBytes, messageS5F2.ackc5());
+    onRecvMessageS5F2(sessionID, systemBytes, messageS5F2.ackc5());
 }
 
 void B1SECS2ServerSession::recvMessageS5F3(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)

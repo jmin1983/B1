@@ -17,18 +17,15 @@
 
 using namespace BnD;
 
-B1SECS2Client::B1SECS2Client(const B1SECS2DataManager* secs2DataManager)
-    : B1BaseClient()
-    , _secs2DataManager(secs2DataManager)
+B1SECS2Client::B1SECS2Client()
 {
 }
 
-B1BaseClientSession* B1SECS2Client::createSession(B1ClientSocket* clientSocket, void* param)
+B1SECS2Client::~B1SECS2Client()
 {
-    return new B1SECS2ClientSession(clientSocket, this, *(uint16*)param, _secs2DataManager);
 }
 
-std::shared_ptr<B1SECS2ClientSession> B1SECS2Client::getSession(uint16 deviceID)
+std::shared_ptr<B1SECS2ClientSession> B1SECS2Client::getSession(uint16 deviceID) const
 {
     return sessionManager()->getSessionByHandleID<B1SECS2ClientSession>(deviceID);
 }
@@ -66,10 +63,26 @@ bool B1SECS2Client::sendMessageS1F3(uint16 deviceID, const std::list<B1SECS2Data
     return false;
 }
 
+bool B1SECS2Client::sendMessageS1F11(uint16 deviceID, const std::list<B1SECS2DataSVID>& svIDs)
+{
+    if (auto session = getSession(deviceID)) {
+        return session->sendMessageS1F11(svIDs);
+    }
+    return false;
+}
+
 bool B1SECS2Client::sendMessageS1F13(uint16 deviceID)
 {
     if (auto session = getSession(deviceID)) {
         return session->sendMessageS1F13();
+    }
+    return false;
+}
+
+bool B1SECS2Client::sendMessageS1F14(uint16 deviceID, const class B1SECS2DataCOMMACK& commAck)
+{
+    if (auto session = getSession(deviceID)) {
+        return session->sendMessageS1F14(commAck);
     }
     return false;
 }
@@ -86,6 +99,54 @@ bool B1SECS2Client::sendMessageS1F17(uint16 deviceID)
 {
     if (auto session = getSession(deviceID)) {
         return session->sendMessageS1F17();
+    }
+    return false;
+}
+
+bool B1SECS2Client::sendMessageS1F21(uint16 deviceID, const std::list<B1SECS2DataVID>& vIDs)
+{
+    if (auto session = getSession(deviceID)) {
+        return session->sendMessageS1F21(vIDs);
+    }
+    return false;
+}
+
+bool B1SECS2Client::sendMessageS1F23(uint16 deviceID, const std::list<B1SECS2DataCEID>& ceIDs)
+{
+    if (auto session = getSession(deviceID)) {
+        return session->sendMessageS1F23(ceIDs);
+    }
+    return false;
+}
+
+bool B1SECS2Client::sendMessageS2F13(uint16 deviceID, const std::list<B1SECS2DataECID>& ecIDs)
+{
+    if (auto session = getSession(deviceID)) {
+        return session->sendMessageS2F13(ecIDs);
+    }
+    return false;
+}
+
+bool B1SECS2Client::sendMessageS2F15(uint16 deviceID, const std::map<B1SECS2DataECID, class B1SECS2DataECV>& ecvs)
+{
+    if (auto session = getSession(deviceID)) {
+        return session->sendMessageS2F15(ecvs);
+    }
+    return false;
+}
+
+bool B1SECS2Client::sendMessageS2F17(uint16 deviceID)
+{
+    if (auto session = getSession(deviceID)) {
+        return session->sendMessageS2F17();
+    }
+    return false;
+}
+
+bool B1SECS2Client::sendMessageS2F29(uint16 deviceID, const std::list<B1SECS2DataECID>& ecIDs)
+{
+    if (auto session = getSession(deviceID)) {
+        return session->sendMessageS2F29(ecIDs);
     }
     return false;
 }

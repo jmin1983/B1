@@ -30,5 +30,5 @@ void B1SECS2ClientSession::recvMessageS5F4(uint16 sessionID, bool wait, const st
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS5F4(sessionID, wait, systemBytes, message.ackc5());
+    onRecvMessageS5F4(sessionID, systemBytes, message.ackc5());
 }

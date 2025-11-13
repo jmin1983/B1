@@ -21,15 +21,15 @@ namespace BnD {
         enum COMM_STATE {   //  Communications State Model
             COMM_STATE_DISABLED = 0,
             COMM_STATE_ENABLED,
-            COMM_STATE_COMMUNICATING,       //  서버는 이 값으로 설정될 수 없음.
-            COMM_STATE_NOT_COMMUNICATING,   //  서버는 이 값으로 설정될 수 없음.
+            COMM_STATE_COMMUNICATING,       //  server can not be set to this value.
+            COMM_STATE_NOT_COMMUNICATING,   //  server can not be set to this value.
 
             COMM_STATE_COUNT,
         };
         enum CONTROL_STATE {    //  Control State Model
             CONTROL_STATE_OFFLINE_UNKNOWN = 0,
             CONTROL_STATE_OFFLINE_EQ = 1,
-            CONTROL_STATE_OFFLINE_ATTEMPT_ONLINE = 2,   //  S1F1 보낸 이후 상태이므로 세션에서만 의미가 있음. 따라서 서버는 이 값으로 설정될 수 없음.
+            CONTROL_STATE_OFFLINE_ATTEMPT_ONLINE = 2,   //  server can not be set to this value.
             CONTROL_STATE_OFFLINE_HOST = 3,
             CONTROL_STATE_ONLINE_LOCAL = 4,
             CONTROL_STATE_ONLINE_REMOTE = 5,

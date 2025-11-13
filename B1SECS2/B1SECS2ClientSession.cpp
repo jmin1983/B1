@@ -19,11 +19,11 @@
 using namespace BnD;
 using namespace B1SECS2Consts;
 
-B1SECS2ClientSession::B1SECS2ClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, uint16 secs2SessionID, const B1SECS2DataManager* secs2DataManager)
+B1SECS2ClientSession::B1SECS2ClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, uint16 secs2SessionID)
     : B1ArrayBufferClientSession(clientSocket, listener)
     , _initialSystemByte(0)
     , _secs2SessionID(secs2SessionID)
-    , _secs2DataManager(secs2DataManager)
+    , _secs2DataManager()
     , _lastMessage()
     , _t7Checker()
     , _aliveChecker()
@@ -78,7 +78,7 @@ void B1SECS2ClientSession::recvHSMSControl(uint16 sessionID, const std::vector<u
     switch (controlMessage) {
         case CONTROL_MESSAGE_SELECT_RSP:
             _t7Checker.stop();
-            _aliveChecker.start(TIME_OUT_ALIVE);
+            _aliveChecker.start(CONSTS_ALIVE_TIME_OUT);
             onSelectCompleted();
             break;
         case CONTROL_MESSAGE_DESELECT_RSP:
@@ -346,13 +346,34 @@ void B1SECS2ClientSession::sendMessageF0(uint8 stream, uint16 sessionID, const s
     sendDataMessage(sessionID, systemBytes, stream, 0, false);
 }
 
+bool B1SECS2ClientSession::implInitializeSession()
+{
+    if (B1ArrayBufferClientSession::implInitializeSession() != true) {
+        return false;
+    }
+    _secs2DataManager.reset(createSECS2DataManager());
+    if (_secs2DataManager->initialize() != true) {
+        return false;
+    }
+    return true;
+}
+
+void B1SECS2ClientSession::implFinalizeSession()
+{
+    if (_secs2DataManager) {
+        _secs2DataManager->finalize();
+        _secs2DataManager.reset();
+    }
+    B1ArrayBufferClientSession::implFinalizeSession();
+}
+
 void B1SECS2ClientSession::implOnConnect()
 {
     B1ArrayBufferClientSession::implOnConnect();
     srand((unsigned int)time(0));
     _initialSystemByte = rand();
     _lastMessage.reset();
-    _t7Checker.start(TIME_OUT_T7);
+    _t7Checker.start(B1HSMSMessage::TIME_OUT_T7);
     _aliveChecker.stop();
     _lastAliveRequestTick = B1TickUtil::currentTick();
 }

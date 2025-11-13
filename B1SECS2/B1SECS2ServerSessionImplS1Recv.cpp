@@ -42,7 +42,7 @@ void B1SECS2ServerSession::recvMessageS1F2(uint16 sessionID, bool wait, const st
     B1SECS2MessageS1F2Readable messageS1F2(wait, data, dataLength, secs2DataManager());
     if (messageS1F2.readData() != true)
         return;
-    onRecvMessageS1F2(sessionID, wait, systemBytes);
+    onRecvMessageS1F2(sessionID, systemBytes);
 }
 
 void B1SECS2ServerSession::recvMessageS1F3(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
@@ -87,7 +87,7 @@ void B1SECS2ServerSession::recvMessageS1F14(uint16 sessionID, bool wait, const s
         return;
     }
 
-    onRecvMessageS1F14(sessionID, wait, systemBytes, messageS1F14.commAck());
+    onRecvMessageS1F14(sessionID, systemBytes, messageS1F14.commAck());
 }
 
 void B1SECS2ServerSession::recvMessageS1F15(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)

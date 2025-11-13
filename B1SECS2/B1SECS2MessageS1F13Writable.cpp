@@ -34,7 +34,7 @@ B1SECS2MessageS1F13Writable::~B1SECS2MessageS1F13Writable()
 
 B1String B1SECS2MessageS1F13Writable::fullName()
 {
-    return _mdln ? "Establish Communications Request (CR) E -> H" : "Establish Communications Request (CR) H -> E";
+    return _mdln ? "Establish Communications Request (CR) E->H" : "Establish Communications Request (CR) H->E";
 }
 
 bool B1SECS2MessageS1F13Writable::implWriteData(std::list<std::shared_ptr<B1SECS2Data> >* data)
@@ -51,7 +51,7 @@ bool B1SECS2MessageS1F13Writable::implWriteData(std::list<std::shared_ptr<B1SECS
         addData(*_softRev, data);
     }
     else {
-        /* Establish Communications Request (CR) H -> E
+        /* Establish Communications Request (CR) H->E
         <L 0>
         */
         addList(0, data);

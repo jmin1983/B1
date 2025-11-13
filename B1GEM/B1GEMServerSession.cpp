@@ -2,7 +2,7 @@
 // B1GEMServerSession.cpp
 //
 // Library: B1GEM
-// Package: B1GEM
+// Package: Server
 // Module:  B1GEM
 //
 // Written by jmin1983@gmail.com
@@ -81,7 +81,7 @@ void B1GEMServerSession::onRecvMessageS1F1(uint16 sessionID, bool wait, const st
     }
 }
 
-void B1GEMServerSession::onRecvMessageS1F2(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes)
+void B1GEMServerSession::onRecvMessageS1F2(uint16 sessionID, const std::vector<uint8>& systemBytes)
 {
     if (_attemptOnline) {
         sendCurrentControlState();
@@ -113,7 +113,7 @@ void B1GEMServerSession::onRecvMessageS1F13(uint16 sessionID, bool wait, const s
     sendCurrentControlState();
 }
 
-void B1GEMServerSession::onRecvMessageS1F14(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack)
+void B1GEMServerSession::onRecvMessageS1F14(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack)
 {
     std::shared_ptr<B1SECS2DataBIN> bin(static_cast<B1SECS2DataBIN*>(commack.get()->clone()));
     if (bin->data()[0] == 1) {
@@ -217,7 +217,7 @@ B1GEMDataRepository* B1GEMServerSession::dataRepository()
 bool B1GEMServerSession::onRecvHSMSDataControlStateOfflineEQ(uint8 stream, uint8 function)
 {
     bool result = false;
-    switch (stream) {   //  eq_control_state가 eq_offline 일 때 허용할 메시지.
+    switch (stream) {   //  allow meesage when eq_control_state == eq_offline.
         case 1:
             result = 1 == function || 17 == function;
             break;
@@ -227,15 +227,16 @@ bool B1GEMServerSession::onRecvHSMSDataControlStateOfflineEQ(uint8 stream, uint8
         default:
             break;
     }
-    if (result != true)
+    if (result != true) {
         writeLog("not allowed in control_state is offline_eq");
+    }
     return result;
 }
 
 bool B1GEMServerSession::onRecvHSMSDataControlStateOfflineHost(uint8 stream, uint8 function)
 {
     bool result = false;
-    switch (stream) {   //  eq_control_state가 host_offline 일 때 허용할 메시지.
+    switch (stream) {   //  allow meesage when eq_control_state == host_offline.
         case 1:
             result = 1 == function || 17 == function;
             break;
@@ -245,12 +246,13 @@ bool B1GEMServerSession::onRecvHSMSDataControlStateOfflineHost(uint8 stream, uin
         default:
             break;
     }
-    if (result != true)
+    if (result != true) {
         writeLog("not allowed in control_state is offline_host");
+    }
     return result;
 }
 
 bool B1GEMServerSession::onRecvHSMSDataControlStateOnlineLocal(uint8 stream, uint8 function)
 {
-    return true;    //  online_local이면 모든 메시지 허용(online_remote와 차이 없음).
+    return true;    //  allow all message when eq_control_state == online_local(same as online_remote).
 }

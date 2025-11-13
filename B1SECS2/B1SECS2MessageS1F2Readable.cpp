@@ -42,11 +42,11 @@ void B1SECS2MessageS1F2Readable::implToString(B1String* string)
 
 bool B1SECS2MessageS1F2Readable::implReadData()
 {
-    /* ON-LINE Data (D) H -> E
+    /* ON-LINE Data (D) H->E
     <L 0>
     */
 
-    /* ON-LINE Data (D) E -> H
+    /* ON-LINE Data (D) E->H
     <L 2>
         <MDLN>
         <SOFTREV>

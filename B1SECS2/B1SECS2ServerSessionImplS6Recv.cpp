@@ -27,9 +27,10 @@ void B1SECS2ServerSession::recvMessageS6F12(uint16 sessionID, bool wait, const s
 {
     _t6Checker.stop();
     B1SECS2MessageS6F12Readable messageS6F12(wait, data, dataLength, secs2DataManager());
-    if (messageS6F12.readData() != true)
+    if (messageS6F12.readData() != true) {
         return;
-    onRecvMessageS6F12(sessionID, wait, systemBytes, messageS6F12.ackc6());
+    }
+    onRecvMessageS6F12(sessionID, systemBytes, messageS6F12.ackc6());
 }
 
 void B1SECS2ServerSession::recvMessageS6F15(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)

@@ -49,7 +49,7 @@ BnD::b1log_callback_t g_callback = NULL;
 void* g_callbackParam = NULL;
 BnD::B1FileLog* g_fileLogger = NULL;
 BnD::int32 g_serviceID = 0;
-BnD::uint32 g_pid_for_file_logging = BnD::B1SystemUtil::getCurrentProcessID();
+const BnD::uint32 g_pid_for_file_logging = BnD::B1SystemUtil::getCurrentProcessID();
 
 bool BnD::testB1FileLog()
 {

@@ -94,7 +94,7 @@ void B1SECS2ServerSession::recvHSMSControl(uint16 sessionID, const std::vector<u
     switch (controlMessage) {
         case CONTROL_MESSAGE_DESELECT_REQ:
             _selected = false;
-            _t7Checker.start(TIME_OUT_T7);
+            _t7Checker.start(B1HSMSMessage::TIME_OUT_T7);
             sendControlMessage(sessionID, systemBytes, CONTROL_MESSAGE_DESELECT_RSP);
             onDeselectCompleted();
             break;
@@ -432,10 +432,10 @@ void B1SECS2ServerSession::implOnConnect()
     _initialSystemByte = rand();
     _lastMessage.reset();
     _selected = false;
-    _t6Checker.start(TIME_OUT_T6);
+    _t6Checker.start(B1HSMSMessage::TIME_OUT_T6);
     _t6Checker.stop();
-    _t7Checker.start(TIME_OUT_T7);
-    _t8Checker.start(TIME_OUT_T8);
+    _t7Checker.start(B1HSMSMessage::TIME_OUT_T7);
+    _t8Checker.start(B1HSMSMessage::TIME_OUT_T8);
     _t8Checker.stop();
 }
 

@@ -24,7 +24,7 @@ namespace BnD {
         B1SECS2MessageS1F2Readable(bool wait, const uint8* data, uint32 dataLength, const B1SECS2DataManager* dataManager);
         virtual ~B1SECS2MessageS1F2Readable();
     protected:
-        B1SECS2DataLIST _list;    //  count 0 if [H -> E] else [E -> H]
+        B1SECS2DataLIST _list;    //  count 0 if [H->E] else [E->H]
         B1SECS2DataMDLN _mdln;
         B1SECS2DataSOFTREV _softRev;
     protected:

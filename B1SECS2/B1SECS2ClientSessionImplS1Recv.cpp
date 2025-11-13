@@ -39,7 +39,7 @@ void B1SECS2ClientSession::recvMessageS1F2(uint16 sessionID, bool wait, const st
     if (messageS1F2.readData() != true) {
         return;
     }
-    onRecvMessageS1F2(sessionID, wait, systemBytes);
+    onRecvMessageS1F2(sessionID, systemBytes, messageS1F2.mdln(), messageS1F2.softRev());
 }
 
 void B1SECS2ClientSession::recvMessageS1F4(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
@@ -48,7 +48,7 @@ void B1SECS2ClientSession::recvMessageS1F4(uint16 sessionID, bool wait, const st
     if (messageS1F4.readData() != true) {
         return;
     }
-    onRecvMessageS1F4(sessionID, wait, systemBytes, messageS1F4.svs());
+    onRecvMessageS1F4(sessionID, systemBytes, messageS1F4.svs());
 }
 
 void B1SECS2ClientSession::recvMessageS1F14(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
@@ -57,7 +57,7 @@ void B1SECS2ClientSession::recvMessageS1F14(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS1F14(sessionID, wait, systemBytes, message.commAck(), message.mdln(), message.softRev());
+    onRecvMessageS1F14(sessionID, systemBytes, message.commAck(), message.mdln(), message.softRev());
 }
 
 void B1SECS2ClientSession::recvMessageS1F16(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
@@ -66,7 +66,7 @@ void B1SECS2ClientSession::recvMessageS1F16(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS1F16(sessionID, wait, systemBytes, message.oflAck());
+    onRecvMessageS1F16(sessionID, systemBytes, message.oflAck());
 }
 
 void B1SECS2ClientSession::recvMessageS1F18(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
@@ -75,5 +75,5 @@ void B1SECS2ClientSession::recvMessageS1F18(uint16 sessionID, bool wait, const s
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS1F18(sessionID, wait, systemBytes, message.onlAck());
+    onRecvMessageS1F18(sessionID, systemBytes, message.onlAck());
 }

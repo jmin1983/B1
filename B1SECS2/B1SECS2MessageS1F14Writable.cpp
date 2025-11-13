@@ -28,13 +28,13 @@ B1SECS2MessageS1F14Writable::~B1SECS2MessageS1F14Writable()
 
 B1String B1SECS2MessageS1F14Writable::fullName()
 {
-    return isSentFromHost() ? "Establish Communications Request Acknowledge (CRA) H -> E" : "Establish Communications Request Acknowledge (CRA) E -> H";
+    return isSentFromHost() ? "Establish Communications Request Acknowledge (CRA) H->E" : "Establish Communications Request Acknowledge (CRA) E->H";
 }
 
 bool B1SECS2MessageS1F14Writable::implWriteData(std::list<std::shared_ptr<B1SECS2Data> >* data)
 {
     if (isSentFromHost()) {
-        /* Establish Communications Request Acknowledge (CRA) H -> E
+        /* Establish Communications Request Acknowledge (CRA) H->E
         <L 2
             < COMMACK >
             <L 0>
@@ -45,7 +45,7 @@ bool B1SECS2MessageS1F14Writable::implWriteData(std::list<std::shared_ptr<B1SECS
         addList(0, data);
     }
     else {
-        /* Establish Communications Request Acknowledge (CRA) E -> H
+        /* Establish Communications Request Acknowledge (CRA) E->H
         <L 2
             <COMMACK>
             <L 2
