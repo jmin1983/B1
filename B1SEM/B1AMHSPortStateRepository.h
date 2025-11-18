@@ -34,10 +34,13 @@ namespace BnD {
         std::map<int32, B1AMHSSEM::PORT_STATE> _states;   //  map<port_id, states>
     protected:
         bool setState(int32 id, B1AMHSSEM::PORT_STATE newState, B1AMHSSEM::PORT_STATE* prevState);
-    public:
-        bool initialize(const std::map<int32, B1AMHSSEM::PORT_STATE>& states, B1AMHSPortStateRepositoryListener* listener);
-        void finalize();
         void setPortState(int32 id, B1AMHSSEM::PORT_STATE newState);
+    public:
+        bool initialize(std::map<int32, B1AMHSSEM::PORT_STATE>&& states, B1AMHSPortStateRepositoryListener* listener);
+        void finalize();
+        void setPortStateInService(int32 id);
+        void setPortStateOutOfService(int32 id);
+        bool isPortStateInService(int32 id) const;
         B1AMHSSEM::PORT_STATE portState(int32 id) const;
     };
 }   //  !BnD

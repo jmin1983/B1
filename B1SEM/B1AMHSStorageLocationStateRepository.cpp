@@ -45,6 +45,17 @@ bool B1AMHSStorageLocationStateRepository::setState(int32 id, STORAGE_LOCATION_S
     return true;
 }
 
+void B1AMHSStorageLocationStateRepository::setStorageLocationState(int32 id, STORAGE_LOCATION_STATE newState)
+{
+    STORAGE_LOCATION_STATE prevState;
+    if (setState(id, newState, &prevState) != true) {
+        return;
+    }
+    if (_listener) {
+        _listener->onActionStorageLocationStatusChanged(id, prevState, newState);
+    }
+}
+
 bool B1AMHSStorageLocationStateRepository::initialize(const std::map<int32, B1AMHSSEM::STORAGE_LOCATION_STATE>& states, B1AMHSStorageLocationStateRepositoryListener* listener)
 {
     _listener = listener;
@@ -58,15 +69,19 @@ void B1AMHSStorageLocationStateRepository::finalize()
     _states.clear();
 }
 
-void B1AMHSStorageLocationStateRepository::setStorageLocationState(int32 id, STORAGE_LOCATION_STATE newState)
+void B1AMHSStorageLocationStateRepository::setStorageLocationStateEnabled(int32 id)
 {
-    STORAGE_LOCATION_STATE prevState;
-    if (setState(id, newState, &prevState) != true) {
-        return;
-    }
-    if (_listener) {
-        _listener->onActionStorageLocationStatusChanged(id, prevState, newState);
-    }
+    setStorageLocationState(id, STORAGE_LOCATION_STATE::ENABLED);
+}
+
+void B1AMHSStorageLocationStateRepository::setStorageLocationStateDisabled(int32 id)
+{
+    setStorageLocationState(id, STORAGE_LOCATION_STATE::DISABLED);
+}
+
+bool B1AMHSStorageLocationStateRepository::isStorageLocationStateEnabled(int32 id) const
+{
+    return storageLocationState(id) == STORAGE_LOCATION_STATE::ENABLED;
 }
 
 STORAGE_LOCATION_STATE B1AMHSStorageLocationStateRepository::storageLocationState(int32 id) const

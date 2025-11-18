@@ -32,14 +32,16 @@ namespace BnD {
         std::shared_ptr<B1Lock> _lock;
         B1AMHSSEM::SYSTEM_STATE _systemState;
         B1AMHSSEM::SYSTEM_AVAIL_STATE _systemAvailState;
+    protected:
+        bool setSystemState(B1AMHSSEM::SYSTEM_STATE newState);
+        void setSystemAvailState(B1AMHSSEM::SYSTEM_AVAIL_STATE newState);
     public:
         bool initialize(B1AMHSTSSCStateRepositoryListener* listener);
         void finalize();
-        void setSystemState(B1AMHSSEM::SYSTEM_STATE newState);
-        void setSystemStatePausing();
-        void setSystemStatePaused();
-        void setSystemStateAuto();
-        void setSystemAvailState(B1AMHSSEM::SYSTEM_AVAIL_STATE newState);
+        bool setSystemStateInit();
+        bool setSystemStatePausing();
+        bool setSystemStatePaused();
+        bool setSystemStateAuto();
         void setSystemAvailStateInService();
         void setSystemAvailStateOutOfService();
         bool isSystemState(B1AMHSSEM::SYSTEM_STATE state) const;

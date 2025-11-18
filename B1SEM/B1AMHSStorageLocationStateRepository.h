@@ -34,10 +34,13 @@ namespace BnD {
         std::map<int32, B1AMHSSEM::STORAGE_LOCATION_STATE> _states;   //  map<location_id, states>
     protected:
         bool setState(int32 id, B1AMHSSEM::STORAGE_LOCATION_STATE newState, B1AMHSSEM::STORAGE_LOCATION_STATE* prevState);
+        void setStorageLocationState(int32 id, B1AMHSSEM::STORAGE_LOCATION_STATE newState);
     public:
         bool initialize(const std::map<int32, B1AMHSSEM::STORAGE_LOCATION_STATE>& states, B1AMHSStorageLocationStateRepositoryListener* listener);
         void finalize();
-        void setStorageLocationState(int32 id, B1AMHSSEM::STORAGE_LOCATION_STATE newState);
+        void setStorageLocationStateEnabled(int32 id);
+        void setStorageLocationStateDisabled(int32 id);
+        bool isStorageLocationStateEnabled(int32 id) const;
         B1AMHSSEM::STORAGE_LOCATION_STATE storageLocationState(int32 id) const;
     };
 }   //  !BnD

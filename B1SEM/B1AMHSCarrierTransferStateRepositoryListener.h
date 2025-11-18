@@ -23,29 +23,30 @@ namespace BnD {
     };
     class B1AMHSCarrierTransferStateRepositoryListener {
     public:
-        virtual void onActionCarrierWaitIn(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
-        virtual void onActionCarrierTransferring(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
-        virtual void onActionCarrierStoredAlt(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
-        virtual void onActionCarrierStored(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
-        virtual void onActionCarrierResumed(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
-        virtual void onActionCarrierWaitOut(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
-        virtual void onActionCarrierRemoved(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
-        virtual void onActionCarrierInstallCompleted(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
-        virtual void onActionCarrierRemoveCompleted(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
-        virtual void onActionCarrierETC(int32 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) { assert(false); }
+        virtual void onActionCarrierWaitIn(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
+        virtual void onActionCarrierTransferring(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
+        virtual void onActionCarrierStoredAlt(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
+        virtual void onActionCarrierStored(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
+        virtual void onActionCarrierResumed(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
+        virtual void onActionCarrierWaitOut(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
+        virtual void onActionCarrierRemoved(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
+        virtual void onActionCarrierInstallCompleted(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
+        virtual void onActionCarrierRemoveCompleted(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) {}
+        virtual void onActionCarrierETC(int64 id, B1AMHSSEM::CARRIER_STATE prevState, B1AMHSSEM::CARRIER_STATE newState) { assert(false); }
 
-        virtual void onActionTransferInitiated(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferring(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferCancelInitiated(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferCancelFailed(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferCancelCompleted(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferPaused(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferResumed(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferAbortInitiated(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferAbortFailed(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferAbortCompleted(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
-        virtual void onActionTransferCompleted(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState, void* param) {}
-        virtual void onActionTransferETC(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) { assert(false); }
+        virtual void onActionTransferQueued(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferInitiated(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferring(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferCancelInitiated(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferCancelFailed(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferCancelCompleted(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferPaused(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferResumed(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferAbortInitiated(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferAbortFailed(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferAbortCompleted(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferCompleted(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) {}
+        virtual void onActionTransferETC(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE prevState, B1AMHSSEM::TRANSFER_COMMAND_STATE newState) { assert(false); }
     };
 }   //  !BnD
 

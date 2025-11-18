@@ -20,8 +20,8 @@
 using namespace BnD;
 using namespace B1AMHSSEM;
 
-B1AMHSCarrierTransferStateRepository::B1AMHSCarrierTransferStateRepository(B1AMHSCarrierTransferStateRepositoryListener* listener)
-    : _listener(listener)
+B1AMHSCarrierTransferStateRepository::B1AMHSCarrierTransferStateRepository()
+    : _listener(NULL)
     , _lock(new B1RecursiveLock())
     , _data()
 {
@@ -31,34 +31,303 @@ B1AMHSCarrierTransferStateRepository::~B1AMHSCarrierTransferStateRepository()
 {
 }
 
-bool B1AMHSCarrierTransferStateRepository::setState(int32 id, CARRIER_STATE newState, CARRIER_STATE* prevState)
+bool B1AMHSCarrierTransferStateRepository::setCarrierState(int64 id, CARRIER_STATE newState)
 {
-    B1AutoLock al(*_lock);
+    _lock->lock();
     auto itr = _data.find(id);
     if (itr == _data.end()) {
+        assert(false);
+        _lock->unlock();
         return false;
     }
     if (itr->second->carrierState() == newState) {
-        return false;
+        _lock->unlock();
+        return true;
     }
-    *prevState = itr->second->carrierState();
-    itr->second->setCarrierState(newState);
-    return true;
+
+    const auto currentState = itr->second->carrierState();
+    if (CARRIER_STATE::NONE == currentState && CARRIER_STATE::INSTALLED_WAIT_IN == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierWaitIn: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierWaitIn(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::INSTALLED_WAIT_IN == currentState && CARRIER_STATE::INSTALLED_TRANSFERRING == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierTransferring: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierTransferring(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::INSTALLED_TRANSFERRING == currentState && CARRIER_STATE::INSTALLED_STORED_COMPLETED == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierStored: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierStored(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::INSTALLED_STORED_COMPLETED == currentState && CARRIER_STATE::INSTALLED_TRANSFERRING == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierTransferring: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierTransferring(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::INSTALLED_TRANSFERRING == currentState && CARRIER_STATE::INSTALLED_WAIT_OUT == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierWaitOut: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierWaitOut(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::INSTALLED_WAIT_OUT == currentState && CARRIER_STATE::NONE == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierRemoved: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierRemoved(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::INSTALLED_TRANSFERRING == currentState && CARRIER_STATE::INSTALLED_STORED_ALTERNATE == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierStoredAlt: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierStoredAlt(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::INSTALLED_STORED_ALTERNATE == currentState && CARRIER_STATE::INSTALLED_TRANSFERRING == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierResumed: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierResumed(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::NONE == currentState && CARRIER_STATE::INSTALLED_STORED_COMPLETED == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierInstallCompleted: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierInstallCompleted(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (isCarrierStateInstalled(currentState) && CARRIER_STATE::NONE == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierRemoveCompleted: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierRemoveCompleted(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::INSTALLED_STORED_ALTERNATE == currentState && CARRIER_STATE::INSTALLED_STORED_COMPLETED == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierStored: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierStored(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::NONE == currentState && CARRIER_STATE::INSTALLED_WAIT_OUT == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierWaitOut: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierWaitOut(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::NONE == currentState && CARRIER_STATE::INSTALLED_TRANSFERRING == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierTransferring: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierTransferring(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (CARRIER_STATE::INSTALLED_TRANSFERRING == currentState && CARRIER_STATE::NONE == newState) {
+        itr->second->setCarrierState(newState);
+        _lock->unlock();
+        B1LOG("onActionCarrierRemoved: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionCarrierRemoved(id, currentState, newState);
+        }
+        return true;
+    }
+
+    _lock->unlock();
+    if (_listener) {
+        _listener->onActionCarrierETC(id, currentState, newState);
+    }
+    return false;
 }
 
-bool B1AMHSCarrierTransferStateRepository::setState(int32 id, TRANSFER_COMMAND_STATE newState, TRANSFER_COMMAND_STATE* prevState)
+bool B1AMHSCarrierTransferStateRepository::setTransferCommandState(int64 id, TRANSFER_COMMAND_STATE newState)
 {
-    B1AutoLock al(*_lock);
+    _lock->lock();
     auto itr = _data.find(id);
     if (itr == _data.end()) {
+        assert(false);
+        _lock->unlock();
         return false;
     }
     if (itr->second->transferCommandState() == newState) {
-        return false;
+        _lock->unlock();
+        return true;
     }
-    *prevState = itr->second->transferCommandState();
-    itr->second->setTransferCommandState(newState);
-    return true;
+
+    const auto currentState = itr->second->transferCommandState();
+    if (TRANSFER_COMMAND_STATE::NONE == currentState && TRANSFER_COMMAND_STATE::NOT_ACTIVE_QUEUED == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferQueued: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferQueued(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (TRANSFER_COMMAND_STATE::NOT_ACTIVE_QUEUED == currentState && TRANSFER_COMMAND_STATE::NOT_ACTIVE_WAITING == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferInitiated: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferInitiated(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (TRANSFER_COMMAND_STATE::NOT_ACTIVE_WAITING == currentState && TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferring: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferring(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (isTransferStateNotActive(currentState) && TRANSFER_COMMAND_STATE::CANCELING == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferCancelInitiated: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferCancelInitiated(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (TRANSFER_COMMAND_STATE::CANCELING == currentState && isTransferStateNotActive(newState)) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferCancelFailed: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferCancelFailed(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (TRANSFER_COMMAND_STATE::CANCELING == currentState && TRANSFER_COMMAND_STATE::NONE == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferCancelCompleted: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferCancelCompleted(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == currentState && TRANSFER_COMMAND_STATE::ACTIVE_PAUSED == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferPaused: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferPaused(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (TRANSFER_COMMAND_STATE::ACTIVE_PAUSED == currentState && TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferResumed: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferResumed(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (isTransferStateActive(currentState) && TRANSFER_COMMAND_STATE::ABORTING == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferAbortInitiated: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferAbortInitiated(id, currentState, newState);
+        }
+        return true;
+    }
+
+    else if (TRANSFER_COMMAND_STATE::ABORTING == currentState && TRANSFER_COMMAND_STATE::NONE == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferAbortCompleted: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferAbortCompleted(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (isTransferStateActive(currentState) && TRANSFER_COMMAND_STATE::NONE == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferCompleted: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferCompleted(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (TRANSFER_COMMAND_STATE::ABORTING == currentState && isTransferStateActive(newState)) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferAbortFailed: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferAbortFailed(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (TRANSFER_COMMAND_STATE::CANCELING == currentState && TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferring: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferring(id, currentState, newState);
+        }
+        return true;
+    }
+    else if (TRANSFER_COMMAND_STATE::NOT_ACTIVE_QUEUED == currentState && TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == newState) {
+        itr->second->setTransferCommandState(newState);
+        _lock->unlock();
+        B1LOG("onActionTransferring: id[%lld], state[%d]->[%d]", id, currentState, newState);
+        if (_listener) {
+            _listener->onActionTransferring(id, currentState, newState);
+        }
+        return true;
+    }
+
+    _lock->unlock();
+    if (_listener) {
+        _listener->onActionTransferETC(id, currentState, newState);
+    }
+    return false;
 }
 
 bool B1AMHSCarrierTransferStateRepository::isCarrierStateInstalled(CARRIER_STATE state) const
@@ -82,18 +351,7 @@ bool B1AMHSCarrierTransferStateRepository::isTransferStateActive(TRANSFER_COMMAN
            TRANSFER_COMMAND_STATE::ACTIVE_PAUSED == state;
 }
 
-bool B1AMHSCarrierTransferStateRepository::initialize()
-{
-    return implInitialize();
-}
-
-void B1AMHSCarrierTransferStateRepository::finalize()
-{
-    implFinalize();
-    _data.clear();
-}
-
-bool B1AMHSCarrierTransferStateRepository::addData(int32 id, std::shared_ptr<B1AMHSCarrierTransferState> data)
+bool B1AMHSCarrierTransferStateRepository::addData(int64 id, std::shared_ptr<B1AMHSCarrierTransferState> data)
 {
     B1AutoLock al(*_lock);
     if (_data.find(id) != _data.end()) {
@@ -103,191 +361,94 @@ bool B1AMHSCarrierTransferStateRepository::addData(int32 id, std::shared_ptr<B1A
     return true;
 }
 
-void B1AMHSCarrierTransferStateRepository::removeData(int32 id)
+void B1AMHSCarrierTransferStateRepository::removeData(int64 id)
 {
     B1AutoLock al(*_lock);
     _data.erase(id);
 }
 
-void B1AMHSCarrierTransferStateRepository::setCarrierState(int32 id, CARRIER_STATE newState)
+bool B1AMHSCarrierTransferStateRepository::initialize(std::map<int64, std::shared_ptr<B1AMHSCarrierTransferState> >&& data, B1AMHSCarrierTransferStateRepositoryListener* listener)
 {
-    CARRIER_STATE prevState;
-    if (setState(id, newState, &prevState) != true) {
-        return;
-    }
-    if (CARRIER_STATE::NONE == prevState && CARRIER_STATE::INSTALLED_WAIT_IN == newState) {
-        if (_listener) {
-            _listener->onActionCarrierWaitIn(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::INSTALLED_WAIT_IN == prevState && CARRIER_STATE::INSTALLED_TRANSFERRING == newState) {
-        if (_listener) {
-            _listener->onActionCarrierTransferring(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::INSTALLED_TRANSFERRING == prevState && CARRIER_STATE::INSTALLED_STORED_COMPLETED == newState) {
-        if (_listener) {
-            _listener->onActionCarrierStored(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::INSTALLED_STORED_COMPLETED == prevState && CARRIER_STATE::INSTALLED_TRANSFERRING == newState) {
-        if (_listener) {
-            _listener->onActionCarrierTransferring(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::INSTALLED_TRANSFERRING == prevState && CARRIER_STATE::INSTALLED_WAIT_OUT == newState) {
-        if (_listener) {
-            _listener->onActionCarrierWaitOut(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::INSTALLED_WAIT_OUT == prevState && CARRIER_STATE::NONE == newState) {
-        if (_listener) {
-            _listener->onActionCarrierRemoved(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::INSTALLED_TRANSFERRING == prevState && CARRIER_STATE::INSTALLED_STORED_ALTERNATE == newState) {
-        if (_listener) {
-            _listener->onActionCarrierStoredAlt(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::INSTALLED_STORED_ALTERNATE == prevState && CARRIER_STATE::INSTALLED_TRANSFERRING == newState) {
-        if (_listener) {
-            _listener->onActionCarrierResumed(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::NONE == prevState && CARRIER_STATE::INSTALLED_STORED_COMPLETED == newState) {
-        if (_listener) {
-            _listener->onActionCarrierInstallCompleted(id, prevState, newState);
-        }
-    }
-    else if (isCarrierStateInstalled(prevState) && CARRIER_STATE::NONE == newState) {
-        if (_listener) {
-            _listener->onActionCarrierRemoveCompleted(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::INSTALLED_STORED_ALTERNATE == prevState && CARRIER_STATE::INSTALLED_STORED_COMPLETED == newState) {
-        if (_listener) {
-            _listener->onActionCarrierStored(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::NONE == prevState && CARRIER_STATE::INSTALLED_WAIT_OUT == newState) {
-        if (_listener) {
-            _listener->onActionCarrierWaitOut(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::NONE == prevState && CARRIER_STATE::INSTALLED_TRANSFERRING == newState) {
-        if (_listener) {
-            _listener->onActionCarrierTransferring(id, prevState, newState);
-        }
-    }
-    else if (CARRIER_STATE::INSTALLED_TRANSFERRING == prevState && CARRIER_STATE::NONE == newState) {
-        if (_listener) {
-            _listener->onActionCarrierRemoved(id, prevState, newState);
-        }
-    }
-    else {
-        if (_listener) {
-            _listener->onActionCarrierETC(id, prevState, newState);
-        }
-    }
+    _data.swap(data);
+    _listener = listener;
+    return implInitialize();
 }
 
-void B1AMHSCarrierTransferStateRepository::setTransferCommandState(int32 id, TRANSFER_COMMAND_STATE newState, void* param)
+void B1AMHSCarrierTransferStateRepository::finalize()
 {
-    TRANSFER_COMMAND_STATE prevState;
-    if (setState(id, newState, &prevState) != true) {
-        return;
-    }
-    if (TRANSFER_COMMAND_STATE::NOT_ACTIVE_QUEUED == prevState && TRANSFER_COMMAND_STATE::NOT_ACTIVE_WAITING == newState) {
-        if (_listener) {
-            _listener->onActionTransferInitiated(id, prevState, newState);
-        }
-    }
-    else if (TRANSFER_COMMAND_STATE::NOT_ACTIVE_WAITING == prevState && TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == newState) {
-        if (_listener) {
-            _listener->onActionTransferring(id, prevState, newState);
-        }
-    }
-    else if (TRANSFER_COMMAND_STATE::CANCELING == newState) {
-        if (isTransferStateNotActive(prevState)) {
-            if (_listener) {
-                _listener->onActionTransferCancelInitiated(id, prevState, newState);
-            }
-            setTransferCommandState(id, TRANSFER_COMMAND_STATE::NONE, param);
-        }
-        else {
-            if (_listener) {
-                _listener->onActionTransferCancelFailed(id, prevState, newState);
-            }
-            setTransferCommandState(id, prevState, param);
-        }
-    }
-    else if (TRANSFER_COMMAND_STATE::CANCELING == prevState && TRANSFER_COMMAND_STATE::NONE == newState) {
-        if (_listener) {
-            _listener->onActionTransferCancelCompleted(id, prevState, newState);
-        }
-    }
-    else if (TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == prevState && TRANSFER_COMMAND_STATE::ACTIVE_PAUSED == newState) {
-        if (_listener) {
-            _listener->onActionTransferPaused(id, prevState, newState);
-        }
-    }
-    else if (TRANSFER_COMMAND_STATE::ACTIVE_PAUSED == prevState && TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == newState) {
-        if (_listener) {
-            _listener->onActionTransferResumed(id, prevState, newState);
-        }
-    }
-    else if (TRANSFER_COMMAND_STATE::ABORTING == newState) {
-        if (isTransferStateActive(prevState)) {
-            if (_listener) {
-                _listener->onActionTransferAbortInitiated(id, prevState, newState);
-            }
-            setTransferCommandState(id, TRANSFER_COMMAND_STATE::NONE, param);
-        }
-        else {
-            if (_listener) {
-                _listener->onActionTransferAbortFailed(id, prevState, newState);
-            }
-            setTransferCommandState(id, prevState, param);
-        }
-    }
-    else if (TRANSFER_COMMAND_STATE::ABORTING == prevState && TRANSFER_COMMAND_STATE::NONE == newState) {
-        if (_listener) {
-            _listener->onActionTransferAbortCompleted(id, prevState, newState);
-        }
-    }
-    else if (isTransferStateActive(prevState) && TRANSFER_COMMAND_STATE::NONE == newState) {
-        if (_listener) {
-            _listener->onActionTransferCompleted(id, prevState, newState, param);
-        }
-    }
-    else if (TRANSFER_COMMAND_STATE::CANCELING == prevState && TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == newState) {
-        if (_listener) {
-            _listener->onActionTransferring(id, prevState, newState);
-        }
-    }
-    else if (TRANSFER_COMMAND_STATE::NOT_ACTIVE_QUEUED == prevState && TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING == newState) {
-        if (_listener) {
-            _listener->onActionTransferring(id, prevState, newState);
-        }
-    }
-    else {
-        if (_listener) {
-            _listener->onActionTransferETC(id, prevState, newState);
-        }
-    }
+    implFinalize();
+    _data.clear();
+    _listener = NULL;
 }
 
-CARRIER_STATE B1AMHSCarrierTransferStateRepository::carrierState(int32 id) const
+bool B1AMHSCarrierTransferStateRepository::setCarrierStateWaitIn(int64 id)
+{
+    return setCarrierState(id, CARRIER_STATE::INSTALLED_WAIT_IN);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setCarrierStateTransferring(int64 id)
+{
+    return setCarrierState(id, CARRIER_STATE::INSTALLED_TRANSFERRING);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setCarrierStateCompleted(int64 id)
+{
+    return setCarrierState(id, CARRIER_STATE::INSTALLED_STORED_COMPLETED);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setCarrierStateWaitOut(int64 id)
+{
+    return setCarrierState(id, CARRIER_STATE::INSTALLED_WAIT_OUT);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setCarrierStateNone(int64 id)
+{
+    return setCarrierState(id, CARRIER_STATE::NONE);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setCarrierStateAlternate(int64 id)
+{
+    return setCarrierState(id, CARRIER_STATE::INSTALLED_STORED_ALTERNATE);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setTransferCommandStateQueued(int64 id)
+{
+    return setTransferCommandState(id, TRANSFER_COMMAND_STATE::NOT_ACTIVE_QUEUED);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setTransferCommandStateWaiting(int64 id)
+{
+    return setTransferCommandState(id, TRANSFER_COMMAND_STATE::NOT_ACTIVE_WAITING);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setTransferCommandStateTransferring(int64 id)
+{
+    return setTransferCommandState(id, TRANSFER_COMMAND_STATE::ACTIVE_TRANSFERRING);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setTransferCommandStateCanceling(int64 id)
+{
+    return setTransferCommandState(id, TRANSFER_COMMAND_STATE::CANCELING);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setTransferCommandStateNone(int64 id)
+{
+    return setTransferCommandState(id, TRANSFER_COMMAND_STATE::NONE);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setTransferCommandStatePaused(int64 id)
+{
+    return setTransferCommandState(id, TRANSFER_COMMAND_STATE::ACTIVE_PAUSED);
+}
+
+bool B1AMHSCarrierTransferStateRepository::setTransferCommandStateAborting(int64 id)
+{
+    return setTransferCommandState(id, TRANSFER_COMMAND_STATE::ABORTING);
+}
+
+auto B1AMHSCarrierTransferStateRepository::findCarrierTransferState(int64 id) const -> std::shared_ptr<B1AMHSCarrierTransferState>
 {
     B1AutoLock al(*_lock);
     auto itr = _data.find(id);
-    return itr != _data.end() ? itr->second->carrierState() : CARRIER_STATE::NONE;
-}
-
-TRANSFER_COMMAND_STATE B1AMHSCarrierTransferStateRepository::transferState(int32 id) const
-{
-    B1AutoLock al(*_lock);
-    auto itr = _data.find(id);
-    return itr != _data.end() ? itr->second->transferCommandState() : TRANSFER_COMMAND_STATE::NONE;
+    return itr != _data.end() ? itr->second : std::shared_ptr<B1AMHSCarrierTransferState>();
 }

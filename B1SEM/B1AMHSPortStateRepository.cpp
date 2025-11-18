@@ -45,19 +45,6 @@ bool B1AMHSPortStateRepository::setState(int32 id, PORT_STATE newState, PORT_STA
     return true;
 }
 
-bool B1AMHSPortStateRepository::initialize(const std::map<int32, B1AMHSSEM::PORT_STATE>& states, B1AMHSPortStateRepositoryListener* listener)
-{
-    _listener = listener;
-    _states = states;
-    return true;
-}
-
-void B1AMHSPortStateRepository::finalize()
-{
-    _listener = NULL;
-    _states.clear();
-}
-
 void B1AMHSPortStateRepository::setPortState(int32 id, PORT_STATE newState)
 {
     PORT_STATE prevState;
@@ -74,6 +61,34 @@ void B1AMHSPortStateRepository::setPortState(int32 id, PORT_STATE newState)
             _listener->onActionPortOutOfService(id, prevState, newState);
         }
     }
+}
+
+bool B1AMHSPortStateRepository::initialize(std::map<int32, B1AMHSSEM::PORT_STATE>&& states, B1AMHSPortStateRepositoryListener* listener)
+{
+    _listener = listener;
+    _states.swap(states);
+    return true;
+}
+
+void B1AMHSPortStateRepository::finalize()
+{
+    _listener = NULL;
+    _states.clear();
+}
+
+void B1AMHSPortStateRepository::setPortStateInService(int32 id)
+{
+    setPortState(id, PORT_STATE::IN_SERVICE);
+}
+
+void B1AMHSPortStateRepository::setPortStateOutOfService(int32 id)
+{
+    setPortState(id, PORT_STATE::OUT_OF_SERVICE);
+}
+
+bool B1AMHSPortStateRepository::isPortStateInService(int32 id) const
+{
+    return portState(id) == PORT_STATE::IN_SERVICE;
 }
 
 PORT_STATE B1AMHSPortStateRepository::portState(int32 id) const

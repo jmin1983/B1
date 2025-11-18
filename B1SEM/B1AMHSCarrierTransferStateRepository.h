@@ -28,7 +28,7 @@ namespace BnD {
     class B1RecursiveLock;
     class B1AMHSCarrierTransferStateRepository {
     public:
-        B1AMHSCarrierTransferStateRepository(B1AMHSCarrierTransferStateRepositoryListener* listener);
+        B1AMHSCarrierTransferStateRepository();
         virtual ~B1AMHSCarrierTransferStateRepository();
     protected:
         B1AMHSCarrierTransferStateRepositoryListener* _listener;
@@ -37,21 +37,31 @@ namespace BnD {
     protected:
         virtual bool implInitialize() { return true; }
         virtual void implFinalize() {}
-    private:
-        bool setState(int32 id, B1AMHSSEM::CARRIER_STATE newState, B1AMHSSEM::CARRIER_STATE* prevState);
-        bool setState(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE newState, B1AMHSSEM::TRANSFER_COMMAND_STATE* prevState);
+    protected:
+        bool setCarrierState(int64 id, B1AMHSSEM::CARRIER_STATE newState);
+        bool setTransferCommandState(int64 id, B1AMHSSEM::TRANSFER_COMMAND_STATE newState);
         bool isCarrierStateInstalled(B1AMHSSEM::CARRIER_STATE state) const;
         bool isTransferStateNotActive(B1AMHSSEM::TRANSFER_COMMAND_STATE state) const;
         bool isTransferStateActive(B1AMHSSEM::TRANSFER_COMMAND_STATE state) const;
+        bool addData(int64 id, std::shared_ptr<B1AMHSCarrierTransferState> data);
+        void removeData(int64 id);
     public:
-        bool initialize();
+        bool initialize(std::map<int64, std::shared_ptr<B1AMHSCarrierTransferState> >&& data, B1AMHSCarrierTransferStateRepositoryListener* listener);
         void finalize();
-        bool addData(int32 id, std::shared_ptr<B1AMHSCarrierTransferState> data);
-        void removeData(int32 id);
-        void setCarrierState(int32 id, B1AMHSSEM::CARRIER_STATE newState);
-        void setTransferCommandState(int32 id, B1AMHSSEM::TRANSFER_COMMAND_STATE newState, void* param = NULL);
-        B1AMHSSEM::CARRIER_STATE carrierState(int32 id) const;
-        B1AMHSSEM::TRANSFER_COMMAND_STATE transferState(int32 id) const;
+        bool setCarrierStateWaitIn(int64 id);
+        bool setCarrierStateTransferring(int64 id);
+        bool setCarrierStateCompleted(int64 id);
+        bool setCarrierStateWaitOut(int64 id);
+        bool setCarrierStateNone(int64 id);
+        bool setCarrierStateAlternate(int64 id);
+        bool setTransferCommandStateQueued(int64 id);
+        bool setTransferCommandStateWaiting(int64 id);
+        bool setTransferCommandStateTransferring(int64 id);
+        bool setTransferCommandStateCanceling(int64 id);
+        bool setTransferCommandStateNone(int64 id);
+        bool setTransferCommandStatePaused(int64 id);
+        bool setTransferCommandStateAborting(int64 id);
+        std::shared_ptr<B1AMHSCarrierTransferState> findCarrierTransferState(int64 id) const;
     };
 }   //  !BnD
 

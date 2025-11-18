@@ -43,16 +43,14 @@ namespace BnD {
         std::shared_ptr<B1Lock> _lock;
         std::map<int32, States> _states;    //  map<vehicle_id, states>
     protected:
-        bool setState(int32 id, B1AMHSSEM::VEHICLE_ACT_STATE newState, B1AMHSSEM::VEHICLE_ACT_STATE* prevState);
-        bool setState(int32 id, B1AMHSSEM::VEHICLE_AVAIL_STATE newState, B1AMHSSEM::VEHICLE_AVAIL_STATE* prevState);
+        bool setVehicleActivityState(int32 id, B1AMHSSEM::VEHICLE_ACT_STATE newState);
+        void setVehicleAvailState(int32 id, B1AMHSSEM::VEHICLE_AVAIL_STATE newState);
         bool isStateAssigned(B1AMHSSEM::VEHICLE_ACT_STATE state) const;
         bool isStateInstalled(B1AMHSSEM::VEHICLE_ACT_STATE state) const;
     public:
         bool initialize(const std::map<int32, std::pair<B1AMHSSEM::VEHICLE_ACT_STATE, B1AMHSSEM::VEHICLE_AVAIL_STATE> >& states,
                         B1AMHSVehicleStateRepositoryListener* listener);
         void finalize();
-        void setVehicleActivityState(int32 id, B1AMHSSEM::VEHICLE_ACT_STATE newState);
-        void setVehicleAvailState(int32 id, B1AMHSSEM::VEHICLE_AVAIL_STATE newState);
         B1AMHSSEM::VEHICLE_ACT_STATE vehicleActivityState(int32 id) const;
         B1AMHSSEM::VEHICLE_AVAIL_STATE vehicleAvailState(int32 id) const;
     };
