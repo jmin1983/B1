@@ -17,13 +17,13 @@
 
 using namespace BnD;
 
-bool B1SECS2ClientSession::sendMessageS6F12(uint16 sessionID, const B1SECS2DataACKC6& ackc6)
+bool B1SECS2ClientSession::sendMessageS6F12(const B1SECS2DataACKC6& ackc6)
 {
     B1SECS2MessageS6F12Writable message(ackc6);
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(sessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -33,7 +33,7 @@ bool B1SECS2ClientSession::sendMessageS6F15(const B1SECS2DataCEID& ceID)
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -43,6 +43,6 @@ bool B1SECS2ClientSession::sendMessageS6F19(const B1SECS2DataRPTID& rptID)
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }

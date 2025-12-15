@@ -15,15 +15,15 @@
 using namespace BnD;
 using namespace B1GEMConsts;
 
-B1GEMClientSession::B1GEMClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, uint16 secs2SessionID)
-    : B1SECS2ClientSession(clientSocket, listener, secs2SessionID)
+B1GEMClientSession::B1GEMClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener)
+    : B1SECS2ClientSession(clientSocket, listener)
     , _controlState(CONTROL_STATE_OFFLINE_UNKNOWN)
 {
 }
 
-void B1GEMClientSession::onRecvMessageS1F1(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes)
+void B1GEMClientSession::onRecvMessageS1F1(bool wait, const std::vector<uint8>& systemBytes)
 {
-    sendMessageS1F2(sessionID, systemBytes);
+    sendMessageS1F2(systemBytes);
 }
 
 void B1GEMClientSession::setControlState(CONTROL_STATE controlState)

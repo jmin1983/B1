@@ -14,8 +14,8 @@
 
 using namespace BnD;
 
-void B1SECS2ClientSession::onRecvMessageS1F1(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes)
+void B1SECS2ClientSession::onRecvMessageS1F1(bool wait, const std::vector<uint8>& systemBytes)
 {
     assert(false);
-    sendMessageS1F0(sessionID, systemBytes);
+    sendMessageS1F0(systemBytes);
 }

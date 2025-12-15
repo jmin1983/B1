@@ -43,7 +43,7 @@ void B1SECS2Client::finalize()
 bool B1SECS2Client::connect(const B1String& address, uint16 port, uint16 deviceID)
 {
     B1LOG("connecting: address[%s], port[%u], deviceID[%d]", address.cString(), port, deviceID);
-    if (NULL == B1BaseClient::connect(address.copy(), port, &deviceID, deviceID)) {
+    if (NULL == B1BaseClient::connect(address.copy(), port, NULL, deviceID)) {
         B1LOG("connect failed: address[%s], port[%u], deviceID[%d]", address.cString(), port, deviceID);
         return false;
     }

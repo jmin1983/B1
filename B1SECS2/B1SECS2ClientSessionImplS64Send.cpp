@@ -21,6 +21,6 @@ bool B1SECS2ClientSession::sendMessageS64F1(const B1SECS2DataRCMD& rcmd, const s
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }

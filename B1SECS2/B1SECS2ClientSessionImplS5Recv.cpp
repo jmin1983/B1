@@ -16,19 +16,19 @@
 
 using namespace BnD;
 
-void B1SECS2ClientSession::recvMessageS5F1(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ClientSession::recvMessageS5F1(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     B1SECS2MessageS5F1Readable message(wait, data, dataLength, secs2DataManager());
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS5F1(sessionID, wait, systemBytes, message.alCD(), message.alID(), message.alTX());
+    onRecvMessageS5F1(wait, systemBytes, message.alCD(), message.alID(), message.alTX());
 }
-void B1SECS2ClientSession::recvMessageS5F4(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ClientSession::recvMessageS5F4(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     B1SECS2MessageS5F4Readable message(wait, data, dataLength, secs2DataManager());
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS5F4(sessionID, systemBytes, message.ackc5());
+    onRecvMessageS5F4(systemBytes, message.ackc5());
 }

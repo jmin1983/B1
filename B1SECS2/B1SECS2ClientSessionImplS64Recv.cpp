@@ -15,11 +15,11 @@
 
 using namespace BnD;
 
-void B1SECS2ClientSession::recvMessageS64F2(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ClientSession::recvMessageS64F2(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     B1SECS2MessageS64F2Readable message(wait, data, dataLength, secs2DataManager());
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS64F2(sessionID, systemBytes, message.hcAck(), message.cps());
+    onRecvMessageS64F2(systemBytes, message.hcAck(), message.cps());
 }

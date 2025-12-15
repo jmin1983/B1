@@ -22,11 +22,11 @@
 namespace BnD {
     class B1GEMClientSession : public B1SECS2ClientSession {
     public:
-        B1GEMClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, uint16 secs2SessionID);
+        B1GEMClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener);
     protected:
         B1GEMConsts::CONTROL_STATE _controlState;
     protected:
-        virtual void onRecvMessageS1F1(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes) override;
+        virtual void onRecvMessageS1F1(bool wait, const std::vector<uint8>& systemBytes) override;
     protected:
         void setControlState(B1GEMConsts::CONTROL_STATE controlState);
     public:

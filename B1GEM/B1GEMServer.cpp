@@ -56,7 +56,7 @@ void B1GEMServer::onServerSessionDisconnected(B1ServerSocket* serverSocket, int3
 
 bool B1GEMServer::implInitialize(int32 port)
 {
-    if (B1SECS2Server::implInitialize(port) != true) {    //  B1SECS2DataManager 생성 시점 때문에 먼저 B1SECS2Server::implInitialize() 한다.
+    if (B1SECS2Server::implInitialize(port) != true) {    //  B1SECS2Server::implInitialize() before B1SECS2DataManager construction.
         return false;
     }
     _dataRepository.reset(createDataRepository());

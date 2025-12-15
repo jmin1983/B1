@@ -19,10 +19,9 @@
 using namespace BnD;
 using namespace B1SECS2Consts;
 
-B1SECS2ClientSession::B1SECS2ClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, uint16 secs2SessionID)
+B1SECS2ClientSession::B1SECS2ClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener)
     : B1ArrayBufferClientSession(clientSocket, listener)
     , _initialSystemByte(0)
-    , _secs2SessionID(secs2SessionID)
     , _secs2DataManager()
     , _lastMessage()
     , _t7Checker()
@@ -55,14 +54,16 @@ void B1SECS2ClientSession::recvHSMSMessage(const std::vector<uint8>& data)
     else {
         std::vector<uint8> messageHeader(headerSize, 0);
         memcpy(&messageHeader[0], &data[0], headerSize);
-        if (sessionID != _secs2SessionID) {
-            B1LOG("Unknown Device ID: expected[%u], real[%u]", _secs2SessionID, sessionID);
+        if (sessionID != deviceID()) {
+            B1LOG("Unknown Device ID: expected[%u], real[%u]", deviceID(), sessionID);
         }
         else {
-            if (data.size() > headerSize)
-                recvHSMSData(sessionID, stream, function, wait, systemBytes, &data[headerSize], static_cast<uint32>(data.size() - headerSize), messageHeader);
-            else
-                recvHSMSData(sessionID, stream, function, wait, systemBytes, NULL, 0, messageHeader);
+            if (data.size() > headerSize) {
+                recvHSMSData(stream, function, wait, systemBytes, &data[headerSize], static_cast<uint32>(data.size() - headerSize), messageHeader);
+            }
+            else {
+                recvHSMSData(stream, function, wait, systemBytes, NULL, 0, messageHeader);
+            }
         }
     }
 }
@@ -70,8 +71,8 @@ void B1SECS2ClientSession::recvHSMSMessage(const std::vector<uint8>& data)
 void B1SECS2ClientSession::recvHSMSControl(uint16 sessionID, const std::vector<uint8>& systemBytes, CONTROL_MESSAGE controlMessage)
 {
     B1LOG("recvHSMSControl: controlMessage[%d]", controlMessage);
-    if (_secs2SessionID != sessionID) {
-        B1LOG("invalid sessionID received -> disconnect: _secs2SessionID[%d], recved_sessionID[%d]", _secs2SessionID, sessionID);
+    if (deviceID() != sessionID) {
+        B1LOG("invalid sessionID received -> disconnect: deviceID[%d], recved_sessionID[%d]", deviceID(), sessionID);
         disconnect();
         return;
     }
@@ -90,7 +91,7 @@ void B1SECS2ClientSession::recvHSMSControl(uint16 sessionID, const std::vector<u
             _aliveChecker.reset();
             break;
         case CONTROL_MESSAGE_SEPERATE_REQ:
-            B1LOG("recv CONTROL_MESSAGE_SEPERATE_REQ -> disconnect: _secs2SessionID:[%d]", _secs2SessionID);
+            B1LOG("recv CONTROL_MESSAGE_SEPERATE_REQ -> disconnect: deviceID:[%d]", deviceID());
             disconnect();
             break;
         default:
@@ -98,37 +99,37 @@ void B1SECS2ClientSession::recvHSMSControl(uint16 sessionID, const std::vector<u
     }
 }
 
-void B1SECS2ClientSession::recvHSMSData(uint16 sessionID, uint8 stream, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength, const std::vector<uint8>& messageHeader)
+void B1SECS2ClientSession::recvHSMSData(uint8 stream, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength, const std::vector<uint8>& messageHeader)
 {
     B1LOG("recvHSMSData: S[%u]F[%u]", stream, function);
     if (onRecvHSMSData(stream, function) != true) {
         B1LOG("can not proceed: S[%u]F[%u] -> sendMessageF0", stream, function);
-        sendMessageF0(stream, sessionID, systemBytes);
+        sendMessageF0(stream, systemBytes);
         return;
     }
     switch (stream) {
         case 1:
-            if (recvHSMSDataStream1(sessionID, function, wait, systemBytes, data, dataLength) != true) {
+            if (recvHSMSDataStream1(function, wait, systemBytes, data, dataLength) != true) {
                 B1LOG("recvHSMSDataStream1 failed: S[%u]F[%u]", stream, function);
             }
             break;
         case 2:
-            if (recvHSMSDataStream2(sessionID, function, wait, systemBytes, data, dataLength) != true) {
+            if (recvHSMSDataStream2(function, wait, systemBytes, data, dataLength) != true) {
                 B1LOG("recvHSMSDataStream2 failed: S[%u]F[%u]", stream, function);
             }
             break;
         case 5:
-            if (recvHSMSDataStream5(sessionID, function, wait, systemBytes, data, dataLength) != true) {
+            if (recvHSMSDataStream5(function, wait, systemBytes, data, dataLength) != true) {
                 B1LOG("recvHSMSDataStream5 failed: S[%u]F[%u]", stream, function);
             }
             break;
         case 6:
-            if (recvHSMSDataStream6(sessionID, function, wait, systemBytes, data, dataLength) != true) {
+            if (recvHSMSDataStream6(function, wait, systemBytes, data, dataLength) != true) {
                 B1LOG("recvHSMSDataStream6 failed: S[%u]F[%u]", stream, function);
             }
             break;
         case 64:
-            if (recvHSMSDataStream64(sessionID, function, wait, systemBytes, data, dataLength) != true) {
+            if (recvHSMSDataStream64(function, wait, systemBytes, data, dataLength) != true) {
                 B1LOG("recvHSMSDataStream64 failed: S[%u]F[%u]", stream, function);
             }
             break;
@@ -138,29 +139,29 @@ void B1SECS2ClientSession::recvHSMSData(uint16 sessionID, uint8 stream, uint8 fu
     }
 }
 
-bool B1SECS2ClientSession::recvHSMSDataStream1(uint16 sessionID, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+bool B1SECS2ClientSession::recvHSMSDataStream1(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     switch (function) {
         case 0:
-            recvMessageS1F0(sessionID, systemBytes);
+            recvMessageS1F0(systemBytes);
             break;
         case 1:
-            recvMessageS1F1(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS1F1(wait, systemBytes, data, dataLength);
             break;
         case 2:
-            recvMessageS1F2(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS1F2(wait, systemBytes, data, dataLength);
             break;
         case 4:
-            recvMessageS1F4(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS1F4(wait, systemBytes, data, dataLength);
             break;
         case 14:
-            recvMessageS1F14(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS1F14(wait, systemBytes, data, dataLength);
             break;
         case 16:
-            recvMessageS1F16(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS1F16(wait, systemBytes, data, dataLength);
             break;
         case 18:
-            recvMessageS1F18(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS1F18(wait, systemBytes, data, dataLength);
             break;
         default:
             B1LOG("not implemented yet: stream[1], function[%d]", function);
@@ -170,29 +171,29 @@ bool B1SECS2ClientSession::recvHSMSDataStream1(uint16 sessionID, uint8 function,
     return true;
 }
 
-bool B1SECS2ClientSession::recvHSMSDataStream2(uint16 sessionID, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+bool B1SECS2ClientSession::recvHSMSDataStream2(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     switch (function) {
         case 0:
-            recvMessageS2F0(sessionID, systemBytes);
+            recvMessageS2F0(systemBytes);
             break;
         case 32:
-            recvMessageS2F32(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS2F32(wait, systemBytes, data, dataLength);
             break;
         case 34:
-            recvMessageS2F34(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS2F34(wait, systemBytes, data, dataLength);
             break;
         case 36:
-            recvMessageS2F36(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS2F36(wait, systemBytes, data, dataLength);
             break;
         case 38:
-            recvMessageS2F38(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS2F38(wait, systemBytes, data, dataLength);
             break;
         case 42:
-            recvMessageS2F42(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS2F42(wait, systemBytes, data, dataLength);
             break;
         case 50:
-            recvMessageS2F50(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS2F50(wait, systemBytes, data, dataLength);
             break;
         default:
             B1LOG("not implemented yet: stream[2], function[%d]", function);
@@ -202,14 +203,14 @@ bool B1SECS2ClientSession::recvHSMSDataStream2(uint16 sessionID, uint8 function,
     return true;
 }
 
-bool B1SECS2ClientSession::recvHSMSDataStream5(uint16 sessionID, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+bool B1SECS2ClientSession::recvHSMSDataStream5(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     switch (function) {
         case 1:
-            recvMessageS5F1(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS5F1(wait, systemBytes, data, dataLength);
             break;
         case 4:
-            recvMessageS5F4(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS5F4(wait, systemBytes, data, dataLength);
             break;
         default:
             B1LOG("not implemented yet: stream[64], function[%d]", function);
@@ -218,11 +219,11 @@ bool B1SECS2ClientSession::recvHSMSDataStream5(uint16 sessionID, uint8 function,
     return true;
 }
 
-bool B1SECS2ClientSession::recvHSMSDataStream6(uint16 sessionID, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+bool B1SECS2ClientSession::recvHSMSDataStream6(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     switch (function) {
         case 11:
-            recvMessageS6F11(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS6F11(wait, systemBytes, data, dataLength);
             break;
         default:
             B1LOG("not implemented yet: stream[6], function[%d]", function);
@@ -232,11 +233,11 @@ bool B1SECS2ClientSession::recvHSMSDataStream6(uint16 sessionID, uint8 function,
     return true;
 }
 
-bool B1SECS2ClientSession::recvHSMSDataStream64(uint16 sessionID, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+bool B1SECS2ClientSession::recvHSMSDataStream64(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     switch (function) {
         case 2:
-            recvMessageS64F2(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS64F2(wait, systemBytes, data, dataLength);
             break;
         default:
             B1LOG("not implemented yet: stream[64], function[%d]", function);
@@ -245,105 +246,15 @@ bool B1SECS2ClientSession::recvHSMSDataStream64(uint16 sessionID, uint8 function
     return true;
 }
 
-void B1SECS2ClientSession::makeMessageHeader(uint16 sessionID, uint8 stream, uint8 function, bool wait, uint8 stype, const std::vector<uint8>& systemBytes, std::vector<uint8>* result)
+void B1SECS2ClientSession::makeMessageHeader(uint8 stream, uint8 function, bool wait, uint8 stype, const std::vector<uint8>& systemBytes, std::vector<uint8>* result)
 {
-    sessionID = TO_UINT16_FOR_NETWORK(sessionID);   //  15bit integer
+    uint16 sessionID = TO_UINT16_FOR_NETWORK(deviceID());   //  15bit integer
     result->insert(result->end(), (uint8*)&sessionID, (uint8*)&sessionID + sizeof(sessionID));
     result->push_back((wait ? 0x01 << 7 : 0) | stream);
     result->push_back(function);
     result->push_back(0);   //  ptype
     result->push_back(stype);
     result->insert(result->end(), systemBytes.begin(), systemBytes.end());
-}
-
-std::vector<uint8> B1SECS2ClientSession::makeNewSystemBytes()
-{
-    ++_initialSystemByte;
-    size_t size = sizeof(_initialSystemByte);
-    return std::vector<uint8>((uint8*)&_initialSystemByte, (uint8*)&_initialSystemByte + size);
-}
-
-bool B1SECS2ClientSession::toUint32FromSystemBytes(const std::vector<uint8>& systemBytes, int32* result) const
-{
-    const size_t systemByteSize = 4;
-    if (systemBytes.size() != systemByteSize) {
-        return false;
-    }
-    int32 systemByte = 0;
-    memcpy(&systemByte, &systemBytes[0], systemByteSize);
-    systemByte = TO_UINT32_FOR_NETWORK(systemByte);
-    *result = systemByte;
-    return true;
-}
-
-void B1SECS2ClientSession::sendControlMessage(uint16 sessionID, const std::vector<uint8>& systemBytes, CONTROL_MESSAGE controlMessage, bool wait)
-{
-    B1LOG("sendControlMessage: controlMessage[%d]", controlMessage);
-    uint32 messageLenth = 10;
-    std::vector<uint8> message;
-    message.reserve(messageLenth + sizeof(messageLenth));
-    messageLenth = TO_UINT32_FOR_NETWORK(messageLenth);
-    message.insert(message.end(), (uint8*)&messageLenth, (uint8*)&messageLenth + sizeof(messageLenth));
-    makeMessageHeader(sessionID, 0, 0, wait, controlMessage, systemBytes, &message);
-    writeData(message);
-}
-
-void B1SECS2ClientSession::sendDataMessage(uint16 sessionID, const std::vector<uint8>& systemBytes, uint8 stream, uint8 function, bool wait)
-{
-    int32 systemByte = 0;
-    if (toUint32FromSystemBytes(systemBytes, &systemByte)) {
-        B1LOG("sendDataMessage: S[%u]F[%u], systemByte[0x%X]", stream, function, systemByte);
-    }
-    else {
-        B1LOG("sendDataMessage: S[%u]F[%u]", stream, function);
-    }
-
-    uint32 messageLenth = 10;
-    std::vector<uint8> message;
-    message.reserve(messageLenth + sizeof(messageLenth));
-    messageLenth = TO_UINT32_FOR_NETWORK(messageLenth);
-    message.insert(message.end(), (uint8*)&messageLenth, (uint8*)&messageLenth + sizeof(messageLenth));
-    makeMessageHeader(sessionID, stream, function, wait, 0, systemBytes, &message);
-    writeData(message);
-}
-
-void B1SECS2ClientSession::sendDataMessage(uint16 sessionID, const std::vector<uint8>& systemBytes, uint8 stream, uint8 function, const std::vector<std::vector<uint8> >& items, bool wait)
-{
-    int32 systemByte = 0;
-    if (toUint32FromSystemBytes(systemBytes, &systemByte)) {
-        B1LOG("sendDataMessage: S[%u]F[%u], systemByte[0x%X], items[%u]", stream, function, systemByte, static_cast<uint32>(items.size()));
-    }
-    else {
-        B1LOG("sendDataMessage: S[%u]F[%u], items[%u]", stream, function, static_cast<uint32>(items.size()));
-    }
- 
-    uint32 messageLenth = 10;
-    for (const auto& item : items) {
-        messageLenth += static_cast<uint32>(item.size());
-    }
-
-    std::vector<uint8> message;
-    message.reserve(messageLenth + sizeof(messageLenth));
-    messageLenth = TO_UINT32_FOR_NETWORK(messageLenth);
-    message.insert(message.end(), (uint8*)&messageLenth, (uint8*)&messageLenth + sizeof(messageLenth));
-    makeMessageHeader(sessionID, stream, function, wait, 0, systemBytes, &message);
-    for (const auto& item : items) {
-        message.insert(message.end(), item.begin(), item.end());
-    }
-    writeData(message);
-}
-
-void B1SECS2ClientSession::sendDataMessage(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2MessageWritable& message)
-{
-    if (message.items().empty())
-        sendDataMessage(sessionID, systemBytes, message.stream(), message.function(), message.wait());
-    else
-        sendDataMessage(sessionID, systemBytes, message.stream(), message.function(), message.items(), message.wait());
-}
-
-void B1SECS2ClientSession::sendMessageF0(uint8 stream, uint16 sessionID, const std::vector<uint8>& systemBytes)
-{
-    sendDataMessage(sessionID, systemBytes, stream, 0, false);
 }
 
 bool B1SECS2ClientSession::implInitializeSession()
@@ -438,24 +349,116 @@ void B1SECS2ClientSession::onReadComplete(uint8* data, size_t dataSize)
 void B1SECS2ClientSession::implProcessConnected(bool firstConnectedProcess)
 {
     if (_t7Checker.isRunning() && _t7Checker.isTimeover(false)) {
-        B1LOG("SELECT timedout: _secs2SessionID[%d]", _secs2SessionID);
+        B1LOG("SELECT timedout: deviceID[%d]", deviceID());
         disconnect();
         return;
     }
     if (_aliveChecker.isRunning() && _aliveChecker.isTimeover(false)) {
-        B1LOG("NETWORK timedout: _secs2SessionID[%d]", _secs2SessionID);
+        B1LOG("NETWORK timedout: deviceID[%d]", deviceID());
         disconnect();
         return;
     }
     if (firstConnectedProcess) {
-        sendControlMessage(_secs2SessionID, makeNewSystemBytes(), CONTROL_MESSAGE_SELECT_REQ);
+        sendControlMessage(makeNewSystemBytes(), CONTROL_MESSAGE_SELECT_REQ);
     }
     else {
         uint64 now = B1TickUtil::currentTick();
         if (B1TickUtil::diffTick(_lastAliveRequestTick, now) > CONSTS_REQ_ALIVE_INTERVAL) {
             _lastAliveRequestTick = now;
-            sendControlMessage(_secs2SessionID, makeNewSystemBytes(), CONTROL_MESSAGE_LINK_TEST_REQ);
+            sendControlMessage(makeNewSystemBytes(), CONTROL_MESSAGE_LINK_TEST_REQ);
         }
     }
     B1ArrayBufferClientSession::implProcessConnected(firstConnectedProcess);
+}
+
+std::vector<uint8> B1SECS2ClientSession::makeNewSystemBytes()
+{
+    ++_initialSystemByte;
+    size_t size = sizeof(_initialSystemByte);
+    return std::vector<uint8>((uint8*)&_initialSystemByte, (uint8*)&_initialSystemByte + size);
+}
+
+bool B1SECS2ClientSession::toUint32FromSystemBytes(const std::vector<uint8>& systemBytes, int32* result) const
+{
+    const size_t systemByteSize = 4;
+    if (systemBytes.size() != systemByteSize) {
+        return false;
+    }
+    int32 systemByte = 0;
+    memcpy(&systemByte, &systemBytes[0], systemByteSize);
+    systemByte = TO_UINT32_FOR_NETWORK(systemByte);
+    *result = systemByte;
+    return true;
+}
+
+void B1SECS2ClientSession::sendControlMessage(const std::vector<uint8>& systemBytes, CONTROL_MESSAGE controlMessage, bool wait)
+{
+    B1LOG("sendControlMessage: controlMessage[%d]", controlMessage);
+    uint32 messageLenth = 10;
+    std::vector<uint8> message;
+    message.reserve(messageLenth + sizeof(messageLenth));
+    messageLenth = TO_UINT32_FOR_NETWORK(messageLenth);
+    message.insert(message.end(), (uint8*)&messageLenth, (uint8*)&messageLenth + sizeof(messageLenth));
+    makeMessageHeader(0, 0, wait, controlMessage, systemBytes, &message);
+    writeData(message);
+}
+
+void B1SECS2ClientSession::sendDataMessage(const std::vector<uint8>& systemBytes, uint8 stream, uint8 function, bool wait)
+{
+    int32 systemByte = 0;
+    if (toUint32FromSystemBytes(systemBytes, &systemByte)) {
+        B1LOG("sendDataMessage: S[%u]F[%u], systemByte[0x%X]", stream, function, systemByte);
+    }
+    else {
+        B1LOG("sendDataMessage: S[%u]F[%u]", stream, function);
+    }
+
+    uint32 messageLenth = 10;
+    std::vector<uint8> message;
+    message.reserve(messageLenth + sizeof(messageLenth));
+    messageLenth = TO_UINT32_FOR_NETWORK(messageLenth);
+    message.insert(message.end(), (uint8*)&messageLenth, (uint8*)&messageLenth + sizeof(messageLenth));
+    makeMessageHeader(stream, function, wait, 0, systemBytes, &message);
+    writeData(message);
+}
+
+void B1SECS2ClientSession::sendDataMessage(const std::vector<uint8>& systemBytes, uint8 stream, uint8 function, const std::vector<std::vector<uint8> >& items, bool wait)
+{
+    int32 systemByte = 0;
+    if (toUint32FromSystemBytes(systemBytes, &systemByte)) {
+        B1LOG("sendDataMessage: S[%u]F[%u], systemByte[0x%X], items[%u]", stream, function, systemByte, static_cast<uint32>(items.size()));
+    }
+    else {
+        B1LOG("sendDataMessage: S[%u]F[%u], items[%u]", stream, function, static_cast<uint32>(items.size()));
+    }
+
+    uint32 messageLenth = 10;
+    for (const auto& item : items) {
+        messageLenth += static_cast<uint32>(item.size());
+    }
+
+    std::vector<uint8> message;
+    message.reserve(messageLenth + sizeof(messageLenth));
+    messageLenth = TO_UINT32_FOR_NETWORK(messageLenth);
+    message.insert(message.end(), (uint8*)&messageLenth, (uint8*)&messageLenth + sizeof(messageLenth));
+    makeMessageHeader(stream, function, wait, 0, systemBytes, &message);
+    for (const auto& item : items) {
+        message.insert(message.end(), item.begin(), item.end());
+    }
+    writeData(message);
+}
+
+void B1SECS2ClientSession::sendDataMessage(const std::vector<uint8>& systemBytes, const B1SECS2MessageWritable& message)
+{
+    if (message.items().empty()) {
+        sendDataMessage(systemBytes, message.stream(), message.function(), message.wait());
+    }
+    else {
+        sendDataMessage(systemBytes, message.stream(), message.function(), message.items(), message.wait());
+    }
+}
+
+void B1SECS2ClientSession::sendMessageF0(uint8 stream, const std::vector<uint8>& systemBytes)
+{
+    sendDataMessage(systemBytes, stream, 0, false);
 }

@@ -19,61 +19,61 @@
 
 using namespace BnD;
 
-void B1SECS2ClientSession::recvMessageS1F0(uint16 sessionID, const std::vector<uint8>& systemBytes)
+void B1SECS2ClientSession::recvMessageS1F0(const std::vector<uint8>& systemBytes)
 {
-    onRecvMessageS1F0(sessionID, systemBytes);
+    onRecvMessageS1F0(systemBytes);
 }
 
-void B1SECS2ClientSession::recvMessageS1F1(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ClientSession::recvMessageS1F1(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     /* Are You There Request(R)
     W
     */
     B1LOG("recvMessageS1F1\nAre You There Request (R)");
-    onRecvMessageS1F1(sessionID, wait, systemBytes);
+    onRecvMessageS1F1(wait, systemBytes);
 }
 
-void B1SECS2ClientSession::recvMessageS1F2(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ClientSession::recvMessageS1F2(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     B1SECS2MessageS1F2Readable messageS1F2(wait, data, dataLength, secs2DataManager());
     if (messageS1F2.readData() != true) {
         return;
     }
-    onRecvMessageS1F2(sessionID, systemBytes, messageS1F2.mdln(), messageS1F2.softRev());
+    onRecvMessageS1F2(systemBytes, messageS1F2.mdln(), messageS1F2.softRev());
 }
 
-void B1SECS2ClientSession::recvMessageS1F4(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ClientSession::recvMessageS1F4(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     B1SECS2MessageS1F4Readable messageS1F4(wait, data, dataLength, secs2DataManager());
     if (messageS1F4.readData() != true) {
         return;
     }
-    onRecvMessageS1F4(sessionID, systemBytes, messageS1F4.svs());
+    onRecvMessageS1F4(systemBytes, messageS1F4.svs());
 }
 
-void B1SECS2ClientSession::recvMessageS1F14(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ClientSession::recvMessageS1F14(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     B1SECS2MessageS1F14Readable message(wait, data, dataLength, secs2DataManager());
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS1F14(sessionID, systemBytes, message.commAck(), message.mdln(), message.softRev());
+    onRecvMessageS1F14(systemBytes, message.commAck(), message.mdln(), message.softRev());
 }
 
-void B1SECS2ClientSession::recvMessageS1F16(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ClientSession::recvMessageS1F16(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     B1SECS2MessageS1F16Readable message(wait, data, dataLength, secs2DataManager());
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS1F16(sessionID, systemBytes, message.oflAck());
+    onRecvMessageS1F16(systemBytes, message.oflAck());
 }
 
-void B1SECS2ClientSession::recvMessageS1F18(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ClientSession::recvMessageS1F18(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     B1SECS2MessageS1F18Readable message(wait, data, dataLength, secs2DataManager());
     if (message.readData() != true) {
         return;
     }
-    onRecvMessageS1F18(sessionID, systemBytes, message.onlAck());
+    onRecvMessageS1F18(systemBytes, message.onlAck());
 }

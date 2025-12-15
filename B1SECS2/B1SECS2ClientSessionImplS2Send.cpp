@@ -30,7 +30,7 @@ bool B1SECS2ClientSession::sendMessageS2F13(const std::list<B1SECS2DataECID>& ec
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -40,7 +40,7 @@ bool B1SECS2ClientSession::sendMessageS2F15(const std::map<B1SECS2DataECID, B1SE
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -50,7 +50,7 @@ bool B1SECS2ClientSession::sendMessageS2F17()
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -60,7 +60,7 @@ bool B1SECS2ClientSession::sendMessageS2F29(const std::list<B1SECS2DataECID>& ec
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -70,7 +70,7 @@ bool B1SECS2ClientSession::sendMessageS2F31(const B1SECS2DataTIME& time)
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -80,7 +80,7 @@ bool B1SECS2ClientSession::sendMessageS2F33(const B1SECS2DataDATAID& dataID, con
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -90,7 +90,7 @@ bool B1SECS2ClientSession::sendMessageS2F35(const B1SECS2DataDATAID& dataID, con
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -100,7 +100,7 @@ bool B1SECS2ClientSession::sendMessageS2F37(const B1SECS2DataCEED& ceed, const s
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -110,7 +110,7 @@ bool B1SECS2ClientSession::sendMessageS2F41(const B1SECS2DataRCMD& rcmd, const s
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -121,6 +121,6 @@ bool B1SECS2ClientSession::sendMessageS2F49(const B1SECS2DataDATAID& dataID, con
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }

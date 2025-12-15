@@ -18,13 +18,13 @@
 
 using namespace BnD;
 
-bool B1SECS2ClientSession::sendMessageS5F2(uint16 sessionID, const B1SECS2DataACKC5& ackc5)
+bool B1SECS2ClientSession::sendMessageS5F2(const B1SECS2DataACKC5& ackc5)
 {
     B1SECS2MessageS5F2Writable message(ackc5);
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(sessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -34,7 +34,7 @@ bool B1SECS2ClientSession::sendMessageS5F3(const B1SECS2DataALED& alED, const B1
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -44,7 +44,7 @@ bool B1SECS2ClientSession::sendMessageS5F5(const B1SECS2DataALID& alID)
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
 
@@ -54,6 +54,6 @@ bool B1SECS2ClientSession::sendMessageS5F7()
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(_secs2SessionID, makeNewSystemBytes(), message);
+    sendDataMessage(makeNewSystemBytes(), message);
     return true;
 }
