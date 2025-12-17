@@ -20,13 +20,19 @@
 #include <B1GEM/B1GEMConsts.h>
 
 namespace BnD {
+    class B1GEMDataRepository;
     class B1GEMClientSession : public B1SECS2ClientSession {
     public:
         B1GEMClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener);
     protected:
         B1GEMConsts::CONTROL_STATE _controlState;
+        std::shared_ptr<B1GEMDataRepository> _dataRepository;
+    protected:
+        virtual std::shared_ptr<B1GEMDataRepository> createDataRepository() = 0;
     protected:
         virtual void onRecvMessageS1F1(bool wait, const std::vector<uint8>& systemBytes) override;
+        virtual bool implInitializeSession() override;
+        virtual void implFinalizeSession() override;
     protected:
         void setControlState(B1GEMConsts::CONTROL_STATE controlState);
     public:

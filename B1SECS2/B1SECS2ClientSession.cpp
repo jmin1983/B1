@@ -262,7 +262,7 @@ bool B1SECS2ClientSession::implInitializeSession()
     if (B1ArrayBufferClientSession::implInitializeSession() != true) {
         return false;
     }
-    _secs2DataManager.reset(createSECS2DataManager());
+    _secs2DataManager = createSECS2DataManager();
     if (_secs2DataManager->initialize() != true) {
         return false;
     }

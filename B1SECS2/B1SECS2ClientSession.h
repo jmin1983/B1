@@ -95,13 +95,13 @@ namespace BnD {
         virtual void onRecvMessageS64F2(const std::vector<uint8>& systemBytes,
                                         const B1SECS2DataHCACK& hcAck, const std::map<B1SECS2DataCPNAME, B1SECS2DataCPACK>& cps) {}
     protected:
-        virtual B1SECS2DataManager* createSECS2DataManager() = 0;
+        virtual std::shared_ptr<B1SECS2DataManager> createSECS2DataManager() = 0;
         virtual void onSelectCompleted() {}
         virtual void onDeselectCompleted() {}
         virtual bool onRecvHSMSData(uint8 stream, uint8 function) { return true; }  //  return false to send F0
     protected:
-        bool implInitializeSession() final;
-        void implFinalizeSession() final;
+        virtual bool implInitializeSession() override;
+        virtual void implFinalizeSession() override;
         virtual void implOnConnect() override;
         virtual void onReadComplete(uint8* data, size_t dataSize) override;
         virtual void implProcessConnected(bool firstConnectedProcess) override;
