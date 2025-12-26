@@ -18,9 +18,7 @@
 
 #include <B1Base/B1Object.h>
 
-#if defined(_WIN32)
 #include <ctime>    // time_t, struct tm
-#endif
 
 namespace BnD {
     class B1Time : public B1Object {
@@ -61,9 +59,7 @@ namespace BnD {
         };
         static int64 _adjustCurrentSeconds;
         static int32 _adjustCurrentMicroSeconds;
-    protected:
-        bool localTime(time_t64 t, struct tm* lt) const;
-        time_t64 mkTime(struct tm* lt) const;
+        static int64 _adjustCurrentTimeZoneSeconds;
     protected:
         void archiveTo(B1Archive* archive) const final;
         void unarchiveFrom(const B1Archive& archive) final;
@@ -76,13 +72,11 @@ namespace BnD {
         int32 hour() const { return _field.hour; }
         int32 minute() const { return _field.minute; }
         int32 second() const { return _field.second; }
-        DayOfWeek dayOfWeek() const;
 
         void makeInvalid();
         void set(int32 year, int32 month, int32 day, int32 hour = 0, int32 minute = 0, int32 second = 0);
         void set(const B1Time& t) { _value = t._value; }
         time_t64 to_time_t() const;
-        struct tm to_struct_tm() const;
         void from_time_t(time_t64 t);
         void from_struct_tm(const struct tm& t);
         uint32 toUint32() const { return _value; }
@@ -91,6 +85,7 @@ namespace BnD {
         B1String toString() const;
 
         static struct tm to_struct_tm(const B1Time& time);
+        static struct tm to_struct_tm(int64 seconds);
         static bool isLeapYear(int32 year);
         static int32 daysInMonth(int32 year, int32 month);
         static B1Time currentTime();
@@ -100,12 +95,11 @@ namespace BnD {
         static B1String timeInMillisecond(int64 second, int32 microSecond, bool pretty = false);
         static B1String timeInMicrosecond(int64 second, int32 microSecond); //  pretty only.
         static B1String timeInSecond(int64 second, bool pretty = false);
-        static B1String getCurrentTimeZone();
         static bool getCurrentTime(int64* second, int32* microSecond = NULL);
-        static bool getSystemTime(int64* second, int32* microSecond = NULL);
+        static void getSystemTime(int64* second, int32* microSecond = NULL);
         static void setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds);
-        static void setCurrentTimeZone(const B1String& timezone);       //  not supported in Windows.
-        static void setCurrentTime(const B1Time& t);                    //  not supported in Windows.
+        static bool setCurrentTimeZone(const B1String& timezone);
+        static bool setCurrentTime(const B1Time& t);                    //  not supported in Windows.
         static bool setCurrentTime(const B1String& millisecondsString); //  not supported in Windows.
     public:
         B1Time& operator=(const B1Time& t) { set(t); return *this; }

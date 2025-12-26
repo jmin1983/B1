@@ -17,13 +17,23 @@
 #include <winsock.h>
 #else
 #include <unistd.h>
-#include <sys/time.h>
+#endif
+
+#include <chrono>
+
+#ifdef _WIN32
+#define mkgmtime_safe _mkgmtime
+#define gmtime_safe(t, r) gmtime_s(r, t)
+#else
+#define mkgmtime_safe timegm
+#define gmtime_safe(t, r) gmtime_r(t, r)
 #endif
 
 using namespace BnD;
 
 int64 B1Time::_adjustCurrentSeconds = 0;
 int32 B1Time::_adjustCurrentMicroSeconds = 0;
+int64 B1Time::_adjustCurrentTimeZoneSeconds = 0;
 
 B1Time::B1Time()
 {
@@ -54,26 +64,6 @@ B1Time::~B1Time()
 {
 }
 
-bool B1Time::localTime(time_t64 t, struct tm* lt) const
-{
-#if defined(_WIN32)
-    struct tm* p = ::_localtime64(&t);
-    return (p) ? (*lt = *p, true) : false;
-#else
-    time_t tt = static_cast<time_t>(t);
-    return (0 != ::localtime_r(&tt, lt));
-#endif
-}
-
-time_t64 B1Time::mkTime(struct tm* lt) const
-{
-#if defined(_WIN32)
-    return ::_mktime64(lt);
-#else
-    return static_cast<time_t64>(::mktime(lt));
-#endif
-}
-
 void B1Time::archiveTo(B1Archive* archive) const
 {
     writeDataToArchive("Time", to_time_t(), archive);
@@ -99,11 +89,6 @@ bool B1Time::isValid(int32 year, int32 month, int32 day, int32 hour, int32 minut
            0 <= hour && hour <= 23 &&
            0 <= minute && minute <= 59 &&
            0 <= second && second <= 59;
-}
-
-B1Time::DayOfWeek B1Time::dayOfWeek() const
-{
-    return static_cast<DayOfWeek>(to_struct_tm().tm_wday);
 }
 
 void B1Time::makeInvalid()
@@ -134,25 +119,13 @@ void B1Time::set(int32 year, int32 month, int32 day, int32 hour, int32 minute, i
 time_t64 B1Time::to_time_t() const
 {
     struct tm lt = to_struct_tm(*this);
-    return mkTime(&lt);
-}
-
-struct tm B1Time::to_struct_tm() const
-{
-    struct tm lt = to_struct_tm(*this);
-    mkTime(&lt);
-    return lt;
+    return mkgmtime_safe(&lt);
 }
 
 void B1Time::from_time_t(time_t64 t)
 {
-    struct tm lt;
-    if (localTime(t, &lt)) {
-        from_struct_tm(lt);
-    }
-    else {
-        makeInvalid();
-    }
+    struct tm lt = to_struct_tm(t);
+    from_struct_tm(lt);
 }
 
 void B1Time::from_struct_tm(const struct tm& t)
@@ -179,6 +152,14 @@ struct tm B1Time::to_struct_tm(const B1Time& time)
     return t;
 }
 
+struct tm B1Time::to_struct_tm(int64 seconds)
+{
+    struct tm result;
+    time_t second_ = static_cast<time_t>(seconds);
+    gmtime_safe(&second_, &result);
+    return result;
+}
+
 bool B1Time::isLeapYear(int32 year)
 {
     return (((year & 3) == 0 && (year % 100) != 0) || (year % 400) == 0);
@@ -200,28 +181,11 @@ B1Time B1Time::currentTime()
     if (_adjustCurrentSeconds != 0) {
         t = static_cast<time_t64>(t + _adjustCurrentSeconds);
     }
+    if (_adjustCurrentTimeZoneSeconds != 0) {
+        t = static_cast<time_t64>(t + _adjustCurrentTimeZoneSeconds);
+    }
     return B1Time(t);
 }
-
-#if defined(_WIN32)
-int gettimeofday(struct timeval* tv, struct timezone* tz = NULL)
-{
-    const uint64 delta = 11644473600000000Ui64;
-    if (NULL != tv) {
-        FILETIME fileTime;
-        GetSystemTimeAsFileTime(&fileTime);
-        uint64 temp = 0;
-        temp |= fileTime.dwHighDateTime;
-        temp <<= 32;
-        temp |= fileTime.dwLowDateTime;
-        temp /= 10;     //  convert into microseconds.
-        temp -= delta;  //  converting file time to unix epoch.
-        tv->tv_sec = (long)(temp / 1000000UL);
-        tv->tv_usec = (long)(temp % 1000000UL);
-    }
-    return 0;
-}
-#endif
 
 B1String B1Time::currentTimeInSeconds(bool pretty)
 {
@@ -267,79 +231,52 @@ B1String B1Time::currentTimeInMicroseconds(int64* currentSecond, int32* currentM
 
 B1String B1Time::timeInMillisecond(int64 second, int32 microSecond, bool pretty)
 {
-    time_t second_ = static_cast<time_t>(second);
-    tm* crntTime = localtime(static_cast<const time_t*>(&second_));
-    if (NULL == crntTime) {
-        assert(false);
-        return B1String();
-    }
+    auto tm_res = to_struct_tm(second);
     if (pretty) {
         return B1String::formatAs("%04d-%02d-%02d_%02d:%02d:%02d.%03d",
-                                  crntTime->tm_year + 1900, crntTime->tm_mon + 1, crntTime->tm_mday,
-                                  crntTime->tm_hour, crntTime->tm_min, crntTime->tm_sec,
+                                  tm_res.tm_year + 1900, tm_res.tm_mon + 1, tm_res.tm_mday,
+                                  tm_res.tm_hour, tm_res.tm_min, tm_res.tm_sec,
                                   microSecond / 1000);
     }
     else {
         return B1String::formatAs("%04d%02d%02d%02d%02d%02d%02d",
-                                  crntTime->tm_year + 1900, crntTime->tm_mon + 1, crntTime->tm_mday,
-                                  crntTime->tm_hour, crntTime->tm_min, crntTime->tm_sec,
+                                  tm_res.tm_year + 1900, tm_res.tm_mon + 1, tm_res.tm_mday,
+                                  tm_res.tm_hour, tm_res.tm_min, tm_res.tm_sec,
                                   microSecond / 10000);
     }
 }
 
 B1String B1Time::timeInMicrosecond(int64 second, int32 microSecond)
 {
-    time_t second_ = static_cast<time_t>(second);
-    tm* crntTime = localtime(static_cast<const time_t*>(&second_));
-    if (NULL == crntTime) {
-        assert(false);
-        return B1String();
-    }
+    auto tm_res = to_struct_tm(second);
     return B1String::formatAs("%04d-%02d-%02d_%02d:%02d:%02d.%06d",
-                                crntTime->tm_year + 1900, crntTime->tm_mon + 1, crntTime->tm_mday,
-                                crntTime->tm_hour, crntTime->tm_min, crntTime->tm_sec, microSecond);
+                                tm_res.tm_year + 1900, tm_res.tm_mon + 1, tm_res.tm_mday,
+                                tm_res.tm_hour, tm_res.tm_min, tm_res.tm_sec, microSecond);
 }
 
 B1String B1Time::timeInSecond(int64 second, bool pretty)
 {
-    time_t second_ = static_cast<time_t>(second);
-    tm* crntTime = localtime(static_cast<const time_t*>(&second_));
-    if (NULL == crntTime) {
-        assert(false);
-        return B1String();
-    }
+    auto tm_res = to_struct_tm(second);
     if (pretty) {
         return B1String::formatAs("%04d-%02d-%02d_%02d:%02d:%02d",
-                                  crntTime->tm_year + 1900, crntTime->tm_mon + 1, crntTime->tm_mday,
-                                  crntTime->tm_hour, crntTime->tm_min, crntTime->tm_sec);
+                                  tm_res.tm_year + 1900, tm_res.tm_mon + 1, tm_res.tm_mday,
+                                  tm_res.tm_hour, tm_res.tm_min, tm_res.tm_sec);
     }
     else {
         return B1String::formatAs("%04d%02d%02d%02d%02d%02d",
-                                  crntTime->tm_year + 1900, crntTime->tm_mon + 1, crntTime->tm_mday,
-                                  crntTime->tm_hour, crntTime->tm_min, crntTime->tm_sec);
+                                  tm_res.tm_year + 1900, tm_res.tm_mon + 1, tm_res.tm_mday,
+                                  tm_res.tm_hour, tm_res.tm_min, tm_res.tm_sec);
     }
-}
-
-B1String B1Time::getCurrentTimeZone()
-{
-#if defined(_WIN32)
-    _tzset();
-    return _tzname[0];
-#else
-    tzset();
-    return tzname[0];
-#endif
 }
 
 bool B1Time::getCurrentTime(int64* second, int32* microSecond)
 {
-    timeval crntTimeVal;
-    if (gettimeofday(&crntTimeVal, NULL) < 0) {
-        return false;
-    }
+    int64 systemSecond = 0;
+    int32 systemMicroSecond = 0;
+    getSystemTime(&systemSecond, &systemMicroSecond);
     if (_adjustCurrentSeconds != 0 || _adjustCurrentMicroSeconds != 0) {
-        int64 newSecond = crntTimeVal.tv_sec + _adjustCurrentSeconds;
-        int32 newMicroSecond = crntTimeVal.tv_usec + _adjustCurrentMicroSeconds;
+        int64 newSecond = systemSecond + _adjustCurrentSeconds;
+        int32 newMicroSecond = systemMicroSecond + _adjustCurrentMicroSeconds;
         if (newMicroSecond >= 1000000) {
             newMicroSecond -= 1000000;
             newSecond++;
@@ -354,54 +291,55 @@ bool B1Time::getCurrentTime(int64* second, int32* microSecond)
         }
     }
     else {
-        *second = crntTimeVal.tv_sec;
+        *second = systemSecond;
         if (microSecond) {
-            *microSecond = crntTimeVal.tv_usec;
+            *microSecond = systemMicroSecond;
         }
+    }
+    if (_adjustCurrentTimeZoneSeconds != 0) {
+        *second += _adjustCurrentTimeZoneSeconds;
     }
     return true;
 }
 
-bool B1Time::getSystemTime(int64* second, int32* microSecond)
+void B1Time::getSystemTime(int64* second, int32* microSecond)
 {
-    timeval crntTimeVal;
-    if (gettimeofday(&crntTimeVal, NULL) < 0) {
-        return false;
-    }
-    *second = crntTimeVal.tv_sec;
-    if (microSecond) {
-        *microSecond = crntTimeVal.tv_usec;
-    }
-    return true;
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+    auto micros = std::chrono::duration_cast<std::chrono::microseconds>(duration) % 1000000;
+
+    *second = static_cast<int64>(seconds.count());
+    *microSecond = static_cast<int32>(micros.count());
 }
 
 void B1Time::setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds)
 {
-    timeval crntTimeVal;
-    if (gettimeofday(&crntTimeVal, NULL) < 0) {
-        assert(false);
-        return;
-    }
-    if (crntTimeVal.tv_usec > targetMicroSeconds) {
-        _adjustCurrentSeconds = targetSeconds - crntTimeVal.tv_sec - 1;
-        _adjustCurrentMicroSeconds = targetMicroSeconds - crntTimeVal.tv_usec + 1000000;
+    int64 systemSecond = 0;
+    int32 systemMicroSecond = 0;
+    getSystemTime(&systemSecond, &systemMicroSecond);
+    if (systemMicroSecond > targetMicroSeconds) {
+        _adjustCurrentSeconds = targetSeconds - systemSecond - 1;
+        _adjustCurrentMicroSeconds = targetMicroSeconds - systemMicroSecond + 1000000;
     }
     else {
-        _adjustCurrentSeconds = targetSeconds - crntTimeVal.tv_sec;
-        _adjustCurrentMicroSeconds = targetMicroSeconds - crntTimeVal.tv_usec;
+        _adjustCurrentSeconds = targetSeconds - systemSecond;
+        _adjustCurrentMicroSeconds = targetMicroSeconds - systemMicroSecond;
     }
 }
 
-void B1Time::setCurrentTime(const B1Time& t)
+bool B1Time::setCurrentTime(const B1Time& t)
 {
 #if defined(_WIN32)
     assert(false);  //  not supported.
+    return false;
 #else
     assert(t.isValid());
-    struct timeval tv;
-    tv.tv_sec = t.to_time_t();
-    tv.tv_usec = 0;
-    settimeofday(&tv, 0/*&tz*/);
+    struct timespec ts;
+    ts.tv_sec = t.to_time_t();
+    ts.tv_nsec = 0;
+    return clock_settime(CLOCK_REALTIME, &ts) == 0;
 #endif
 }
 
@@ -426,24 +364,44 @@ bool B1Time::setCurrentTime(const B1String& millisecondsString)
         return false;
     }
 #if defined(_WIN32)
-    return true;
+    return true;    //  not supported.
 #else
-    struct timeval tv;
-    tv.tv_sec = t.to_time_t();
-    tv.tv_usec = csecond * 10000;
-    int result = settimeofday(&tv, 0/*&tz*/);
-    return 0 == result;
+    struct timespec ts;
+    ts.tv_sec = t.to_time_t();
+    ts.tv_nsec = csecond * 10000;
+    return clock_settime(CLOCK_REALTIME, &ts) == 0;
 #endif
 }
 
-void B1Time::setCurrentTimeZone(const B1String& timezone)
+bool B1Time::setCurrentTimeZone(const B1String& timezone)
 {
-#if defined(_WIN32)
-    return;
-#else
-    setenv("TZ", timezone.cString(), 1);
-    tzset();
-#endif
+    //  TODO: use libboost_date_time.
+    static const std::unordered_map<std::string, int32> s_tz_table = {
+        {"America/Costa_Rica",  -6 * 3600},
+        {"America/Los_Angeles", -8 * 3600},
+        {"America/New_York",    -5 * 3600},
+        {"America/Santiago",    -3 * 3600},
+        {"Asia/Beijing",        8 * 3600},
+        {"Asia/Chongqing",      8 * 3600},
+        {"Asia/Qatar",          3 * 3600},
+        {"Asia/Saigon",         7 * 3600},
+        {"Asia/Seoul",          9 * 3600},
+        {"Asia/Shanghai",       8 * 3600},
+        {"Asia/Singapore",      8 * 3600},
+        {"Asia/Tokyo",          9 * 3600},
+        {"Australia/Perth",     8 * 3600},
+        {"Australia/Sydney",    11 * 3600},
+        {"Europe/Zurich",       1 * 3600},
+        {"UTC",                 0},
+        {"GMT",                 0}
+    };
+
+    auto itr = s_tz_table.find(timezone.to_string());
+    if (itr != s_tz_table.end()) {
+        _adjustCurrentTimeZoneSeconds = itr->second;
+        return true;
+    }
+    return false;
 }
 
 bool BnD::isSameDate(const B1Time& t1, const B1Time& t2)
