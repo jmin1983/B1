@@ -114,7 +114,7 @@ bool B1BasePLCManager::getRFIDValue(int32 slaveID, B1String* value)
     return implGetRFIDValue(slaveID, value);
 }
 
-bool B1BasePLCManager::getSensorInput(int32 slaveID, int32 channel)
+bool B1BasePLCManager::getSensorInput(int32 slaveID, uint8 channel)
 {
     if (slaveID < 0) {
         assert(false);

@@ -35,7 +35,7 @@ namespace BnD {
         virtual bool implSetReadRFIDDone(int32 slaveID, bool set) { return false; }
         virtual bool implSetWriteRFID(int32 slaveID, const B1String& value) { return false; }
         virtual bool implGetRFIDValue(int32 slaveID, B1String* value) { return false; }
-        virtual bool implGetSensorInput(int32 slaveID, int32 channel) { return false; }
+        virtual bool implGetSensorInput(int32 slaveID, uint8 channel) { return false; }
         virtual bool implIsPLCAlive() { return false; }
         virtual bool implIsPLCOffline() { return false; }
         virtual bool implIsPLCAlarm() { return false; }
@@ -64,7 +64,7 @@ namespace BnD {
         bool setReadRFIDDone(int32 slaveID, bool set);
         bool setWriteRFID(int32 slaveID, const B1String& value);
         bool getRFIDValue(int32 slaveID, B1String* value);
-        bool getSensorInput(int32 slaveID, int32 channel);
+        bool getSensorInput(int32 slaveID, uint8 channel);
         bool isPLCAlive();
         bool isPLCOffline();
         bool isPLCAlarm();
