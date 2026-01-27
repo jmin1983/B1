@@ -247,6 +247,13 @@ bool B1RedisDirectClient::subscribe(std::set<B1String>&& channels)
     return _subscribeSession->subscribe(std::move(channels));
 }
 
+void B1RedisDirectClient::closeSubscribeSession()
+{
+    if (_subscribeSession) {
+        _subscribeSession->closeSession();
+    }
+}
+
 bool B1RedisDirectClient::hmget(const B1String& key, const std::vector<B1String>& fields, std::vector<B1String>* out)
 {
     return _readSession ? _readSession->hmget(key, fields, out) : false;

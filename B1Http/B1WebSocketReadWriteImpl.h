@@ -76,6 +76,7 @@ namespace BnD {
             std::list<std::shared_ptr<Data> > _data;
         protected:
             void implLooperFunc() final;
+            void implThreadEnd() final;
         public:
             void setOwner(B1WebSocketReadWriteImpl* owner) { _owner = owner; }
             void setTextBunchHint(uint32 value) { _textBunchHint = value; }

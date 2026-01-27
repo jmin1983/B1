@@ -87,13 +87,32 @@ void B1WebSocketReadWriteImpl::Writer::implLooperFunc()
             }
             B1Thread::sleep(1);
         }
-        _readyToWrite = false;
-        if (textDataBunch.isEmpty() != true) {
-            _owner->writeText(std::move(textDataBunch));
+        if (_owner->isOpen()) {
+            _readyToWrite = false;
+            if (textDataBunch.isEmpty() != true) {
+                _owner->writeText(std::move(textDataBunch));
+            }
+            else if (binaryData.empty() != true) {
+                _owner->writeBinary(std::move(binaryData));
+            }
         }
-        else if (binaryData.empty() != true) {
-            _owner->writeBinary(std::move(binaryData));
+    }
+}
+
+void B1WebSocketReadWriteImpl::Writer::implThreadEnd()
+{
+    const int32 timeoutCount = 3000;
+    for (int32 i = 0; i < timeoutCount; ++i) {
+        if (_owner->isOpen()) {
+            B1Thread::sleep(1);
         }
+        else {
+            break;
+        }
+    }
+    if (_owner->isOpen()) {
+        B1LOG("session still opened!!! -> can make a crash!!!");
+        B1Thread::sleep(2000);
     }
 }
 
