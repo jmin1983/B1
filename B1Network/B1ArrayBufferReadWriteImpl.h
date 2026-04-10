@@ -38,6 +38,7 @@ namespace BnD {
         std::list<std::vector<uint8> > _dataToWrite;
     protected:
         std::vector<uint8> _recvBuffer;
+        std::vector<uint8> _sendBuffer;
     private:
         class B1ASIOSocketImpl* asioSocketImpl() const;
     protected:
@@ -47,7 +48,7 @@ namespace BnD {
         void implOnWriteComplete(size_t transferredBytes) final;
     protected:
         B1ArrayBufferReadWriteImplListener* listener() const;
-        void writeData(const uint8* data, size_t size);
+        void writeData(std::vector<uint8>&& data);
     public:
         void requestWriteData(const uint8* data, size_t size);
     };

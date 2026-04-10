@@ -26,6 +26,7 @@ B1ArrayBufferReadWriteImpl::B1ArrayBufferReadWriteImpl(B1ArrayBufferReadWriteImp
     , _dataWriting(false)
     , _dataToWrite()
     , _recvBuffer(recvBufferSize, 0)
+    , _sendBuffer()
 {
 }
 
@@ -56,6 +57,7 @@ bool B1ArrayBufferReadWriteImpl::implOnReadComplete(size_t receivedBytes)
 
 void B1ArrayBufferReadWriteImpl::implOnWriteFailed(int32 reason)
 {
+    _sendBuffer.clear();
     B1AutoLock al(*_dataToWriteLock);
     _dataToWrite.clear();
     _dataWriting = false;
@@ -63,6 +65,7 @@ void B1ArrayBufferReadWriteImpl::implOnWriteFailed(int32 reason)
 
 void B1ArrayBufferReadWriteImpl::implOnWriteComplete(size_t transferredBytes)
 {
+    _sendBuffer.clear();
     if (auto l = listener()) {
         l->onWriteComplete(transferredBytes);
     }
@@ -75,10 +78,13 @@ void B1ArrayBufferReadWriteImpl::implOnWriteComplete(size_t transferredBytes)
         else {
             dataToSend.swap(_dataToWrite.front());
             _dataToWrite.pop_front();
+            if (dataToSend.empty()) {
+                _dataWriting = false;
+            }
         }
     }
     if (dataToSend.empty() != true) {
-        writeData(&dataToSend[0], dataToSend.size());
+        writeData(std::move(dataToSend));
     }
 }
 
@@ -87,13 +93,14 @@ auto B1ArrayBufferReadWriteImpl::listener() const -> B1ArrayBufferReadWriteImplL
     return static_cast<B1ArrayBufferReadWriteImplListener*>(B1BaseReadWriteImpl::listener());
 }
 
-void B1ArrayBufferReadWriteImpl::writeData(const uint8* data, size_t size)
+void B1ArrayBufferReadWriteImpl::writeData(std::vector<uint8>&& data)
 {
     if (asioSocketImpl()->getASIOSocket()->is_open() != true) {
         B1LOG("socket is not opened!");
         //assert(false);
     }
-    boost::asio::async_write(*asioSocketImpl()->getASIOSocket(), boost::asio::buffer(data, size),
+    _sendBuffer = std::move(data);
+    boost::asio::async_write(*asioSocketImpl()->getASIOSocket(), boost::asio::buffer(&_sendBuffer[0], _sendBuffer.size()),
                              boost::bind(&B1ArrayBufferReadWriteImpl::writeComplete, this,
                                          boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
@@ -105,10 +112,11 @@ void B1ArrayBufferReadWriteImpl::requestWriteData(const uint8* data, size_t size
         return;
     }
     bool writeImmediately = false;
+    std::vector<uint8> dataToWrite(data, data + size);
     {
         B1AutoLock al(*_dataToWriteLock);
         if (_dataWriting) {
-            _dataToWrite.push_back(std::vector<uint8>(data, data + size));
+            _dataToWrite.push_back(std::move(dataToWrite));
         }
         else {
             _dataWriting = true;
@@ -116,6 +124,6 @@ void B1ArrayBufferReadWriteImpl::requestWriteData(const uint8* data, size_t size
         }
     }
     if (writeImmediately) {
-        writeData(data, size);
+        writeData(std::move(dataToWrite));
     }
 }
