@@ -17,8 +17,6 @@
 
 #include <B1Base/B1Thread.h>
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1Acceptor::B1Acceptor(const B1IOContext* context)
@@ -39,18 +37,22 @@ void B1Acceptor::accept()
         _closed = true;
         return;
     }
-    auto serverSocket = new B1ServerSocket(_context);
-    _acceptor->async_accept(*serverSocket->asioSocket(), boost::bind(&B1Acceptor::acceptComplete, this, serverSocket, boost::asio::placeholders::error));
+    auto serverSocket = std::make_shared<B1ServerSocket>(_context);
+    _acceptor->async_accept(
+        *serverSocket->asioSocket(),
+        [this, serverSocket](const boost::system::error_code& error) {
+            this->acceptComplete(serverSocket, error);
+        }
+    );
 }
 
-void B1Acceptor::acceptComplete(B1ServerSocket* serverSocket, const boost::system::error_code& error)
+void B1Acceptor::acceptComplete(std::shared_ptr<B1ServerSocket> serverSocket, const boost::system::error_code& error)
 {
-    auto sserverSocket = std::shared_ptr<B1ServerSocket>(serverSocket);
     if (error) {
-        _listener->onAcceptFailed(sserverSocket, error.value());
+        _listener->onAcceptFailed(serverSocket, error.value());
     }
     else {
-        _listener->onAcceptComplete(sserverSocket);
+        _listener->onAcceptComplete(serverSocket);
     }
     accept();
 }

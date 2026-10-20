@@ -45,7 +45,7 @@ int B1DaemonService::startWorkingProcess()
 
 bool B1DaemonService::startDaemon(uint32 restartInterval)
 {
-    _daemon.reset(new B1Daemon(restartInterval));
+    _daemon = std::make_shared<B1Daemon>(restartInterval);
     if (_daemon->startDaemon(this) != true)
         return false;
     _daemon.reset();

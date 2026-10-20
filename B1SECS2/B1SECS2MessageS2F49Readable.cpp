@@ -42,7 +42,7 @@ void B1SECS2MessageS2F49Readable::implToString(B1String* string)
     for (const auto& cpsPair : _cps) {
         appendStringDepth2List(2, string);
         appendStringDepth3(cpsPair.first->toString(), string);
-        appendStringDepth3(cpsPair.second->toString(), string);
+        string->append(cpsPair.second.toString(3));
         appendStringDepth2Closer(string);
     }
     appendStringDepth1Closer(string);

@@ -23,14 +23,14 @@ B1BaseComponent::~B1BaseComponent()
 {
 }
 
-B1BaseSessionManager* B1BaseComponent::createSessionManager()
+auto B1BaseComponent::createSessionManager() -> std::shared_ptr<B1BaseSessionManager>
 {
-    return new B1BaseSessionManager();
+    return std::make_shared<B1BaseSessionManager>();
 }
 
 bool B1BaseComponent::startup()
 {
-    _sessionManager.reset(createSessionManager());
+    _sessionManager = createSessionManager();
     if (_sessionManager->startup() != true) {
         return false;
     }

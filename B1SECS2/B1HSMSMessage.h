@@ -19,10 +19,11 @@
 namespace BnD {
     struct B1HSMSMessage {
         enum TIME_OUT {
-            TIME_OUT_T3 = 45 * 1000,    //  T3(Reply Timeout) range:1~120sec, default:45sec
-            TIME_OUT_T6 = 5 * 1000,     //  T5(Connect Separation Timeout) range:1~240sec, default:5sec
-            TIME_OUT_T7 = 10 * 1000,    //  T7(NOT SELECTED Timeout) range:1~240sec, default:10sec
-            TIME_OUT_T8 = 5 * 1000,     //  T8(Network Intercharacter Timeout) range:1~120sec, default:5sec
+            TIME_OUT_DEFAULT_T3 = 45 * 1000,    //  T3(Reply Timeout) range:1~120sec, default:45sec
+            TIME_OUT_DEFAULT_T6 = 5 * 1000,     //  T6(Connect Separation Timeout) range:1~240sec, default:5sec
+            TIME_OUT_DEFAULT_T7 = 10 * 1000,    //  T7(NOT SELECTED Timeout) range:1~240sec, default:10sec
+            TIME_OUT_DEFAULT_T8 = 5 * 1000,     //  T8(Network Intercharacter Timeout) range:1~120sec, default:5sec
+            TIME_OUT_DEFAULT_LINK_TEST = 121 * 1000,
         };
         B1HSMSMessage() : _recved(0), _length(0), _data() {}
         uint32 _recved;

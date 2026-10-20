@@ -16,8 +16,6 @@
 
 #include <B1Network/B1BaseSocketImpl.h>
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1HttpClientReadWriteImpl::B1HttpClientReadWriteImpl(B1HttpClientReadWriteImplListener* listener)
@@ -46,9 +44,12 @@ B1BaseSocketImpl* B1HttpClientReadWriteImpl::createBaseSocketImpl()
 bool B1HttpClientReadWriteImpl::implRead()
 {
     _httpMessage->clearResponse();
-    boost::beast::http::async_read(*httpSocketImpl()->stream(), _httpMessage->buffer(), _httpMessage->response(),
-                                    boost::bind(&B1HttpClientReadWriteImpl::readComplete, this,
-                                                boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    boost::beast::http::async_read(
+        *httpSocketImpl()->stream(), _httpMessage->buffer(), _httpMessage->response(),
+        [this](const boost::system::error_code& error, size_t receivedBytes) {
+            this->readComplete(error, receivedBytes);
+        }
+    );
     return true;
 }
 
@@ -77,7 +78,10 @@ void B1HttpClientReadWriteImpl::writeRequest(const B1String& target)
     _httpMessage->request().set(boost::beast::http::field::host, peerAddress().cString());
     _httpMessage->request().set(boost::beast::http::field::user_agent, BOOST_BEAST_VERSION_STRING);
 
-    boost::beast::http::async_write(*httpSocketImpl()->stream(), _httpMessage->request(),
-                                    boost::bind(&B1HttpClientReadWriteImpl::writeRequestComplete, this,
-                                                boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    boost::beast::http::async_write(
+        *httpSocketImpl()->stream(), _httpMessage->request(),
+        [this](const boost::system::error_code& error, size_t transferredBytes) {
+            this->writeRequestComplete(error, transferredBytes);
+        }
+    );
 }

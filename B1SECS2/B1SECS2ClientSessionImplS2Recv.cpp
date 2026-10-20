@@ -27,7 +27,7 @@ void B1SECS2ClientSession::recvMessageS2F0(const std::vector<uint8>& systemBytes
 
 void B1SECS2ClientSession::recvMessageS2F32(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS2F32Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS2F32Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }
@@ -36,7 +36,7 @@ void B1SECS2ClientSession::recvMessageS2F32(bool wait, const std::vector<uint8>&
 
 void B1SECS2ClientSession::recvMessageS2F34(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS2F34Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS2F34Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }
@@ -44,7 +44,7 @@ void B1SECS2ClientSession::recvMessageS2F34(bool wait, const std::vector<uint8>&
 }
 void B1SECS2ClientSession::recvMessageS2F36(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS2F36Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS2F36Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }
@@ -52,7 +52,7 @@ void B1SECS2ClientSession::recvMessageS2F36(bool wait, const std::vector<uint8>&
 }
 void B1SECS2ClientSession::recvMessageS2F38(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS2F38Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS2F38Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }
@@ -61,7 +61,7 @@ void B1SECS2ClientSession::recvMessageS2F38(bool wait, const std::vector<uint8>&
 
 void B1SECS2ClientSession::recvMessageS2F42(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS2F42Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS2F42Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }
@@ -70,7 +70,7 @@ void B1SECS2ClientSession::recvMessageS2F42(bool wait, const std::vector<uint8>&
 
 void B1SECS2ClientSession::recvMessageS2F50(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS2F50Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS2F50Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }

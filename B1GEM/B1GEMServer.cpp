@@ -30,9 +30,9 @@ B1GEMServer::~B1GEMServer()
 {
 }
 
-B1BaseSessionManager* B1GEMServer::createSessionManager()
+auto B1GEMServer::createSessionManager() -> std::shared_ptr<B1BaseSessionManager>
 {
-    return new B1GEMServerSessionManager();
+    return std::make_shared<B1GEMServerSessionManager>();
 }
 
 bool B1GEMServer::isAcceptableSession(B1ServerSocket* serverSocket)
@@ -59,8 +59,8 @@ bool B1GEMServer::implInitialize(int32 port)
     if (B1SECS2Server::implInitialize(port) != true) {    //  B1SECS2Server::implInitialize() before B1SECS2DataManager construction.
         return false;
     }
-    _dataRepository.reset(createDataRepository());
-    if (_dataRepository->initialize(secs2DataManager()) != true) {
+    _dataRepository = createDataRepository();
+    if (_dataRepository->initialize(serverSecs2DataManager()) != true) {
         return false;
     }
     return true;

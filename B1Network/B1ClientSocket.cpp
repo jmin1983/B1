@@ -15,8 +15,6 @@
 #include "B1IOContext.h"
 #include "B1IOLooper.h"
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1ClientSocket::B1ClientSocket()
@@ -65,7 +63,7 @@ bool B1ClientSocket::connectAsync()
     }
     try {
         if (_ioLooper->pause() != true) {
-            _ioLooper.reset(new B1IOLooper());
+            _ioLooper = std::make_shared<B1IOLooper>();
             _ioLooper->startup();
             resetSocket(_ioLooper->ioContext());
         }
@@ -76,7 +74,12 @@ bool B1ClientSocket::connectAsync()
         if (result.empty()) {
             return false;
         }
-        asioSocket()->async_connect(result.begin()->endpoint(), boost::bind(&B1ClientSocket::connectComplete, this, boost::asio::placeholders::error));
+        asioSocket()->async_connect(
+            result.begin()->endpoint(),
+            [this](const boost::system::error_code& error) {
+                this->connectComplete(error);
+            }
+        );
         _ioLooper->resume();
     }
     catch (...) {

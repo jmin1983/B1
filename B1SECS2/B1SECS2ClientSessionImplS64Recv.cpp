@@ -17,7 +17,7 @@ using namespace BnD;
 
 void B1SECS2ClientSession::recvMessageS64F2(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS64F2Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS64F2Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }

@@ -87,7 +87,7 @@ bool B1MariaDBConnectionPool::initialize(B1String&& address, uint16 port, B1Stri
     _user = std::move(user);
     _password = std::move(password);
     _useSSL = useSSL;
-    _lock.reset(new B1Lock());
+    _lock = std::make_shared<B1Lock>();
 
     for (uint32 i = 0; i < connectionCount; ++i) {
         auto newHandle = createNewHandle();

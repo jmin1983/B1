@@ -58,6 +58,51 @@ bool B1String::caseInsensitiveCompare(const B1String& s) const
     return (result) ? (_string.begin() == result.begin()) : false;
 }
 
+bool B1String::isUTF8() const
+{
+    size_t i = 0;
+    while (i < _string.size()) {
+        unsigned char c = static_cast<unsigned char>(_string[i]);
+        if (c <= 0x7F) {
+            ++i;
+            continue;
+        }
+
+        size_t len = 0;
+        if (c >= 0xC2 && c <= 0xDF) {
+            len = 2;
+        }
+        else if (c >= 0xE0 && c <= 0xEF) {
+            len = 3;
+        }
+        else if (c >= 0xF0 && c <= 0xF4) {
+            len = 4;
+        }
+        else {
+            return false;
+        }
+
+        if (len > _string.size() - i) {
+            return false;
+        }
+
+        for (size_t j = 1; j < len; ++j) {
+            unsigned char b = static_cast<unsigned char>(_string[i + j]);
+            if ((b & 0xC0) != 0x80) {
+                return false;
+            }
+        }
+
+        unsigned char b1 = static_cast<unsigned char>(_string[i + 1]);
+        if (c == 0xE0 && b1 < 0xA0) return false;
+        if (c == 0xED && b1 > 0x9F) return false;
+        if (c == 0xF0 && b1 < 0x90) return false;
+        if (c == 0xF4 && b1 > 0x8F) return false;
+        i += len;
+    }
+    return true;
+}
+
 void B1String::makeUpper()
 {
     boost::to_upper(_string);
@@ -171,6 +216,18 @@ void B1String::vformat(std::string* result, const std::string& format, va_list a
         }
         i = t + 1;
         si = i;
+    }
+}
+
+void B1String::replace(const B1String& from, const B1String& to)
+{
+    if (from.isEmpty()) {
+        return;
+    }
+    size_t pos = 0;
+    while ((pos = _string.find(from.to_string(), pos)) != std::string::npos) {
+        _string.replace(pos, from.length(), to.to_string());
+        pos += to.length();
     }
 }
 

@@ -38,7 +38,7 @@ namespace BnD {
         bool _closed;
         B1AcceptorListener* _listener;
     private:
-        void acceptComplete(B1ServerSocket* serverSocket, const boost::system::error_code& error);
+        void acceptComplete(std::shared_ptr<B1ServerSocket> serverSocket, const boost::system::error_code& error);
     protected:
         void accept();
     public:

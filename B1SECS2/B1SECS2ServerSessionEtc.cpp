@@ -20,12 +20,6 @@ void B1SECS2ServerSession::onRecvMessageS1F1(uint16 sessionID, bool wait, const 
     sendMessageS1F0(sessionID, systemBytes);
 }
 
-void B1SECS2ServerSession::onRecvMessageS1F2(uint16 sessionID, const std::vector<uint8>& systemBytes)
-{
-    assert(false);
-    sendMessageS1F0(sessionID, systemBytes);
-}
-
 void B1SECS2ServerSession::onRecvMessageS1F3(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const std::vector<B1SECS2DataSVID>& svIDs)
 {
     assert(false);
@@ -139,10 +133,15 @@ void B1SECS2ServerSession::onRecvMessageS2F49(uint16 sessionID, bool wait, const
     sendMessageS2F0(sessionID, systemBytes);
 }
 
-void B1SECS2ServerSession::onRecvMessageS5F2(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC5& ackc5)
+void B1SECS2ServerSession::onRecvMessageS3F17(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes,
+                                              const B1SECS2DataDATAID& dataID,
+                                              const B1SECS2DataCARRIERACTION& carrierAction,
+                                              const B1SECS2DataCARRIERID& carrierID,
+                                              const B1SECS2DataPTN& ptn,
+                                              const std::map<B1SECS2DataCATTRID, B1SECS2DataCATTRDATA>& cattrData)
 {
     assert(false);
-    sendMessageS5F0(sessionID, systemBytes);
+    sendMessageS3F0(sessionID, systemBytes);
 }
 
 void B1SECS2ServerSession::onRecvMessageS5F3(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataALED& alED, const B1SECS2DataALID& alID)
@@ -161,12 +160,6 @@ void B1SECS2ServerSession::onRecvMessageS5F7(uint16 sessionID, bool wait, const 
 {
     assert(false);
     sendMessageS5F0(sessionID, systemBytes);
-}
-
-void B1SECS2ServerSession::onRecvMessageS6F12(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataACKC6& ackc6)
-{
-    assert(false);
-    sendMessageS6F0(sessionID, systemBytes);
 }
 
 void B1SECS2ServerSession::onRecvMessageS6F15(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataCEID& ceID)

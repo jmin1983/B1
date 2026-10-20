@@ -37,14 +37,14 @@ namespace BnD {
         mutable B1LockUtil<B1GEMConsts::CONTROL_STATE> _controlState;
         std::shared_ptr<B1GEMDataRepository> _dataRepository;
     protected:
-        virtual B1BaseSessionManager* createSessionManager() override;
+        virtual std::shared_ptr<B1BaseSessionManager> createSessionManager() override;
         bool isAcceptableSession(B1ServerSocket* serverSocket) final;
         void onServerSessionDisconnected(B1ServerSocket* serverSocket, int32 reason) final;
     protected:
         virtual bool implInitialize(int32 port) override;
         virtual void implFinalize() override;
     protected:
-        virtual B1GEMDataRepository* createDataRepository() = 0;
+        virtual std::shared_ptr<B1GEMDataRepository> createDataRepository() = 0;
         virtual void onCommStateChanged(B1GEMConsts::COMM_STATE newState) const {}
         virtual void onControlStateChanged(B1GEMConsts::CONTROL_STATE newState) const {}
     protected:

@@ -53,27 +53,6 @@ void B1PathInfo::addZoneIDs(const std::vector<int32>& zoneIDs)
     _zoneIDs.insert(_zoneIDs.end(), zoneIDs.begin(), zoneIDs.end());
 }
 
-int32 B1PathInfo::currentZoneID() const
-{
-    int32 zoneID = 0;
-    getZoneID(&zoneID, 0);
-    return zoneID;
-}
-
-bool B1PathInfo::getJunctionZoneIDsIfJunction(std::vector<int32>* result) const
-{
-    auto itr = _junctionIndex.find(_currentIndex);
-    if (itr == _junctionIndex.end()) {
-        return false;
-    }
-    for (++itr; itr != _junctionIndex.end(); ++itr) {
-        if (static_cast<int32>(_zoneIDs.size()) > *itr) {
-            result->push_back(_zoneIDs[*itr]);
-        }
-    }
-    return true;
-}
-
 void B1PathInfo::removeAfterCurrentIndex(uint32 offset)
 {
     if (static_cast<int32>(_zoneIDs.size()) > static_cast<int32>(_currentIndex + offset + 1)) {
@@ -106,6 +85,11 @@ void B1PathInfo::removeBeforeCurrentIndex()
     setCurrentIndex(0);
 }
 
+bool B1PathInfo::getCurrentZoneID(int32* zoneID) const
+{
+    return getZoneID(zoneID, 0);
+}
+
 void B1PathInfo::getCurrentZoneIDs(std::vector<int32>* zoneIDs, uint32 indexCount) const
 {
     zoneIDs->reserve(indexCount);
@@ -115,6 +99,20 @@ void B1PathInfo::getCurrentZoneIDs(std::vector<int32>* zoneIDs, uint32 indexCoun
         }
         zoneIDs->push_back(_zoneIDs[i]);
     }
+}
+
+bool B1PathInfo::getJunctionZoneIDsIfJunction(std::vector<int32>* result) const
+{
+    auto itr = _junctionIndex.find(_currentIndex);
+    if (itr == _junctionIndex.end()) {
+        return false;
+    }
+    for (++itr; itr != _junctionIndex.end(); ++itr) {
+        if (static_cast<int32>(_zoneIDs.size()) > *itr) {
+            result->push_back(_zoneIDs[*itr]);
+        }
+    }
+    return true;
 }
 
 bool B1PathInfo::getZoneID(int32* zoneID, int32 offset) const

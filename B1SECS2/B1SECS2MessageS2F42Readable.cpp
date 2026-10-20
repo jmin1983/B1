@@ -81,7 +81,7 @@ bool B1SECS2MessageS2F42Readable::implReadData()
         if (readSECS2Data(&cpAck) != true) {
             return false;
         }
-        _cps.insert(std::make_pair(cpName, cpAck));
+        _cps.emplace(cpName, cpAck);
     }
     return true;
 }

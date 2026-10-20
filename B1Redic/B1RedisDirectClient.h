@@ -61,7 +61,7 @@ namespace BnD {
         B1RedisDirectClientSubscribeSession* _subscribeSession;
         B1RedisDirectClientWriteSession* _writeSession;
     protected:
-        virtual B1BaseSessionManager* createSessionManager() override;
+        virtual std::shared_ptr<B1BaseSessionManager> createSessionManager() override;
         B1BaseClientSession* createSession(B1ClientSocket* clientSocket, void* param) final;
     public:
         int32 maxAliveCount() const { return _maxAliveCount; }

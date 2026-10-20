@@ -17,8 +17,6 @@
 #include <B1Network/B1BaseSocket.h>
 #include <B1Util/B1UtilMacro.h>
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1WebSocketReadWriteImpl::B1WebSocketReadWriteImpl(B1WebSocketReadWriteImplListener* listener)
@@ -40,6 +38,7 @@ B1WebSocketReadWriteImpl::Writer::Writer()
     : _owner(NULL)
     , _readyToWrite(true)
     , _textBunchHint(CONSTS_DEFAULT_TEXT_BUNCH_HINT)
+    , _maxDataSize(CONSTS_DEFAULT_MAX_DATA_SIZE)
 {
 }
 
@@ -119,12 +118,18 @@ void B1WebSocketReadWriteImpl::Writer::implThreadEnd()
 void B1WebSocketReadWriteImpl::Writer::addWriteBinary(std::vector<uint8>&& data)
 {
     B1AutoLock al(_lock);
+    if (_data.size() > _maxDataSize) {
+        _data.pop_front();
+    }
     _data.push_back(std::make_shared<BinaryData>(std::move(data)));
 }
 
 void B1WebSocketReadWriteImpl::Writer::addWriteText(B1String&& text)
 {
     B1AutoLock al(_lock);
+    if (_data.size() > _maxDataSize) {
+        _data.pop_front();
+    }
     _data.push_back(std::make_shared<TextData>(std::move(text)));
 }
 
@@ -132,20 +137,26 @@ void B1WebSocketReadWriteImpl::implWriteBinary(std::vector<uint8>&& data)
 {
     webSocketImpl()->webSocketStream()->binary(true);
 
-    auto temp = new std::vector<uint8>(std::move(data));
-    webSocketImpl()->webSocketStream()->async_write(boost::beast::net::buffer(*temp),
-                                                    boost::bind(&B1WebSocketReadWriteImpl::writeBinaryComplete, this,
-                                                                temp, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    auto temp = std::make_shared<std::vector<uint8> >(std::move(data));
+    webSocketImpl()->webSocketStream()->async_write(\
+        boost::beast::net::buffer(*temp),
+        [this, temp](const boost::system::error_code& error, size_t transferredBytes) {
+            this->writeBinaryComplete(temp, error, transferredBytes);
+        }
+    );
 }
 
 void B1WebSocketReadWriteImpl::implWriteText(B1String&& data)
 {
     webSocketImpl()->webSocketStream()->text(true);
 
-    auto temp = new std::string(std::move(const_cast<std::string&>(data.to_string())));
-    webSocketImpl()->webSocketStream()->async_write(boost::beast::net::buffer(*temp),
-                                                    boost::bind(&B1WebSocketReadWriteImpl::writeTextComplete, this,
-                                                                temp, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    auto temp = std::make_shared<std::string>(std::move(const_cast<std::string&>(data.to_string())));
+    webSocketImpl()->webSocketStream()->async_write(
+        boost::beast::net::buffer(*temp),
+        [this, temp](const boost::system::error_code& error, size_t transferredBytes) {
+            this->writeTextComplete(temp, error, transferredBytes);
+        }
+    );
 }
 
 B1BaseSocketImpl* B1WebSocketReadWriteImpl::createBaseSocketImpl()
@@ -156,9 +167,12 @@ B1BaseSocketImpl* B1WebSocketReadWriteImpl::createBaseSocketImpl()
 bool B1WebSocketReadWriteImpl::implRead()
 {
     try {
-        webSocketImpl()->webSocketStream()->async_read(_webSocketMessage->buffer(),
-                                                       boost::bind(&B1WebSocketReadWriteImpl::readComplete, this,
-                                                                   boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+        webSocketImpl()->webSocketStream()->async_read(
+            _webSocketMessage->buffer(),
+            [this](const boost::system::error_code& error, size_t receivedBytes) {
+                this->readComplete(error, receivedBytes);
+            }
+        );
     }
     catch (...) {
         return false;
@@ -199,10 +213,9 @@ void B1WebSocketReadWriteImpl::writeText(B1String&& text)
     implWriteText(std::move(text));
 }
 
-void B1WebSocketReadWriteImpl::writeBinaryComplete(std::vector<uint8>* data, const boost::system::error_code& error, size_t transferredBytes)
+void B1WebSocketReadWriteImpl::writeBinaryComplete(std::shared_ptr<std::vector<uint8> > data, const boost::system::error_code& error, size_t transferredBytes)
 {
     _writer.writeComplete();
-    delete data;
     if (error) {
         B1BaseReadWriteImpl::writeComplete(error, transferredBytes);
     }
@@ -213,10 +226,9 @@ void B1WebSocketReadWriteImpl::writeBinaryComplete(std::vector<uint8>* data, con
     }
 }
 
-void B1WebSocketReadWriteImpl::writeTextComplete(std::string* text, const boost::system::error_code& error, size_t transferredBytes)
+void B1WebSocketReadWriteImpl::writeTextComplete(std::shared_ptr<std::string> text, const boost::system::error_code& error, size_t transferredBytes)
 {
     _writer.writeComplete();
-    delete text;
     if (error) {
         B1BaseReadWriteImpl::writeComplete(error, transferredBytes);
     }

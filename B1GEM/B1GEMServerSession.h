@@ -25,7 +25,8 @@ namespace BnD {
     class B1GEMServer;
     class B1GEMServerSession : public B1SECS2ServerSession {
     public:
-        B1GEMServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener, uint16 secs2SessionID, B1GEMServer* owner);
+        B1GEMServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener, uint16 secs2SessionID, B1GEMServer* owner,
+                           uint32 timeoutT3, uint32 timeoutT6, uint32 timeoutT7, uint32 timeoutT8, uint32 timeoutLinkTest);
         virtual ~B1GEMServerSession();
     protected:
         bool _communicating;
@@ -56,7 +57,6 @@ namespace BnD {
     protected:
         virtual bool isAlarmEnabled(const B1SECS2DataALID& alID) const { return true; }
         virtual bool isEventEnabled(const B1SECS2DataCEID& ceID) const { return true; }
-        virtual void implSendMessageS1F13(uint16 sessionID, const std::vector<uint8>& systemBytes) = 0;
         virtual void implSendMessageS1F14(uint16 sessionID, const std::vector<uint8>& systemBytes, bool setCommunicatingResult) = 0;
         virtual void implSendMessageS1F16(uint16 sessionID, const std::vector<uint8>& systemBytes) = 0;
         virtual void implSendMessageS1F18(uint16 sessionID, const std::vector<uint8>& systemBytes, B1GEMConsts::CONTROL_STATE controlState) = 0;

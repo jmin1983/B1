@@ -69,7 +69,7 @@ void B1BaseServer::onServerSessionDisconnected(B1ServerSocket* serverSocket, int
 
 bool B1BaseServer::implStartup()
 {
-    _ioLooper.reset(new B1IOLooper());
+    _ioLooper = std::make_shared<B1IOLooper>();
     return _ioLooper->startup();
 }
 
@@ -84,7 +84,7 @@ void B1BaseServer::implShutdown()
 bool B1BaseServer::accept(uint16 port)
 {
     B1LOG("begin accept: port[%d]", port);
-    _acceptor.reset(new B1Acceptor(_ioLooper->ioContext()));
+    _acceptor = std::make_shared<B1Acceptor>(_ioLooper->ioContext());
     if (_acceptor->initialize(port, this) != true) {
         _acceptor.reset();
         return false;

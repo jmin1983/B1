@@ -22,7 +22,7 @@ void B1SECS2ServerSession::recvMessageS64F0(uint16 sessionID, const std::vector<
 
 void B1SECS2ServerSession::recvMessageS64F1(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS64F1Readable messageS64F1(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS64F1Readable messageS64F1(wait, data, dataLength, serverSecs2DataManager());
     if (messageS64F1.readData() != true) {
         writeLog("sendMessageS64F0");
         sendMessageS64F0(sessionID, systemBytes);

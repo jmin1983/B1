@@ -16,8 +16,6 @@
 
 #include <B1Base/B1Lock.h>
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1ArrayBufferReadWriteImpl::B1ArrayBufferReadWriteImpl(B1ArrayBufferReadWriteImplListener* listener, size_t recvBufferSize)
@@ -41,9 +39,12 @@ auto B1ArrayBufferReadWriteImpl::asioSocketImpl() const -> B1ASIOSocketImpl*
 
 bool B1ArrayBufferReadWriteImpl::implRead()
 {
-    asioSocketImpl()->getASIOSocket()->async_read_some(boost::asio::buffer(_recvBuffer),
-                                                       boost::bind(&B1ArrayBufferReadWriteImpl::readComplete, this,
-                                                                   boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    asioSocketImpl()->getASIOSocket()->async_read_some(
+        boost::asio::buffer(_recvBuffer),
+        [this](const boost::system::error_code& error, std::size_t receivedBytes) {
+            this->readComplete(error, receivedBytes);
+        }
+    );
     return true;
 }
 
@@ -97,12 +98,14 @@ void B1ArrayBufferReadWriteImpl::writeData(std::vector<uint8>&& data)
 {
     if (asioSocketImpl()->getASIOSocket()->is_open() != true) {
         B1LOG("socket is not opened!");
-        //assert(false);
     }
     _sendBuffer = std::move(data);
-    boost::asio::async_write(*asioSocketImpl()->getASIOSocket(), boost::asio::buffer(&_sendBuffer[0], _sendBuffer.size()),
-                             boost::bind(&B1ArrayBufferReadWriteImpl::writeComplete, this,
-                                         boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    boost::asio::async_write(
+        *asioSocketImpl()->getASIOSocket(), boost::asio::buffer(_sendBuffer),
+        [this](const boost::system::error_code& ec, std::size_t bytes_transferred) {
+            this->writeComplete(ec, bytes_transferred);
+        }
+    );
 }
 
 void B1ArrayBufferReadWriteImpl::requestWriteData(const uint8* data, size_t size)

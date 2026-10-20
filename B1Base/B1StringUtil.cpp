@@ -105,7 +105,7 @@ void B1StringUtil::hexaStringToBinary(const B1String& source, std::vector<uint8>
 bool B1StringUtil::vectorIntToString(const std::vector<int32>& source, B1String* result)
 {
     B1Archive archive;
-    archive.writeData("B1VectorInt32", source);
+    archive.writeData("BnDVectorInt32", source);
     return archive.toString(result);
 }
 
@@ -114,5 +114,8 @@ bool B1StringUtil::stringToVectorInt(const B1String& source, std::vector<int32>*
     B1Archive archive;
     archive.fromString(source);
     std::vector<int32>().swap(*result);
-    return archive.readData("B1VectorInt32", result);
+    if (archive.readData("BnDVectorInt32", result)) {
+        return true;
+    }
+    return archive.readData("B1VectorInt32", result);   //  for compatibility with B1. WARNING: do not remove this code.
 }

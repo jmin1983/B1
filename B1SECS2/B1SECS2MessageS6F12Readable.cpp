@@ -14,8 +14,8 @@
 
 using namespace BnD;
 
-B1SECS2MessageS6F12Readable::B1SECS2MessageS6F12Readable(bool wait, const uint8* data, uint32 dataLength, const B1SECS2DataManager* dataManager)
-    : B1SECS2MessageReadable(wait, 6, 12, "recvMessageS6F12", data, dataLength, dataManager)
+B1SECS2MessageS6F12Readable::B1SECS2MessageS6F12Readable(const uint8* data, uint32 dataLength, const B1SECS2DataManager* dataManager)
+    : B1SECS2MessageReadable(false, 6, 12, "recvMessageS6F12", data, dataLength, dataManager)
     , _ackc6(dataManager)
 {
 }

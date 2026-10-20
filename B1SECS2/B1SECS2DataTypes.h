@@ -26,6 +26,7 @@ namespace BnD {
         enum INDEX {
             INDEX_ACKC5 = 0,
             INDEX_ACKC6,
+            INDEX_ACKC10,
             INDEX_ALCD,
             INDEX_ALED,
             INDEX_ALID,
@@ -62,11 +63,21 @@ namespace BnD {
             INDEX_SV,       //  SV: B1SECS2Data + list
             INDEX_SVID,
             INDEX_SVNAME,
+            INDEX_TEXT,
             INDEX_TIACK,
+            INDEX_TID,
             INDEX_TIME,
             INDEX_UNITS,
             INDEX_VID,
             INDEX_V,
+            INDEX_CARRIERACTION,
+            INDEX_CARRIERID,
+            INDEX_PTN,
+            INDEX_CATTRID,
+            INDEX_CATTRDATA,
+            INDEX_CAACK,
+            INDEX_ERRCODE,
+            INDEX_ERRTEXT,
 
             INDEX_SEPERATOR_END,
             INDEX_SEPERATOR_BEGIN = INDEX_ACKC5,
@@ -101,11 +112,13 @@ namespace BnD {
 #define SECS2_DATA_LIST_TYPE_IMPL(d) \
     class B1SECS2Data##d : public B1SECS2DataBase { public:\
         B1SECS2Data##d(std::shared_ptr<B1SECS2Data> data) : B1SECS2DataBase(INDEX_##d, data) {}\
-        std::list<std::shared_ptr<B1SECS2Data> > _list; /*중간에 LIST가 나와도 최종 개수는 변경 없다. LIST 존재 여부에 상관 없이 모든 아이템 전부 합친게 여기 들어감.*/ \
+        std::list<std::shared_ptr<B1SECS2Data> > _list; /*The final count does not change even if "LIST" appears in the middle of data. The total of all items is displayed here regardless of the presence of "LIST".*/ \
+        B1String toString(int32 depth) const;\
     }
 
     SECS2_DATA_TYPE_IMPL(ACKC5);
     SECS2_DATA_TYPE_IMPL(ACKC6);
+    SECS2_DATA_TYPE_IMPL(ACKC10);
     SECS2_DATA_TYPE_IMPL(ALCD);
     SECS2_DATA_TYPE_IMPL(ALED);
     SECS2_DATA_TYPE_IMPL(ALID);
@@ -142,11 +155,21 @@ namespace BnD {
     SECS2_DATA_LIST_TYPE_IMPL(SV);
     SECS2_DATA_TYPE_IMPL(SVID);
     SECS2_DATA_TYPE_IMPL(SVNAME);
+    SECS2_DATA_TYPE_IMPL(TEXT);
     SECS2_DATA_TYPE_IMPL(TIACK);
+    SECS2_DATA_TYPE_IMPL(TID);
     SECS2_DATA_TYPE_IMPL(TIME);
     SECS2_DATA_TYPE_IMPL(UNITS);
     SECS2_DATA_TYPE_IMPL(VID);
     SECS2_DATA_LIST_TYPE_IMPL(V);
+    SECS2_DATA_TYPE_IMPL(CARRIERACTION);
+    SECS2_DATA_TYPE_IMPL(CARRIERID);
+    SECS2_DATA_TYPE_IMPL(PTN);
+    SECS2_DATA_TYPE_IMPL(CATTRID);
+    SECS2_DATA_TYPE_IMPL(CATTRDATA);
+    SECS2_DATA_TYPE_IMPL(CAACK);
+    SECS2_DATA_TYPE_IMPL(ERRCODE);
+    SECS2_DATA_TYPE_IMPL(ERRTEXT);
 }   //  !BnD
 
 #endif  // !_B1SECS2_DATA_TYPES_H

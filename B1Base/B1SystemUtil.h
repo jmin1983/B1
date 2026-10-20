@@ -48,8 +48,14 @@ namespace BnD {
         int terminateProcess(int pid);
         bool rebootSystem();
         bool dropCaches();  // works on linux_system only.
-        bool getHostName(B1String* name);
         bool getLocalNetworkAddresses(std::list<B1String>* addresses);
+        bool getHostName(B1String* name);
+        bool isSystemWindows();
+        bool isSystemLinux();
+        bool isSystemX86();
+        bool isSystemX64();
+        bool isSystemARM32();
+        bool isSystemARM64();
     }
 }   //  !BnD
 

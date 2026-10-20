@@ -20,13 +20,13 @@ using namespace BnD;
 void B1SECS2ServerSession::sendMessageS6F11(uint16 sessionID, const std::vector<uint8>& systemBytes,
                                           const B1SECS2DataDATAID& dataID, const B1SECS2DataCEID& ceID, const std::map<B1SECS2DataRPTID, std::list<B1SECS2DataV> >& reportsData)
 {
-    _t6Checker.reset();
     B1SECS2MessageS6F11Writable messageS6F11(dataID, ceID, reportsData);
     if (messageS6F11.writeData() != true) {
         writeLog("sendMessageS6F0");
         sendMessageS6F0(sessionID, systemBytes);
         return;
     }
+    _t6Checker.reset();
     sendDataMessage(sessionID, systemBytes, messageS6F11);
 }
 

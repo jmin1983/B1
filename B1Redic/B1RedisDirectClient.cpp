@@ -43,9 +43,9 @@ B1RedisDirectClient::~B1RedisDirectClient()
 {
 }
 
-B1BaseSessionManager* B1RedisDirectClient::createSessionManager()
+auto B1RedisDirectClient::createSessionManager() -> std::shared_ptr<B1BaseSessionManager>
 {
-    return new B1BaseSessionManager(CONSTS_CONNECTED_CHECK_INTERVAL);
+    return std::make_shared<B1BaseSessionManager>(CONSTS_CONNECTED_CHECK_INTERVAL);
 }
 
 B1BaseClientSession* B1RedisDirectClient::createSession(B1ClientSocket* clientSocket, void* param)

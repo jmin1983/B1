@@ -17,13 +17,13 @@
 
 using namespace BnD;
 
-bool B1SECS2ClientSession::sendMessageS6F12(const B1SECS2DataACKC6& ackc6)
+bool B1SECS2ClientSession::sendMessageS6F12(const std::vector<uint8>& systemBytes, const B1SECS2DataACKC6& ackc6)
 {
     B1SECS2MessageS6F12Writable message(ackc6);
     if (message.writeData() != true) {
         return false;
     }
-    sendDataMessage(makeNewSystemBytes(), message);
+    sendDataMessage(systemBytes, message);
     return true;
 }
 

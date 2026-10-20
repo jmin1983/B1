@@ -14,8 +14,6 @@
 
 #include <B1Network/B1SSLContext.h>
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1SecureSocketImpl::B1SecureSocketImpl(const B1SSLContext& sslContext)

@@ -1,0 +1,37 @@
+//
+// B1SECS2MessageS10F2Readable.h
+//
+// Library: B1SECS2
+// Package: S10
+// Module:  B1SECS2
+//
+// Written by jmin1983@gmail.com
+// Feel free to use, for any purpose.
+//
+
+#ifndef _B1SECS2_MESSAGE_S10F2_READABLE_H
+#define _B1SECS2_MESSAGE_S10F2_READABLE_H
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#pragma once
+#endif
+
+#include <B1SECS2/B1SECS2MessageReadable.h>
+
+namespace BnD {
+    class B1SECS2MessageS10F2Readable : public B1SECS2MessageReadable {
+    public:
+        B1SECS2MessageS10F2Readable(const uint8* data, uint32 dataLength, const B1SECS2DataManager* dataManager);
+        virtual ~B1SECS2MessageS10F2Readable();
+    protected:
+        B1SECS2DataACKC10 _ackc10;
+    protected:
+        virtual B1String fullName() override;
+        virtual void implToString(B1String* string) override;
+        virtual bool implReadData() override;
+    public:
+        const B1SECS2DataACKC10& ackc10() const { return _ackc10; }
+    };
+}   //  !BnD
+
+#endif  // !_B1SECS2_MESSAGE_S10F2_READABLE_H

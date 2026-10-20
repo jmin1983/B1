@@ -53,7 +53,7 @@ void B1GEMEventRepository::deleteAllReports()
     }
 }
 
-B1GEMEventRepository::RESULT B1GEMEventRepository::linkReport(const std::map<B1SECS2DataCEID, std::list<std::shared_ptr<B1SECS2DataRPTID> > >& linkData)
+auto B1GEMEventRepository::linkReport(const std::map<B1SECS2DataCEID, std::list<std::shared_ptr<B1SECS2DataRPTID> > >& linkData) -> RESULT
 {
     B1AutoLock al(_lock);
     std::map<const B1SECS2DataCEID, SPGEMEvent> events;
@@ -111,7 +111,7 @@ bool B1GEMEventRepository::getAvailableCEIDs(const std::vector<B1SECS2DataCEID>&
     return true;
 }
 
-SPGEMEvent B1GEMEventRepository::findEvent(const B1SECS2DataCEID& ceID) const
+auto B1GEMEventRepository::findEvent(const B1SECS2DataCEID& ceID) const -> SPGEMEvent
 {
     B1AutoLock al(_lock);
     auto itr = _events.find(ceID);

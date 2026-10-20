@@ -175,6 +175,36 @@ int32 B1Time::daysInMonth(int32 year, int32 month)
     return (isLeapYear(year) && month == 2) ? days + 1 : days;
 }
 
+int64 B1Time::adjustSecondsForTimeZone(const B1String& timezone)
+{
+    //  TODO: use libboost_date_time.
+    static const std::unordered_map<std::string, int32> s_tz_table = {
+        {"America/Costa_Rica",  -6 * 3600},
+        {"America/Los_Angeles", -8 * 3600},
+        {"America/New_York",    -5 * 3600},
+        {"America/Santiago",    -3 * 3600},
+        {"Asia/Beijing",        8 * 3600},
+        {"Asia/Chongqing",      8 * 3600},
+        {"Asia/Qatar",          3 * 3600},
+        {"Asia/Saigon",         7 * 3600},
+        {"Asia/Seoul",          9 * 3600},
+        {"Asia/Shanghai",       8 * 3600},
+        {"Asia/Singapore",      8 * 3600},
+        {"Asia/Tokyo",          9 * 3600},
+        {"Australia/Perth",     8 * 3600},
+        {"Australia/Sydney",    11 * 3600},
+        {"Europe/Zurich",       1 * 3600},
+        {"UTC",                 0},
+        {"GMT",                 0}
+    };
+    auto itr = s_tz_table.find(timezone.to_string());
+    if (itr != s_tz_table.end()) {
+        return itr->second;
+    }
+    assert(false);
+    return 0;
+}
+
 B1Time B1Time::currentTime()
 {
     time_t64 t = static_cast<time_t64>(time(0));
@@ -329,79 +359,33 @@ void B1Time::setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds)
     }
 }
 
-bool B1Time::setCurrentTime(const B1Time& t)
+bool B1Time::setCurrentTime(int64 seconds, int32 microSecond)
 {
+    if (microSecond < 0 || microSecond >= 1'000'000) {
+        return false;
+    }
 #if defined(_WIN32)
-    assert(false);  //  not supported.
-    return false;
+    return false;   //  not supported.
 #else
-    assert(t.isValid());
-    struct timespec ts;
-    ts.tv_sec = t.to_time_t();
-    ts.tv_nsec = 0;
-    return clock_settime(CLOCK_REALTIME, &ts) == 0;
+    timespec ts{};
+    ts.tv_sec = static_cast<time_t>(seconds);
+    ts.tv_nsec = static_cast<long>(microSecond) * 1'000L;
+    return ::clock_settime(CLOCK_REALTIME, &ts) == 0;
 #endif
 }
 
-bool B1Time::setCurrentTime(const B1String& millisecondsString)
+bool B1Time::setCurrentTime(const B1Time& t, int32 microSecond)
 {
-    if (millisecondsString.length() != 16) {
-        assert(false);
-        return false;
-    }
-    int32 year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0, csecond = 0;
-    try { year =    millisecondsString.substring(0, 4).toInt32(); } catch (...) { return false; }
-    try { month =   millisecondsString.substring(4, 2).toInt32(); } catch (...) { return false; }
-    try { day =     millisecondsString.substring(6, 2).toInt32(); } catch (...) { return false; }
-    try { hour =    millisecondsString.substring(8, 2).toInt32(); } catch (...) { return false; }
-    try { minute =  millisecondsString.substring(10, 2).toInt32(); } catch (...) { return false; }
-    try { second =  millisecondsString.substring(12, 2).toInt32(); } catch (...) { return false; }
-    try { csecond = millisecondsString.substring(14, 2).toInt32(); } catch (...) { return false; }
-
-    B1Time t(year, month, day, hour, minute, second);
     if (t.isValid() != true) {
         assert(false);
         return false;
     }
-#if defined(_WIN32)
-    return true;    //  not supported.
-#else
-    struct timespec ts;
-    ts.tv_sec = t.to_time_t();
-    ts.tv_nsec = csecond * 10000;
-    return clock_settime(CLOCK_REALTIME, &ts) == 0;
-#endif
+    return setCurrentTime(t.to_time_t(), microSecond);
 }
 
-bool B1Time::setCurrentTimeZone(const B1String& timezone)
+void B1Time::setCurrentTimeZone(const B1String& timezone)
 {
-    //  TODO: use libboost_date_time.
-    static const std::unordered_map<std::string, int32> s_tz_table = {
-        {"America/Costa_Rica",  -6 * 3600},
-        {"America/Los_Angeles", -8 * 3600},
-        {"America/New_York",    -5 * 3600},
-        {"America/Santiago",    -3 * 3600},
-        {"Asia/Beijing",        8 * 3600},
-        {"Asia/Chongqing",      8 * 3600},
-        {"Asia/Qatar",          3 * 3600},
-        {"Asia/Saigon",         7 * 3600},
-        {"Asia/Seoul",          9 * 3600},
-        {"Asia/Shanghai",       8 * 3600},
-        {"Asia/Singapore",      8 * 3600},
-        {"Asia/Tokyo",          9 * 3600},
-        {"Australia/Perth",     8 * 3600},
-        {"Australia/Sydney",    11 * 3600},
-        {"Europe/Zurich",       1 * 3600},
-        {"UTC",                 0},
-        {"GMT",                 0}
-    };
-
-    auto itr = s_tz_table.find(timezone.to_string());
-    if (itr != s_tz_table.end()) {
-        _adjustCurrentTimeZoneSeconds = itr->second;
-        return true;
-    }
-    return false;
+    _adjustCurrentTimeZoneSeconds = adjustSecondsForTimeZone(timezone);
 }
 
 bool BnD::isSameDate(const B1Time& t1, const B1Time& t2)

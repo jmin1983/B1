@@ -21,7 +21,7 @@
 namespace BnD {
     class B1SECS2MessageS6F12Readable : public B1SECS2MessageReadable {
     public:
-        B1SECS2MessageS6F12Readable(bool wait, const uint8* data, uint32 dataLength, const B1SECS2DataManager* dataManager);
+        B1SECS2MessageS6F12Readable(const uint8* data, uint32 dataLength, const B1SECS2DataManager* dataManager);
         virtual ~B1SECS2MessageS6F12Readable();
     protected:
         B1SECS2DataACKC6 _ackc6;

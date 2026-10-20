@@ -137,6 +137,11 @@ bool B1Encryptor::decryptAES256(const B1String& key, const std::vector<uint8>& s
     return true;
 }
 
+void B1Encryptor::encodeBase64(const B1String& source, B1String* result)
+{
+    encodeBase64(std::vector<uint8>(source.cString(), source.cString() + source.length()), result);
+}
+
 void B1Encryptor::encodeBase64(const std::vector<uint8>& source, B1String* result)
 {
     const char base64digits[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -170,6 +175,22 @@ void B1Encryptor::encodeBase64(const std::vector<uint8>& source, B1String* resul
     catch (...) {
         result->clear();
     }
+}
+
+bool B1Encryptor::decodeBase64(const B1String& source, B1String* result)
+{
+    std::vector<uint8> data;
+    if (decodeBase64(source, &data) != true) {
+        return false;
+    }
+    data.push_back(0);
+    try {
+        result->from((char*)&data[0]);
+    }
+    catch (...) {
+        return false;
+    }
+    return true;
 }
 
 bool B1Encryptor::decodeBase64(const B1String& source, std::vector<uint8>* result)

@@ -88,6 +88,7 @@ namespace BnD {
         static struct tm to_struct_tm(int64 seconds);
         static bool isLeapYear(int32 year);
         static int32 daysInMonth(int32 year, int32 month);
+        static int64 adjustSecondsForTimeZone(const B1String& timezone);
         static B1Time currentTime();
         static B1String currentTimeInSeconds(bool pretty = false);
         static B1String currentTimeInMilliseconds(bool pretty = false, int64* currentSecond = NULL, int32* currentMicroSecond = NULL);
@@ -98,9 +99,9 @@ namespace BnD {
         static bool getCurrentTime(int64* second, int32* microSecond = NULL);
         static void getSystemTime(int64* second, int32* microSecond = NULL);
         static void setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds);
-        static bool setCurrentTimeZone(const B1String& timezone);
-        static bool setCurrentTime(const B1Time& t);                    //  not supported in Windows.
-        static bool setCurrentTime(const B1String& millisecondsString); //  not supported in Windows.
+        static void setCurrentTimeZone(const B1String& timezone);
+        static bool setCurrentTime(int64 seconds, int32 microSecond);   //  not supported in Windows.
+        static bool setCurrentTime(const B1Time& t, int32 microSecond); //  not supported in Windows.
     public:
         B1Time& operator=(const B1Time& t) { set(t); return *this; }
         bool operator==(const B1Time& t) const { return _value == t._value; }

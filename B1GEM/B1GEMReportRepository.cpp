@@ -36,7 +36,7 @@ bool B1GEMReportRepository::isDeleteReportRequested(const std::list<std::shared_
     return newVIDs.empty();
 }
 
-B1GEMReportRepository::RESULT B1GEMReportRepository::updateReport(const std::map<B1SECS2DataRPTID, std::list<std::shared_ptr<B1SECS2DataVID> > >& newReports)
+auto B1GEMReportRepository::updateReport(const std::map<B1SECS2DataRPTID, std::list<std::shared_ptr<B1SECS2DataVID> > >& newReports) -> RESULT
 {
     bool deleteAllReportsRequested = isDeleteAllReportsRequested(newReports);
     B1AutoLock al(_lock);
@@ -75,14 +75,14 @@ B1GEMReportRepository::RESULT B1GEMReportRepository::updateReport(const std::map
     return RESULT_ACCEPTED;
 }
 
-SPGEMReport B1GEMReportRepository::findReport(const B1SECS2DataRPTID& rptID) const
+auto B1GEMReportRepository::findReport(const B1SECS2DataRPTID& rptID) const -> SPGEMReport
 {
     B1AutoLock al(_lock);
     auto itr = _reports.find(rptID);
     return itr != _reports.end() ? itr->second : SPGEMReport();
 }
 
-std::vector<SPGEMReport> B1GEMReportRepository::findReports(const std::vector<std::shared_ptr<B1SECS2DataRPTID> >& rptIDs) const
+auto B1GEMReportRepository::findReports(const std::vector<std::shared_ptr<B1SECS2DataRPTID> >& rptIDs) const -> std::vector<SPGEMReport>
 {
     B1AutoLock al(_lock);
     std::vector<SPGEMReport> reports;

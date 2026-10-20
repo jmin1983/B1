@@ -48,6 +48,7 @@ namespace BnD {
         protected:
             enum CONSTS {
                 CONSTS_DEFAULT_TEXT_BUNCH_HINT = 1024 * 512,
+                CONSTS_DEFAULT_MAX_DATA_SIZE = 100000,
             };
         protected:
             struct Data {
@@ -72,6 +73,7 @@ namespace BnD {
             B1WebSocketReadWriteImpl* _owner;
             bool _readyToWrite;
             uint32 _textBunchHint;
+            uint32 _maxDataSize;
             mutable B1Lock _lock;
             std::list<std::shared_ptr<Data> > _data;
         protected:
@@ -80,6 +82,7 @@ namespace BnD {
         public:
             void setOwner(B1WebSocketReadWriteImpl* owner) { _owner = owner; }
             void setTextBunchHint(uint32 value) { _textBunchHint = value; }
+            void setMaxDataSize(uint32 value) { _maxDataSize = value; }
             void addWriteBinary(std::vector<uint8>&& data);
             void addWriteText(B1String&& text);
             void writeComplete() { _readyToWrite = true; }
@@ -97,8 +100,8 @@ namespace BnD {
         B1WebSocketReadWriteImplListener* listener() const;
         void writeBinary(std::vector<uint8>&& data);
         void writeText(B1String&& text);
-        void writeBinaryComplete(std::vector<uint8>* data, const boost::system::error_code& error, size_t transferredBytes);
-        void writeTextComplete(std::string* text, const boost::system::error_code& error, size_t transferredBytes);
+        void writeBinaryComplete(std::shared_ptr<std::vector<uint8> > data, const boost::system::error_code& error, size_t transferredBytes);
+        void writeTextComplete(std::shared_ptr<std::string> text, const boost::system::error_code& error, size_t transferredBytes);
     public:
         void addWriteBinary(std::vector<uint8>&& data);
         void addWriteText(B1String&& text);

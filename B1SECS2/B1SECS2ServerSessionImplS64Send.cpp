@@ -17,11 +17,11 @@ using namespace BnD;
 
 void B1SECS2ServerSession::sendMessageS64F2(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataHCACK& hcAck, const std::map<B1SECS2DataCPNAME, B1SECS2DataCPACK>& cps)
 {
-    B1SECS2MessageS64F2Writable messageS66F2(hcAck, cps);
-    if (messageS66F2.writeData() != true) {
+    B1SECS2MessageS64F2Writable messageS64F2(hcAck, cps);
+    if (messageS64F2.writeData() != true) {
         writeLog("sendMessageS64F0");
         sendMessageS64F0(sessionID, systemBytes);
         return;
     }
-    sendDataMessage(sessionID, systemBytes, messageS66F2);
+    sendDataMessage(sessionID, systemBytes, messageS64F2);
 }

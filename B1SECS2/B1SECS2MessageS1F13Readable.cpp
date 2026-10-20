@@ -32,6 +32,7 @@ B1String B1SECS2MessageS1F13Readable::fullName()
 void B1SECS2MessageS1F13Readable::implToString(B1String* string)
 {
     appendStringDepth0List(_list.count(), string);
+    appendStringDepth0Closer(string);
 }
 
 bool B1SECS2MessageS1F13Readable::implReadData()

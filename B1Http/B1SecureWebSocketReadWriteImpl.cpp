@@ -14,8 +14,6 @@
 #include "B1SecureWebSocketImpl.h"
 #include "B1WebSocketMessage.h"
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1SecureWebSocketReadWriteImpl::B1SecureWebSocketReadWriteImpl(const B1SSLContext& sslContext, B1WebSocketReadWriteImplListener* listener)
@@ -32,20 +30,26 @@ void B1SecureWebSocketReadWriteImpl::implWriteBinary(std::vector<uint8>&& data)
 {
     secureWebSocketImpl()->secureWebSocketStream()->binary(true);
 
-    auto temp = new std::vector<uint8>(std::move(data));
-    secureWebSocketImpl()->secureWebSocketStream()->async_write(boost::beast::net::buffer(*temp),
-                                                                boost::bind(&B1SecureWebSocketReadWriteImpl::writeBinaryComplete, this, temp,
-                                                                            boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    auto temp = std::make_shared<std::vector<uint8> >(std::move(data));
+    secureWebSocketImpl()->secureWebSocketStream()->async_write(
+        boost::beast::net::buffer(*temp),
+        [this, temp](const boost::system::error_code& error, size_t transferredBytes) {
+            this->writeBinaryComplete(temp, error, transferredBytes);
+        }
+    );
 }
 
 void B1SecureWebSocketReadWriteImpl::implWriteText(B1String&& data)
 {
     secureWebSocketImpl()->secureWebSocketStream()->text(true);
 
-    auto temp = new std::string(std::move(const_cast<std::string&>(data.to_string())));
-    secureWebSocketImpl()->secureWebSocketStream()->async_write(boost::beast::net::buffer(*temp),
-                                                                boost::bind(&B1SecureWebSocketReadWriteImpl::writeTextComplete, this,
-                                                                            temp, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    auto temp = std::make_shared<std::string>(std::move(const_cast<std::string&>(data.to_string())));
+    secureWebSocketImpl()->secureWebSocketStream()->async_write(
+        boost::beast::net::buffer(*temp),
+        [this, temp](const boost::system::error_code& error, size_t transferredBytes) {
+            this->writeTextComplete(temp, error, transferredBytes);
+        }
+    );
 }
 
 B1BaseSocketImpl* B1SecureWebSocketReadWriteImpl::createBaseSocketImpl()
@@ -56,9 +60,12 @@ B1BaseSocketImpl* B1SecureWebSocketReadWriteImpl::createBaseSocketImpl()
 bool B1SecureWebSocketReadWriteImpl::implRead()
 {
     try {
-        secureWebSocketImpl()->secureWebSocketStream()->async_read(_webSocketMessage->buffer(),
-                                                                   boost::bind(&B1SecureWebSocketReadWriteImpl::readComplete, this,
-                                                                               boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+        secureWebSocketImpl()->secureWebSocketStream()->async_read(
+            _webSocketMessage->buffer(),
+            [this](const boost::system::error_code& error, size_t receivedBytes) {
+                this->readComplete(error, receivedBytes);
+            }
+        );
     }
     catch (...) {
         return false;

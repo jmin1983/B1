@@ -56,9 +56,9 @@ void B1HttpServer::onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSoc
     }
 }
 
-B1BaseSessionManager* B1HttpServer::createSessionManager()
+auto B1HttpServer::createSessionManager() -> std::shared_ptr<B1BaseSessionManager>
 {
-    return new B1HttpServerSessionManager();
+    return std::make_shared<B1HttpServerSessionManager>();
 }
 
 B1BaseServerSession* B1HttpServer::createSession(B1ServerSocket* serverSocket)

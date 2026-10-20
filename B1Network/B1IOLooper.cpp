@@ -34,7 +34,7 @@ void B1IOLooper::implLooperFunc()
 
 bool B1IOLooper::startup()
 {
-    _ioContext.reset(new B1IOContext(CONSTS_THREAD_COUNT_HINT));
+    _ioContext = std::make_shared<B1IOContext>(CONSTS_THREAD_COUNT_HINT);
     if (implStartup() != true) {
         _ioContext.reset();
         return false;

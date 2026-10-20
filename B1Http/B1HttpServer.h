@@ -35,7 +35,7 @@ namespace BnD {
     protected:
         void onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSocket, const B1HttpServerMessage& httpMessage) final;
     protected:
-        virtual B1BaseSessionManager* createSessionManager() override;
+        virtual std::shared_ptr<B1BaseSessionManager> createSessionManager() override;
         virtual B1BaseServerSession* createSession(B1ServerSocket* serverSocket) override;
     protected:
         virtual bool implInitialize(int32 port);

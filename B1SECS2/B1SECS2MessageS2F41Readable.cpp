@@ -81,7 +81,7 @@ bool B1SECS2MessageS2F41Readable::implReadData()
         if (cpVal == NULL) {
             return false;
         }
-        _cps.insert(std::make_pair(cpName, cpVal));
+        _cps.emplace(cpName, cpVal);
     }
     return true;
 }

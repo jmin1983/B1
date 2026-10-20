@@ -18,7 +18,7 @@ using namespace BnD;
 B1SECS2Server::B1SECS2Server(uint16 deviceID)
     : B1BaseServer()
     , _deviceID(deviceID)
-    , _secs2DataManager()
+    , _serverSecs2DataManager()
 {
 }
 
@@ -28,16 +28,21 @@ B1SECS2Server::~B1SECS2Server()
 
 B1BaseServerSession* B1SECS2Server::createSession(B1ServerSocket* serverSocket)
 {
-    return new B1SECS2ServerSession(serverSocket, this, _deviceID, this);
+    return new B1SECS2ServerSession(serverSocket, this, _deviceID, this,
+                                    B1HSMSMessage::TIME_OUT_DEFAULT_T3,
+                                    B1HSMSMessage::TIME_OUT_DEFAULT_T6,
+                                    B1HSMSMessage::TIME_OUT_DEFAULT_T7,
+                                    B1HSMSMessage::TIME_OUT_DEFAULT_T8,
+                                    B1HSMSMessage::TIME_OUT_DEFAULT_LINK_TEST);
 }
 
 bool B1SECS2Server::implInitialize(int32 port)
 {
-    _secs2DataManager.reset(createSECS2DataManager());
-    if (_secs2DataManager == NULL) {
+    _serverSecs2DataManager = createServerSECS2DataManager();
+    if (_serverSecs2DataManager == NULL) {
         return false;
     }
-    if (_secs2DataManager->initialize() != true) {
+    if (_serverSecs2DataManager->initialize() != true) {
         return false;
     }
     if (port < 1 || port - 1 > UINT16_MAX) {
@@ -56,9 +61,9 @@ void B1SECS2Server::implFinalize()
 {
     close();
     shutdown();
-    if (_secs2DataManager) {
-        _secs2DataManager->finalize();
-        _secs2DataManager.reset();
+    if (_serverSecs2DataManager) {
+        _serverSecs2DataManager->finalize();
+        _serverSecs2DataManager.reset();
     }
 }
 

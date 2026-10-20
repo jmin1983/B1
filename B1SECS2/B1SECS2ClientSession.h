@@ -36,7 +36,7 @@ namespace BnD {
     private:
         int32 _initialSystemByte;
     protected:
-        std::shared_ptr<B1SECS2DataManager> _secs2DataManager;
+        std::shared_ptr<B1SECS2DataManager> _clientSecs2DataManager;
         B1HSMSMessage _lastMessage;
         B1TimeChecker _t7Checker;
         B1TimeChecker _aliveChecker;
@@ -47,8 +47,10 @@ namespace BnD {
         void recvHSMSData(uint8 stream, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength, const std::vector<uint8>& messageHeader);
         bool recvHSMSDataStream1(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         bool recvHSMSDataStream2(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
+        bool recvHSMSDataStream3(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         bool recvHSMSDataStream5(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         bool recvHSMSDataStream6(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
+        bool recvHSMSDataStream10(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         bool recvHSMSDataStream64(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         void recvMessageS1F0(const std::vector<uint8>& systemBytes);
         void recvMessageS1F1(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
@@ -64,9 +66,16 @@ namespace BnD {
         void recvMessageS2F38(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         void recvMessageS2F42(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         void recvMessageS2F50(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
+        void recvMessageS3F0(const std::vector<uint8>& systemBytes);
+        void recvMessageS3F18(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
+        void recvMessageS5F0(const std::vector<uint8>& systemBytes);
         void recvMessageS5F1(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         void recvMessageS5F4(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         void recvMessageS6F11(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
+        void recvMessageS10F0(const std::vector<uint8>& systemBytes);
+        void recvMessageS10F1(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
+        void recvMessageS10F4(const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
+        void recvMessageS10F6(const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         void recvMessageS64F2(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength);
         void makeMessageHeader(uint8 stream, uint8 function, bool wait, uint8 stype, const std::vector<uint8>& systemBytes, std::vector<uint8>* result);
     protected:
@@ -87,15 +96,23 @@ namespace BnD {
                                         const B1SECS2DataHCACK& hcAck, const std::map<B1SECS2DataCPNAME, B1SECS2DataCPACK>& cps) {}
         virtual void onRecvMessageS2F50(const std::vector<uint8>& systemBytes,
                                         const B1SECS2DataHCACK& hcAck, const std::map<B1SECS2DataCPNAME, B1SECS2DataCEPACK>& cps) {}
+        virtual void onRecvMessageS3F0(const std::vector<uint8>& systemBytes) {}
+        virtual void onRecvMessageS3F18(const std::vector<uint8>& systemBytes,
+                                        const B1SECS2DataCAACK& hcAck, const std::map<B1SECS2DataERRCODE, B1SECS2DataERRTEXT>& errorText) {}
+        virtual void onRecvMessageS5F0(const std::vector<uint8>& systemBytes) {}
         virtual void onRecvMessageS5F1(bool wait, const std::vector<uint8>& systemBytes,
                                        const B1SECS2DataALCD& alcd, const B1SECS2DataALID& alid, const B1SECS2DataALTX& altx) {}
         virtual void onRecvMessageS5F4(const std::vector<uint8>& systemBytes, const B1SECS2DataACKC5& ackc5) {}
         virtual void onRecvMessageS6F11(bool wait, const std::vector<uint8>& systemBytes,
                                         const B1SECS2DataDATAID dataID, const B1SECS2DataCEID& ceID, const std::map<B1SECS2DataRPTID, std::vector<B1SECS2DataV> >& reportData) {}
+        virtual void onRecvMessageS10F0(const std::vector<uint8>& systemBytes) {}
+        virtual void onRecvMessageS10F1(bool wait, const std::vector<uint8>& systemBytes, const B1SECS2DataTID& tid, const B1SECS2DataTEXT& text) {}
+        virtual void onRecvMessageS10F4(const std::vector<uint8>& systemBytes, const B1SECS2DataACKC10& ackc10) {}
+        virtual void onRecvMessageS10F6(const std::vector<uint8>& systemBytes, const B1SECS2DataACKC10& ackc10) {}
         virtual void onRecvMessageS64F2(const std::vector<uint8>& systemBytes,
                                         const B1SECS2DataHCACK& hcAck, const std::map<B1SECS2DataCPNAME, B1SECS2DataCPACK>& cps) {}
     protected:
-        virtual std::shared_ptr<B1SECS2DataManager> createSECS2DataManager() = 0;
+        virtual std::shared_ptr<B1SECS2DataManager> createClientSECS2DataManager() = 0;
         virtual void onSelectCompleted() {}
         virtual void onDeselectCompleted() {}
         virtual bool onRecvHSMSData(uint8 stream, uint8 function) { return true; }  //  return false to send F0
@@ -107,7 +124,7 @@ namespace BnD {
         virtual void implProcessConnected(bool firstConnectedProcess) override;
     protected:
         uint16 deviceID() const { return static_cast<uint16>(sessionHandleID()); }
-        const B1SECS2DataManager* secs2DataManager() const { return _secs2DataManager.get(); }
+        const B1SECS2DataManager* clientSecs2DataManager() const { return _clientSecs2DataManager.get(); }
         std::vector<uint8> makeNewSystemBytes();
         bool toUint32FromSystemBytes(const std::vector<uint8>& systemBytes, int32* result) const;   //  return false if converting failed.
         void sendControlMessage(const std::vector<uint8>& systemBytes, B1SECS2Consts::CONTROL_MESSAGE controlMessage, bool wait = false);
@@ -119,7 +136,9 @@ namespace BnD {
         bool sendMessageS1F1(const std::vector<uint8>& systemBytes);
         bool sendMessageS1F2(const std::vector<uint8>& systemBytes);
         bool sendMessageS5F2(const B1SECS2DataACKC5& ackc5);
-        bool sendMessageS6F12(const B1SECS2DataACKC6& ackc6);
+        void sendMessageS6F0(const std::vector<uint8>& systemBytes) { sendMessageF0(6, systemBytes); }
+        bool sendMessageS6F12(const std::vector<uint8>& systemBytes, const B1SECS2DataACKC6& ackc6);
+        void sendMessageS10F0(const std::vector<uint8>& systemBytes) { sendMessageF0(10, systemBytes); }
     public:
         bool sendMessageS1F3(const std::list<B1SECS2DataSVID>& svIDs);
         bool sendMessageS1F11(const std::list<B1SECS2DataSVID>& svIDs);
@@ -140,11 +159,18 @@ namespace BnD {
         bool sendMessageS2F41(const B1SECS2DataRCMD& rcmd, const std::map<B1SECS2DataCPNAME, B1SECS2DataCPVAL>& cps);
         bool sendMessageS2F49(const B1SECS2DataDATAID& dataID, const B1SECS2DataOBJSPEC& objSpec, const B1SECS2DataRCMD& rcmd,
                               const std::map<B1SECS2DataCPNAME, B1SECS2DataCEPVAL>& cps);
+        bool sendMessageS3F17(const B1SECS2DataDATAID& dataID,
+                              const B1SECS2DataCARRIERACTION& carrierAction,
+                              const B1SECS2DataCARRIERID& carrierID,
+                              const B1SECS2DataPTN& ptn,
+                              const std::map<B1SECS2DataCATTRID, B1SECS2DataCATTRDATA>& cattrData);
         bool sendMessageS5F3(const B1SECS2DataALED& alED, const B1SECS2DataALID& alID);
         bool sendMessageS5F5(const B1SECS2DataALID& alID);
         bool sendMessageS5F7();
         bool sendMessageS6F15(const B1SECS2DataCEID& ceID);
         bool sendMessageS6F19(const B1SECS2DataRPTID& rptID);
+        bool sendMessageS10F3(const B1SECS2DataTID& tid, const B1SECS2DataTEXT& text);
+        bool sendMessageS10F5(const B1SECS2DataTID& tid, const std::vector<B1SECS2DataTEXT>& texts);
         bool sendMessageS64F1(const B1SECS2DataRCMD& rcmd, const std::map<B1SECS2DataCPNAME, B1SECS2DataCPVAL>& cps);
     };
 }   //  !BnD

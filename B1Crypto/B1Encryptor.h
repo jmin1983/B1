@@ -35,7 +35,9 @@ namespace BnD {
         static bool encryptAES256(const B1String& key, const B1String& source, std::vector<uint8>* result); //  key must be 32byte.
         static bool decryptAES256(const B1String& key, const std::vector<uint8>& source, B1String* result); //  key must be 32byte.
     public:
+        static void encodeBase64(const B1String& source, B1String* result);
         static void encodeBase64(const std::vector<uint8>& source, B1String* result);
+        static bool decodeBase64(const B1String& source, B1String* result);
         static bool decodeBase64(const B1String& source, std::vector<uint8>* result);
         static bool encryptAES256Base64(const B1String& key, const B1String& source, B1String* result);     //  key must be 32byte.
         static bool encryptAES256Hex(const B1String& key, const B1String& source, B1String* result);        //  key must be 32byte.

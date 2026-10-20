@@ -36,9 +36,9 @@ namespace BnD {
         std::shared_ptr<B1GEMVariableRepository> _variableRepository;
         std::shared_ptr<B1GEMReportRepository> _reportRepository;
     protected:
-        virtual B1GEMAlarmRepository* createAlarmRepository(const B1SECS2DataManager* secs2DataManager) = 0;        //  return NULL if init failed.
-        virtual B1GEMEventRepository* createEventRepository(const B1SECS2DataManager* secs2DataManager) = 0;        //  return NULL if init failed.
-        virtual B1GEMVariableRepository* createVariableRepository(const B1SECS2DataManager* secs2DataManager) = 0;  //  return NULL if init failed.
+        virtual std::shared_ptr<B1GEMAlarmRepository> createAlarmRepository(const B1SECS2DataManager* secs2DataManager) = 0;        //  return NULL if init failed.
+        virtual std::shared_ptr<B1GEMEventRepository> createEventRepository(const B1SECS2DataManager* secs2DataManager) = 0;        //  return NULL if init failed.
+        virtual std::shared_ptr<B1GEMVariableRepository> createVariableRepository(const B1SECS2DataManager* secs2DataManager) = 0;  //  return NULL if init failed.
     public:
         bool initialize(const B1SECS2DataManager* secs2DataManager);
         void finalize();

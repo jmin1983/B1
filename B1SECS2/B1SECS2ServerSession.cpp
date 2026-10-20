@@ -15,15 +15,19 @@
 #include "B1SECS2MessageWritable.h"
 
 #include <B1Base/B1Endian.h>
+#include <B1Base/B1TickUtil.h>
 
 #include <stdarg.h>
 
 using namespace BnD;
 using namespace B1SECS2Consts;
 
-B1SECS2ServerSession::B1SECS2ServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener, uint16 secs2SessionID, B1SECS2Server* owner)
+B1SECS2ServerSession::B1SECS2ServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener, uint16 secs2SessionID, B1SECS2Server* owner,
+                                           uint32 timeoutT3, uint32 timeoutT6, uint32 timeoutT7, uint32 timeoutT8, uint32 timeoutLinkTest)
     : B1ArrayBufferServerSession(serverSocket, listener)
     , _initialSystemByte(0)
+    , _t3CheckerLock()
+    , _t3Checker()
     , _secs2SessionID(secs2SessionID)
     , _owner(owner)
     , _t6Checker()
@@ -31,6 +35,12 @@ B1SECS2ServerSession::B1SECS2ServerSession(B1ServerSocket* serverSocket, B1BaseS
     , _t8Checker()
     , _selected(false)
     , _lastMessage()
+    , _lastLinkTestTick(0)
+    , _timeoutT3(timeoutT3)
+    , _timeoutT6(timeoutT6)
+    , _timeoutT7(timeoutT7)
+    , _timeoutT8(timeoutT8)
+    , _timeoutLinkTest(timeoutLinkTest)
 {
 }
 
@@ -41,6 +51,7 @@ B1SECS2ServerSession::~B1SECS2ServerSession()
 void B1SECS2ServerSession::recvHSMSMessage(const std::vector<uint8>& data)
 {
     _t8Checker.stop();
+    resetLastLinkTestTick();
     const size_t headerSize = 10;
     if (data.size() < headerSize) {
         writeLog("[ERROR]header length is too short");
@@ -94,7 +105,12 @@ void B1SECS2ServerSession::recvHSMSControl(uint16 sessionID, const std::vector<u
     switch (controlMessage) {
         case CONTROL_MESSAGE_DESELECT_REQ:
             _selected = false;
-            _t7Checker.start(B1HSMSMessage::TIME_OUT_T7);
+            {
+                const auto timeoutT7 = _timeoutT7;
+                if (timeoutT7 > 0) {
+                    _t7Checker.start(timeoutT7);
+                }
+            }
             sendControlMessage(sessionID, systemBytes, CONTROL_MESSAGE_DESELECT_RSP);
             onDeselectCompleted();
             break;
@@ -114,7 +130,17 @@ void B1SECS2ServerSession::recvHSMSControl(uint16 sessionID, const std::vector<u
 
 void B1SECS2ServerSession::recvHSMSData(uint16 sessionID, uint8 stream, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength, const std::vector<uint8>& messageHeader)
 {
-    writeLog("recvHSMSData: S[%u]F[%u]", stream, function);
+    {
+        int32 systemByte = 0;
+        if (toUint32FromSystemBytes(systemBytes, &systemByte)) {
+            B1LOG("recvHSMSData: S[%u]F[%u], systemByte[0x%X]", stream, function, systemByte);
+        }
+        else {
+            B1LOG("recvHSMSData: S[%u]F[%u]", stream, function);
+        }
+    }
+    endT3Timer(systemBytes);
+
     if (_selected != true) {
         writeLog("not selected: S[%u]F[%u]", stream, function);
         disconnect();
@@ -138,6 +164,12 @@ void B1SECS2ServerSession::recvHSMSData(uint16 sessionID, uint8 stream, uint8 fu
                 sendMessageS9F5(sessionID, makeNewSystemBytes(), messageHeader);
             }
             break;
+        case 3:
+            if (recvHSMSDataStream3(sessionID, function, wait, systemBytes, data, dataLength) != true) {
+                writeLog("recvHSMSDataStream3 failed: S[%u]F[%u]", stream, function);
+                sendMessageS9F5(sessionID, makeNewSystemBytes(), messageHeader);
+            }
+            break;
         case 5:
             if (recvHSMSDataStream5(sessionID, function, wait, systemBytes, data, dataLength) != true) {
                 writeLog("recvHSMSDataStream5 failed: S[%u]F[%u]", stream, function);
@@ -147,6 +179,12 @@ void B1SECS2ServerSession::recvHSMSData(uint16 sessionID, uint8 stream, uint8 fu
         case 6:
             if (recvHSMSDataStream6(sessionID, function, wait, systemBytes, data, dataLength) != true) {
                 writeLog("recvHSMSDataStream6 failed: S[%u]F[%u]", stream, function);
+                sendMessageS9F5(sessionID, makeNewSystemBytes(), messageHeader);
+            }
+            break;
+        case 10:
+            if (recvHSMSDataStream10(sessionID, function, wait, systemBytes, data, dataLength) != true) {
+                writeLog("recvHSMSDataStream10 failed: S[%u]F[%u]", stream, function);
                 sendMessageS9F5(sessionID, makeNewSystemBytes(), messageHeader);
             }
             break;
@@ -247,6 +285,21 @@ bool B1SECS2ServerSession::recvHSMSDataStream2(uint16 sessionID, uint8 function,
     return true;
 }
 
+bool B1SECS2ServerSession::recvHSMSDataStream3(uint16 sessionID, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+{
+    switch (function) {
+        case 0:
+            recvMessageS3F0(sessionID, systemBytes);
+            break;
+        case 17:
+            recvMessageS3F17(sessionID, wait, systemBytes, data, dataLength);
+            break;
+        default:
+            return false;
+    }
+    return true;
+}
+
 bool B1SECS2ServerSession::recvHSMSDataStream5(uint16 sessionID, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     switch (function) {
@@ -278,13 +331,34 @@ bool B1SECS2ServerSession::recvHSMSDataStream6(uint16 sessionID, uint8 function,
             recvMessageS6F0(sessionID, systemBytes);
             break;
         case 12:
-            recvMessageS6F12(sessionID, wait, systemBytes, data, dataLength);
+            recvMessageS6F12(sessionID, systemBytes, data, dataLength);
             break;
         case 15:
             recvMessageS6F15(sessionID, wait, systemBytes, data, dataLength);
             break;
         case 19:
             recvMessageS6F19(sessionID, wait, systemBytes, data, dataLength);
+            break;
+        default:
+            return false;
+    };
+    return true;
+}
+
+bool B1SECS2ServerSession::recvHSMSDataStream10(uint16 sessionID, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+{
+    switch (function) {
+        case 0:
+            recvMessageS10F0(sessionID, systemBytes);
+            break;
+        case 2:
+            recvMessageS10F2(sessionID, systemBytes, data, dataLength);
+            break;
+        case 3:
+            recvMessageS10F3(sessionID, wait, systemBytes, data, dataLength);
+            break;
+        case 5:
+            recvMessageS10F5(sessionID, wait, systemBytes, data, dataLength);
             break;
         default:
             return false;
@@ -329,9 +403,20 @@ void B1SECS2ServerSession::writeLog(const char* format, ...)
     b1log(s);
 }
 
-const B1SECS2DataManager* B1SECS2ServerSession::secs2DataManager() const
+const B1SECS2DataManager* B1SECS2ServerSession::serverSecs2DataManager() const
 {
-    return _owner->secs2DataManager();
+    return _owner->serverSecs2DataManager();
+}
+
+void B1SECS2ServerSession::resetLastLinkTestTick()
+{
+    _lastLinkTestTick = B1TickUtil::currentTick();
+}
+
+bool B1SECS2ServerSession::isLastLinkTestTimeout() const
+{
+    const auto timeoutLinkTest = _timeoutLinkTest;
+    return timeoutLinkTest > 0 ? B1TickUtil::diffTick(B1TickUtil::currentTick(), _lastLinkTestTick) > timeoutLinkTest : false;
 }
 
 std::vector<uint8> B1SECS2ServerSession::makeNewSystemBytes()
@@ -339,6 +424,39 @@ std::vector<uint8> B1SECS2ServerSession::makeNewSystemBytes()
     ++_initialSystemByte;
     size_t size = sizeof(_initialSystemByte);
     return std::vector<uint8>((uint8*)&_initialSystemByte, (uint8*)&_initialSystemByte + size);
+}
+
+void B1SECS2ServerSession::beginT3Timer(const std::vector<uint8>& systemBytes)
+{
+    const auto timeoutT3 = _timeoutT3;
+    if (timeoutT3 > 0) {
+        int32 systemByte = 0;
+        toUint32FromSystemBytes(systemBytes, &systemByte);
+        {
+            B1AutoLock al(_t3CheckerLock);
+            if (_t3Checker.find(systemBytes) != _t3Checker.end()) {
+                B1LOG("beginT3Timer failed. already began: systemByte[0x%X]", systemByte);
+                assert(false);
+                return;
+            }
+            else {
+                _t3Checker[systemBytes].start(timeoutT3);
+            }
+        }
+        B1LOG("beginT3Timer: systemByte[0x%X]", systemByte);
+    }
+}
+
+void B1SECS2ServerSession::endT3Timer(const std::vector<uint8>& systemBytes)
+{
+    size_t erasedCount = 0;
+    {
+        B1AutoLock al(_t3CheckerLock);
+        erasedCount = _t3Checker.erase(systemBytes);
+    }
+    int32 systemByte = 0;
+    toUint32FromSystemBytes(systemBytes, &systemByte);
+    B1LOG("endT3Timer: erasedCount[%d], systemByte[0x%X]", erasedCount, systemByte);
 }
 
 bool B1SECS2ServerSession::toUint32FromSystemBytes(const std::vector<uint8>& systemBytes, int32* result) const
@@ -356,7 +474,10 @@ bool B1SECS2ServerSession::toUint32FromSystemBytes(const std::vector<uint8>& sys
 
 void B1SECS2ServerSession::sendControlMessage(uint16 sessionID, const std::vector<uint8>& systemBytes, CONTROL_MESSAGE controlMessage, bool wait)
 {
-    writeLog("sendControlMessage: controlMessage[%d]", controlMessage);
+    writeLog("sendControlMessage: controlMessage[%d], wait[%d]", controlMessage, wait ? 1 : 0);
+    if (wait) {
+        beginT3Timer(systemBytes);
+    }
     uint32 messageLenth = 10;
     std::vector<uint8> message;
     message.reserve(messageLenth + sizeof(messageLenth));
@@ -370,12 +491,14 @@ void B1SECS2ServerSession::sendDataMessage(uint16 sessionID, const std::vector<u
 {
     int32 systemByte = 0;
     if (toUint32FromSystemBytes(systemBytes, &systemByte)) {
-        writeLog("sendDataMessage: S[%u]F[%u], systemByte[0x%X]", stream, function, systemByte);
+        writeLog("sendDataMessage: S[%u]F[%u], wait[%d], systemByte[0x%X]", stream, function, wait ? 1 : 0, systemByte);
     }
     else {
-        writeLog("sendDataMessage: S[%u]F[%u]", stream, function);
+        writeLog("sendDataMessage: S[%u]F[%u], wait[%d]", stream, function, wait ? 1 : 0);
     }
-
+    if (wait) {
+        beginT3Timer(systemBytes);
+    }
     uint32 messageLenth = 10;
     std::vector<uint8> message;
     message.reserve(messageLenth + sizeof(messageLenth));
@@ -389,12 +512,14 @@ void B1SECS2ServerSession::sendDataMessage(uint16 sessionID, const std::vector<u
 {
     int32 systemByte = 0;
     if (toUint32FromSystemBytes(systemBytes, &systemByte)) {
-        writeLog("sendDataMessage: S[%u]F[%u], systemByte[0x%X], items[%u]", stream, function, systemByte, static_cast<uint32>(items.size()));
+        writeLog("sendDataMessage: S[%u]F[%u], wait[%d], systemByte[0x%X], items[%u]", stream, function, wait ? 1 : 0, systemByte, static_cast<uint32>(items.size()));
     }
     else {
-        writeLog("sendDataMessage: S[%u]F[%u], items[%u]", stream, function, static_cast<uint32>(items.size()));
+        writeLog("sendDataMessage: S[%u]F[%u], wait[%d], items[%u]", stream, function, wait ? 1 : 0, static_cast<uint32>(items.size()));
     }
-
+    if (wait) {
+        beginT3Timer(systemBytes);
+    }
     uint32 messageLenth = 10;
     for (const auto& item : items) {
         messageLenth += static_cast<uint32>(item.size());
@@ -432,11 +557,31 @@ void B1SECS2ServerSession::implOnConnect()
     _initialSystemByte = rand();
     _lastMessage.reset();
     _selected = false;
-    _t6Checker.start(B1HSMSMessage::TIME_OUT_T6);
+    {
+        B1AutoLock al(_t3CheckerLock);
+        _t3Checker.clear();
+    }
+    {
+        const auto timeoutT6 = _timeoutT6;
+        if (timeoutT6 > 0) {
+            _t6Checker.start(timeoutT6);
+        }
+    }
     _t6Checker.stop();
-    _t7Checker.start(B1HSMSMessage::TIME_OUT_T7);
-    _t8Checker.start(B1HSMSMessage::TIME_OUT_T8);
+    {
+        const auto timeoutT7 = _timeoutT7;
+        if (timeoutT7 > 0) {
+            _t7Checker.start(timeoutT7);
+        }
+    }
+    {
+        const auto timeoutT8 = _timeoutT8;
+        if (timeoutT8 > 0) {
+            _t8Checker.start(timeoutT8);
+        }
+    }
     _t8Checker.stop();
+    resetLastLinkTestTick();
 }
 
 void B1SECS2ServerSession::onReadComplete(uint8* data, size_t dataSize)
@@ -507,6 +652,25 @@ void B1SECS2ServerSession::implProcessConnected(bool firstConnectedProcess)
             return;
         }
     }
+    {
+        std::vector<uint8> timedoutSystemBytes; //  set if timedout.
+        {
+            B1AutoLock al(_t3CheckerLock);
+            for (auto& t3Checker : _t3Checker) {
+                if (t3Checker.second.isTimeover()) {
+                    timedoutSystemBytes = t3Checker.first;
+                    break;
+                }
+            }
+        }
+        if (timedoutSystemBytes.empty() != true) {
+            int32 timedoutSystemByte = 0;
+            toUint32FromSystemBytes(timedoutSystemBytes, &timedoutSystemByte);
+            writeLog("T3 Timed out: systemByte[0x%X]", timedoutSystemByte);
+            disconnect();
+            return;
+        }
+    }
     if (_t6Checker.isTimeover(false)) {
         writeLog("T6 Timed out");
         disconnect();
@@ -516,5 +680,44 @@ void B1SECS2ServerSession::implProcessConnected(bool firstConnectedProcess)
         writeLog("T8 Timed out");
         disconnect();
         return;
+    }
+    if (isLastLinkTestTimeout()) {
+        writeLog("LinkTest Timed out");
+        disconnect();
+        return;
+    }
+}
+
+void B1SECS2ServerSession::setHSMSTimeoutValue(uint32 timeoutT3, uint32 timeoutT6, uint32 timeoutT8, uint32 timeoutLinkTest)
+{
+    B1LOG("HSMS timeout value modified: timeoutT3[%d->%d], timeoutT6[%d->%d], timeoutT8[%d->%d], timeoutLinkTest[%d->%d]",
+        _timeoutT3, timeoutT3, _timeoutT6, timeoutT6, _timeoutT8, timeoutT8, _timeoutLinkTest, timeoutLinkTest);
+
+    if (timeoutT3 != _timeoutT3) {
+        {
+            B1AutoLock al(_t3CheckerLock);
+            _t3Checker.clear();
+        }
+        _timeoutT3 = timeoutT3;
+    }
+    if (timeoutT6 != _timeoutT6) {
+        _t6Checker.stop();
+        if (timeoutT6 > 0) {
+            _t6Checker.start(timeoutT6);
+            _t6Checker.stop();
+        }
+        _timeoutT6 = timeoutT6;
+    }
+    if (timeoutT8 != _timeoutT8) {
+        _t8Checker.stop();
+        if (timeoutT8 > 0) {
+            _t8Checker.start(timeoutT8);
+            _t8Checker.stop();
+        }
+        _timeoutT8 = timeoutT8;
+    }
+    if (timeoutLinkTest != _timeoutLinkTest) {
+        resetLastLinkTestTick();
+        _timeoutLinkTest = timeoutLinkTest;
     }
 }

@@ -28,7 +28,7 @@ namespace BnD {
         virtual bool implStartup() { return true; }
         virtual void implShutdown() {}
     protected:
-        virtual B1BaseSessionManager* createSessionManager();
+        virtual std::shared_ptr<B1BaseSessionManager> createSessionManager();
     protected:
         B1BaseSessionManager* sessionManager() const { return _sessionManager.get(); }
     public:

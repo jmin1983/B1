@@ -54,3 +54,47 @@ B1SECS2DataBase* B1SECS2DataBase::clone() const
 {
     return new B1SECS2DataBase(_index, std::shared_ptr<B1SECS2Data>(data()->clone()));
 }
+
+B1String B1SECS2DataCEPVAL::toString(int32 depth) const
+{
+    B1String string;
+    for (int32 i = 0; i < depth; ++i) {
+        string.append("  ");
+    }
+    string.appendf("%s\n", _data->toString().cString());
+    bool listBegin = false;
+    for (auto element : _list) {
+        for (int32 i = 0; i < depth + 1; ++i) {
+            string.append("  ");
+        }
+        if (element->isFormatList()) {
+            if (listBegin) {
+                string.appendf(">\n");
+                for (int32 i = 0; i < depth + 1; ++i) {
+                    string.append("  ");
+                }
+            }
+            string.appendf("%s\n", element->toString().cString());
+            listBegin = true;
+        }
+        else {
+            if (listBegin) {
+                string.appendf("  ");
+            }
+            string.appendf("%s\n", element->toString().cString());
+        }
+    }
+    if (listBegin) {
+        for (int32 i = 0; i < depth + 1; ++i) {
+            string.append("  ");
+        }
+        string.appendf(">\n");
+    }
+    if (_data->isFormatList()) {
+        for (int32 i = 0; i < depth; ++i) {
+            string.append("  ");
+        }
+        string.appendf(">\n");
+    }
+    return string;
+}

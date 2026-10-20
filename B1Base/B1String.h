@@ -48,11 +48,13 @@ namespace BnD {
         int32 compare(const B1String& s) const { return _string.compare(s._string); }
         int32 compare(uint32 index, uint32 length, const B1String& s) const;
         bool caseInsensitiveCompare(const B1String& s) const;
+        bool isUTF8() const;
         void makeUpper();
         void makeLower();
         void trim();
         void trimLeft();
         void trimRight();
+        void replace(const B1String& from, const B1String& to);
         void format(const char* format, ...);
         void format(const B1String* format, ...);
         static B1String formatAs(const char* format, ...);

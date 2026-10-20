@@ -17,8 +17,6 @@
 
 #include <B1Network/B1ServerSocket.h>
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1WebSocketServerSession::B1WebSocketServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener)
@@ -48,7 +46,11 @@ void B1WebSocketServerSession::implAcceptWebSocket(const B1HttpServerMessage& in
 
     // Accept the websocket handshake.
     readWriteImpl()->webSocketImpl()->webSocketStream()->async_accept(
-        initialMessage.request(), boost::bind(&B1WebSocketServerSession::acceptComplete, this, boost::asio::placeholders::error));
+        initialMessage.request(),
+        [this](const boost::system::error_code& error) {
+            this->acceptComplete(error);
+        }
+    );
 }
 
 void B1WebSocketServerSession::onReadFailed(int32 reason)

@@ -15,8 +15,6 @@
 
 #include <B1Network/B1BaseSocketImpl.h>
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1HttpServerReadWriteImpl::B1HttpServerReadWriteImpl(B1HttpServerReadWriteImplListener* listener)
@@ -45,18 +43,24 @@ void B1HttpServerReadWriteImpl::writeResponseComplete(bool keepAlive, const boos
 void B1HttpServerReadWriteImpl::implWriteResponse(boost::beast::http::message_generator&& response)
 {
     bool keepAlive = response.keep_alive();
-    boost::beast::async_write(*asioSocketImpl()->getASIOSocket(), std::move(response),
-                              boost::bind(&B1HttpServerReadWriteImpl::writeResponseComplete, this,
-                                          keepAlive, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    boost::beast::async_write(
+        *asioSocketImpl()->getASIOSocket(), std::move(response),
+        [this, keepAlive](const boost::system::error_code& error, size_t transferredBytes) {
+            this->writeResponseComplete(keepAlive, error, transferredBytes);
+        }
+    );
 }
 
 bool B1HttpServerReadWriteImpl::implRead()
 {
     _httpMessage->clearRequest();   // Make the request empty before reading, otherwise the operation behavior is undefined.
     try {
-        boost::beast::http::async_read(*asioSocketImpl()->getASIOSocket(), _httpMessage->buffer(), _httpMessage->request(),
-                                       boost::bind(&B1HttpServerReadWriteImpl::readComplete, this,
-                                                   boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+        boost::beast::http::async_read(
+            *asioSocketImpl()->getASIOSocket(), _httpMessage->buffer(), _httpMessage->request(),
+            [this](const boost::system::error_code& error, size_t receivedBytes) {
+                this->readComplete(error, receivedBytes);
+            }
+        );
     }
     catch (...) {
         return false;

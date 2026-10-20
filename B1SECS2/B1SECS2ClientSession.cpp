@@ -22,7 +22,7 @@ using namespace B1SECS2Consts;
 B1SECS2ClientSession::B1SECS2ClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener)
     : B1ArrayBufferClientSession(clientSocket, listener)
     , _initialSystemByte(0)
-    , _secs2DataManager()
+    , _clientSecs2DataManager()
     , _lastMessage()
     , _t7Checker()
     , _aliveChecker()
@@ -101,7 +101,16 @@ void B1SECS2ClientSession::recvHSMSControl(uint16 sessionID, const std::vector<u
 
 void B1SECS2ClientSession::recvHSMSData(uint8 stream, uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength, const std::vector<uint8>& messageHeader)
 {
-    B1LOG("recvHSMSData: S[%u]F[%u]", stream, function);
+    {
+        int32 systemByte = 0;
+        if (toUint32FromSystemBytes(systemBytes, &systemByte)) {
+            B1LOG("recvHSMSData: S[%u]F[%u], systemByte[0x%X]", stream, function, systemByte);
+        }
+        else {
+            B1LOG("recvHSMSData: S[%u]F[%u]", stream, function);
+        }
+    }
+
     if (onRecvHSMSData(stream, function) != true) {
         B1LOG("can not proceed: S[%u]F[%u] -> sendMessageF0", stream, function);
         sendMessageF0(stream, systemBytes);
@@ -118,6 +127,11 @@ void B1SECS2ClientSession::recvHSMSData(uint8 stream, uint8 function, bool wait,
                 B1LOG("recvHSMSDataStream2 failed: S[%u]F[%u]", stream, function);
             }
             break;
+        case 3:
+            if (recvHSMSDataStream3(function, wait, systemBytes, data, dataLength) != true) {
+                B1LOG("recvHSMSDataStream3 failed: S[%u]F[%u]", stream, function);
+            }
+            break;
         case 5:
             if (recvHSMSDataStream5(function, wait, systemBytes, data, dataLength) != true) {
                 B1LOG("recvHSMSDataStream5 failed: S[%u]F[%u]", stream, function);
@@ -126,6 +140,11 @@ void B1SECS2ClientSession::recvHSMSData(uint8 stream, uint8 function, bool wait,
         case 6:
             if (recvHSMSDataStream6(function, wait, systemBytes, data, dataLength) != true) {
                 B1LOG("recvHSMSDataStream6 failed: S[%u]F[%u]", stream, function);
+            }
+            break;
+        case 10:
+            if (recvHSMSDataStream10(function, wait, systemBytes, data, dataLength) != true) {
+                B1LOG("recvHSMSDataStream10 failed: S[%u]F[%u]", stream, function);
             }
             break;
         case 64:
@@ -203,6 +222,23 @@ bool B1SECS2ClientSession::recvHSMSDataStream2(uint8 function, bool wait, const 
     return true;
 }
 
+bool B1SECS2ClientSession::recvHSMSDataStream3(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+{
+    switch (function) {
+        case 0:
+            recvMessageS3F0(systemBytes);
+            break;
+        case 18:
+            recvMessageS3F18(wait, systemBytes, data, dataLength);
+            break;
+        default:
+            B1LOG("not implemented yet: stream[3], function[%d]", function);
+            assert(false);
+            return false;
+    }
+    return true;
+}
+
 bool B1SECS2ClientSession::recvHSMSDataStream5(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     switch (function) {
@@ -228,6 +264,25 @@ bool B1SECS2ClientSession::recvHSMSDataStream6(uint8 function, bool wait, const 
         default:
             B1LOG("not implemented yet: stream[6], function[%d]", function);
             assert(false);
+            return false;
+    };
+    return true;
+}
+
+bool B1SECS2ClientSession::recvHSMSDataStream10(uint8 function, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+{
+    switch (function) {
+        case 1:
+            recvMessageS10F1(wait, systemBytes, data, dataLength);
+            break;
+        case 4:
+            recvMessageS10F4(systemBytes, data, dataLength);
+            break;
+        case 6:
+            recvMessageS10F6(systemBytes, data, dataLength);
+            break;
+        default:
+            B1LOG("not implemented yet: stream[10], function[%d]", function);
             return false;
     };
     return true;
@@ -262,8 +317,8 @@ bool B1SECS2ClientSession::implInitializeSession()
     if (B1ArrayBufferClientSession::implInitializeSession() != true) {
         return false;
     }
-    _secs2DataManager = createSECS2DataManager();
-    if (_secs2DataManager->initialize() != true) {
+    _clientSecs2DataManager = createClientSECS2DataManager();
+    if (_clientSecs2DataManager->initialize() != true) {
         return false;
     }
     return true;
@@ -271,9 +326,9 @@ bool B1SECS2ClientSession::implInitializeSession()
 
 void B1SECS2ClientSession::implFinalizeSession()
 {
-    if (_secs2DataManager) {
-        _secs2DataManager->finalize();
-        _secs2DataManager.reset();
+    if (_clientSecs2DataManager) {
+        _clientSecs2DataManager->finalize();
+        _clientSecs2DataManager.reset();
     }
     B1ArrayBufferClientSession::implFinalizeSession();
 }
@@ -284,7 +339,7 @@ void B1SECS2ClientSession::implOnConnect()
     srand((unsigned int)time(0));
     _initialSystemByte = rand();
     _lastMessage.reset();
-    _t7Checker.start(B1HSMSMessage::TIME_OUT_T7);
+    _t7Checker.start(B1HSMSMessage::TIME_OUT_DEFAULT_T7);
     _aliveChecker.stop();
     _lastAliveRequestTick = B1TickUtil::currentTick();
 }

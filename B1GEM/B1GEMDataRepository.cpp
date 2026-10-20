@@ -32,14 +32,14 @@ B1GEMDataRepository::~B1GEMDataRepository()
 
 bool B1GEMDataRepository::initialize(const B1SECS2DataManager* secs2DataManager)
 {
-    _alarmRepository.reset(createAlarmRepository(secs2DataManager));
-    _eventRepository.reset(createEventRepository(secs2DataManager));
-    _variableRepository.reset(createVariableRepository(secs2DataManager));
-    _reportRepository.reset(new B1GEMReportRepository());
-    if (_alarmRepository == NULL ||
-        _eventRepository == NULL ||
-        _variableRepository == NULL ||
-        _reportRepository == NULL) {
+    _alarmRepository = createAlarmRepository(secs2DataManager);
+    _eventRepository = createEventRepository(secs2DataManager);
+    _variableRepository = createVariableRepository(secs2DataManager);
+    _reportRepository = std::make_shared<B1GEMReportRepository>();
+    if (_alarmRepository == nullptr ||
+        _eventRepository == nullptr ||
+        _variableRepository == nullptr ||
+        _reportRepository == nullptr) {
         _alarmRepository.reset();
         _eventRepository.reset();
         _variableRepository.reset();
@@ -119,8 +119,8 @@ SPGEMEvent B1GEMDataRepository::findEvent(const B1SECS2DataCEID& ceID) const
 }
 
 void B1GEMDataRepository::findEquipmentConstants(const std::vector<B1SECS2DataECID>& ecIDs,
-                                               std::vector<B1SECS2DataECID>* resultECIDs, std::vector<B1SECS2DataECNAME>* ecNames, std::vector<B1SECS2DataECMIN>* ecMins,
-                                               std::vector<B1SECS2DataECMAX>* ecMaxes, std::vector<B1SECS2DataECDEF>* ecDefs, std::vector<B1SECS2DataUNITS>* units)
+                                                 std::vector<B1SECS2DataECID>* resultECIDs, std::vector<B1SECS2DataECNAME>* ecNames, std::vector<B1SECS2DataECMIN>* ecMins,
+                                                 std::vector<B1SECS2DataECMAX>* ecMaxes, std::vector<B1SECS2DataECDEF>* ecDefs, std::vector<B1SECS2DataUNITS>* units)
 {
     resultECIDs->reserve(ecIDs.size());
     ecNames->reserve(ecIDs.size());
@@ -182,7 +182,7 @@ std::vector<SPGEMReport> B1GEMDataRepository::findReports(const std::vector<std:
 }
 
 bool B1GEMDataRepository::getEventReportData(const B1SECS2DataCEID& ceID, const B1GEMDataValueCondition& gemCondition,
-                                           std::map<B1SECS2DataRPTID, std::list<B1SECS2DataV> >* result)
+                                             std::map<B1SECS2DataRPTID, std::list<B1SECS2DataV> >* result)
 {
     auto evt = _eventRepository->findEvent(ceID);
     if (evt == NULL) {

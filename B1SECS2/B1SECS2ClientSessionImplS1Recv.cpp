@@ -35,7 +35,7 @@ void B1SECS2ClientSession::recvMessageS1F1(bool wait, const std::vector<uint8>& 
 
 void B1SECS2ClientSession::recvMessageS1F2(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS1F2Readable messageS1F2(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS1F2Readable messageS1F2(wait, data, dataLength, clientSecs2DataManager());
     if (messageS1F2.readData() != true) {
         return;
     }
@@ -44,7 +44,7 @@ void B1SECS2ClientSession::recvMessageS1F2(bool wait, const std::vector<uint8>& 
 
 void B1SECS2ClientSession::recvMessageS1F4(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS1F4Readable messageS1F4(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS1F4Readable messageS1F4(wait, data, dataLength, clientSecs2DataManager());
     if (messageS1F4.readData() != true) {
         return;
     }
@@ -53,7 +53,7 @@ void B1SECS2ClientSession::recvMessageS1F4(bool wait, const std::vector<uint8>& 
 
 void B1SECS2ClientSession::recvMessageS1F14(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS1F14Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS1F14Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }
@@ -62,7 +62,7 @@ void B1SECS2ClientSession::recvMessageS1F14(bool wait, const std::vector<uint8>&
 
 void B1SECS2ClientSession::recvMessageS1F16(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS1F16Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS1F16Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }
@@ -71,7 +71,7 @@ void B1SECS2ClientSession::recvMessageS1F16(bool wait, const std::vector<uint8>&
 
 void B1SECS2ClientSession::recvMessageS1F18(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS1F18Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS1F18Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }

@@ -85,8 +85,10 @@ bool B1SECS2MessageReadable::readData()
 {
     bool result = implReadData();
     B1String log;
-    if (result != true)
-        appendStringDepth0("ERROR", &log);
+    if (result != true) {
+        B1LOG("read error in SECS2Message: message_name[%s]", _messageName.cString());
+        return false;
+    }
     log += toString();
     B1LOG(log.cString());
     return result;

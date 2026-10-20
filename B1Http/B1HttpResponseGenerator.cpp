@@ -16,8 +16,6 @@
 
 #include <B1Base/B1StringUtil.h>
 
-#include <boost/bind/bind.hpp>
-
 namespace Beast = boost::beast;
 namespace BeastHttp = Beast::http;
 

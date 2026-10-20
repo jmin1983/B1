@@ -26,17 +26,17 @@ namespace BnD {
         virtual ~B1SECS2Server();
     protected:
         const uint16 _deviceID;
-        std::shared_ptr<B1SECS2DataManager> _secs2DataManager;
+        std::shared_ptr<B1SECS2DataManager> _serverSecs2DataManager;
     protected:
         virtual B1BaseServerSession* createSession(B1ServerSocket* serverSocket) override;
     protected:
         virtual bool implInitialize(int32 port);
         virtual void implFinalize();
-        virtual B1SECS2DataManager* createSECS2DataManager() = 0;
+        virtual std::shared_ptr<B1SECS2DataManager> createServerSECS2DataManager() = 0;
     public:
         bool initialize(int32 port);
         void finalize();
-        const B1SECS2DataManager* secs2DataManager() const { return _secs2DataManager.get(); }
+        const B1SECS2DataManager* serverSecs2DataManager() const { return _serverSecs2DataManager.get(); }
     };
 }   //  !BnD
 

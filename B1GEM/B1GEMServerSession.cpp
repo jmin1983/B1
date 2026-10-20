@@ -21,8 +21,9 @@
 using namespace BnD;
 using namespace B1GEMConsts;
 
-B1GEMServerSession::B1GEMServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener, uint16 secs2SessionID, B1GEMServer* owner)
-    : B1SECS2ServerSession(serverSocket, listener, secs2SessionID, owner)
+B1GEMServerSession::B1GEMServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener, uint16 secs2SessionID, B1GEMServer* owner,
+                                       uint32 timeoutT3, uint32 timeoutT6, uint32 timeoutT7, uint32 timeoutT8, uint32 timeoutLinkTest)
+    : B1SECS2ServerSession(serverSocket, listener, secs2SessionID, owner, timeoutT3, timeoutT6, timeoutT7, timeoutT8, timeoutLinkTest)
     , _communicating(false)
     , _attemptOnline(false)
 {

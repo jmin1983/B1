@@ -29,7 +29,7 @@ namespace BnD {
     protected:
         std::map<B1SECS2DataBase::INDEX, std::shared_ptr<B1SECS2Data> > _originalDataTypes;
     protected:
-        virtual B1SECS2Data* createOriginalData(B1SECS2DataBase::INDEX index) const = 0;
+        virtual std::shared_ptr<B1SECS2Data> createOriginalData(B1SECS2DataBase::INDEX index) const = 0;
     protected:
         bool isCreateExceptionDataType(B1SECS2DataBase::INDEX index) const;
     public:

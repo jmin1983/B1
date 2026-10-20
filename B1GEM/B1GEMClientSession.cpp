@@ -33,7 +33,7 @@ bool B1GEMClientSession::implInitializeSession()
         return false;
     }
     _dataRepository = createDataRepository();
-    if (_dataRepository->initialize(secs2DataManager()) != true) {
+    if (_dataRepository->initialize(clientSecs2DataManager()) != true) {
         return false;
     }
     return true;

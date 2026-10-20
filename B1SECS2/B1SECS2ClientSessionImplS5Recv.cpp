@@ -16,9 +16,14 @@
 
 using namespace BnD;
 
+void B1SECS2ClientSession::recvMessageS5F0(const std::vector<uint8>& systemBytes)
+{
+    onRecvMessageS5F0(systemBytes);
+}
+
 void B1SECS2ClientSession::recvMessageS5F1(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS5F1Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS5F1Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }
@@ -26,7 +31,7 @@ void B1SECS2ClientSession::recvMessageS5F1(bool wait, const std::vector<uint8>& 
 }
 void B1SECS2ClientSession::recvMessageS5F4(bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS5F4Readable message(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS5F4Readable message(wait, data, dataLength, clientSecs2DataManager());
     if (message.readData() != true) {
         return;
     }

@@ -24,7 +24,7 @@ bool B1MariaDBHandle::initialize(bool useSSL)
     if (_context || _connection || _sslConnection) {
         return false;
     }
-    _context.reset(new B1IOContext(1));
+    _context = std::make_shared<B1IOContext>(1);
     if (useSSL) {
         _sslContext = std::make_shared<B1SSLContext>(false);
         _sslConnection = std::make_shared<boost::mysql::tcp_ssl_connection>(_context->nativeContext()->get_executor(), *_sslContext->nativeContext());

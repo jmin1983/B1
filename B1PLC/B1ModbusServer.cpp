@@ -44,7 +44,7 @@ bool B1ModbusServer::initialize(uint16 port, uint16 coilSize, uint16 holdingRegi
         shutdown();
         return false;
     }   
-    _memoryManager.reset(new B1ModbusServerMemoryManager(holdingRegisterSize, coilSize));
+    _memoryManager = std::make_shared<B1ModbusServerMemoryManager>(holdingRegisterSize, coilSize);
     return true;
 }
 

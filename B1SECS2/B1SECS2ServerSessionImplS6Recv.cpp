@@ -23,10 +23,10 @@ void B1SECS2ServerSession::recvMessageS6F0(uint16 sessionID, const std::vector<u
     onRecvMessageS6F0(sessionID, systemBytes);
 }
 
-void B1SECS2ServerSession::recvMessageS6F12(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
+void B1SECS2ServerSession::recvMessageS6F12(uint16 sessionID, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
     _t6Checker.stop();
-    B1SECS2MessageS6F12Readable messageS6F12(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS6F12Readable messageS6F12(data, dataLength, serverSecs2DataManager());
     if (messageS6F12.readData() != true) {
         return;
     }
@@ -35,7 +35,7 @@ void B1SECS2ServerSession::recvMessageS6F12(uint16 sessionID, bool wait, const s
 
 void B1SECS2ServerSession::recvMessageS6F15(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS6F15Readable messageS6F15(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS6F15Readable messageS6F15(wait, data, dataLength, serverSecs2DataManager());
     if (messageS6F15.readData() != true) {
         writeLog("sendMessageS6F0");
         sendMessageS6F0(sessionID, systemBytes);
@@ -46,7 +46,7 @@ void B1SECS2ServerSession::recvMessageS6F15(uint16 sessionID, bool wait, const s
 
 void B1SECS2ServerSession::recvMessageS6F19(uint16 sessionID, bool wait, const std::vector<uint8>& systemBytes, const uint8* data, uint32 dataLength)
 {
-    B1SECS2MessageS6F19Readable messageS6F19(wait, data, dataLength, secs2DataManager());
+    B1SECS2MessageS6F19Readable messageS6F19(wait, data, dataLength, serverSecs2DataManager());
     if (messageS6F19.readData() != true) {
         writeLog("sendMessageS6F0");
         sendMessageS6F0(sessionID, systemBytes);

@@ -41,15 +41,15 @@ namespace BnD {
         const std::set<int32>& junctionIndex() const { return _junctionIndex; }
         std::set<int32>& junctionIndex() { return _junctionIndex; }
         int32 currentIndex() const { return _currentIndex; }
-        int32 currentZoneID() const;
-        bool getJunctionZoneIDsIfJunction(std::vector<int32>* result) const;
         bool isJunction(uint32 index) const { return _junctionIndex.find(index) != _junctionIndex.end(); }
         void increaseCurrentIndex() { _currentIndex++; }
         void setCurrentIndex(int32 value) { _currentIndex = value; }
         void removeAfterCurrentIndex(uint32 offset);
         void removeBeforeCurrentIndex();
 
+        bool getCurrentZoneID(int32* zoneID) const;
         void getCurrentZoneIDs(std::vector<int32>* zoneIDs, uint32 indexCount) const;   //  indexCount: the number of zoneIDs from _currentIndex.
+        bool getJunctionZoneIDsIfJunction(std::vector<int32>* result) const;
         bool getZoneID(int32* zoneID, int32 offset) const;  //  offset: diff from _currentIndex.
         std::vector<int32> getAllNextZoneIDs(uint32 offset) const;
         bool isEndZone() const;

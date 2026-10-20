@@ -47,13 +47,10 @@ bool B1SECS2DataManager::initialize()
     for (int32 i = B1SECS2DataBase::INDEX_SEPERATOR_BEGIN; i < B1SECS2DataBase::INDEX_SEPERATOR_END; ++i) {
         auto index = static_cast<B1SECS2DataBase::INDEX>(i);
         if (isCreateExceptionDataType(index) != true) {
-            std::shared_ptr<B1SECS2Data> originalData(createOriginalData(index));
-            if (originalData == NULL) {
-                assert(false);
-                return false;
+            if (std::shared_ptr<B1SECS2Data> originalData = createOriginalData(index)) {
+                assert(originalData->label().isEmpty() != true);
+                _originalDataTypes.emplace(index, originalData);
             }
-            assert(originalData->label().isEmpty() != true);
-            _originalDataTypes.insert(std::make_pair(index, originalData));
         }
     }
     return true;

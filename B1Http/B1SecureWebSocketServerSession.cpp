@@ -15,8 +15,6 @@
 #include "B1SecureWebSocketImpl.h"
 #include "B1SecureWebSocketReadWriteImpl.h"
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1SecureWebSocketServerSession::B1SecureWebSocketServerSession(B1ServerSocket* serverSocket, B1BaseServerSessionListener* listener)
@@ -46,7 +44,11 @@ void B1SecureWebSocketServerSession::implAcceptWebSocket(const B1HttpServerMessa
 
     // Accept the websocket handshake.
     readWriteImpl()->secureWebSocketImpl()->secureWebSocketStream()->async_accept(
-        initialMessage.request(), boost::bind(&B1SecureWebSocketServerSession::acceptComplete, this, boost::asio::placeholders::error));
+        initialMessage.request(),
+        [this](const boost::system::error_code& error) {
+            this->acceptComplete(error);
+        }
+    );
 }
 
 auto B1SecureWebSocketServerSession::createReadWriteImpl() -> B1BaseReadWriteImpl*

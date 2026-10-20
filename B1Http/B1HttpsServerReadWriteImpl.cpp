@@ -14,8 +14,6 @@
 #include "B1HttpMessage.h"
 #include "B1SecureSocketImpl.h"
 
-#include <boost/bind/bind.hpp>
-
 using namespace BnD;
 
 B1HttpsServerReadWriteImpl::B1HttpsServerReadWriteImpl(const B1SSLContext& sslContext, B1HttpServerReadWriteImplListener* listener)
@@ -27,9 +25,12 @@ B1HttpsServerReadWriteImpl::B1HttpsServerReadWriteImpl(const B1SSLContext& sslCo
 void B1HttpsServerReadWriteImpl::implWriteResponse(boost::beast::http::message_generator&& response)
 {
     bool keepAlive = response.keep_alive();
-    boost::beast::async_write(*secureSocketImpl()->secureStream(), std::move(response),
-                              boost::bind(&B1HttpsServerReadWriteImpl::writeResponseComplete, this,
-                                          keepAlive, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    boost::beast::async_write(
+        *secureSocketImpl()->secureStream(), std::move(response),
+        [this, keepAlive](const boost::system::error_code& error, size_t transferredBytes) {
+            this->writeResponseComplete(keepAlive, error, transferredBytes);
+        }
+    );
 }
 
 auto B1HttpsServerReadWriteImpl::createBaseSocketImpl() -> B1BaseSocketImpl*
@@ -40,9 +41,12 @@ auto B1HttpsServerReadWriteImpl::createBaseSocketImpl() -> B1BaseSocketImpl*
 bool B1HttpsServerReadWriteImpl::implRead()
 {
     boost::beast::get_lowest_layer(*secureSocketImpl()->secureStream()).expires_after(std::chrono::seconds(30));
-    secureSocketImpl()->secureStream()->async_handshake(boost::asio::ssl::stream_base::server, _httpMessage->buffer().data(),
-                                                        boost::bind(&B1HttpsServerReadWriteImpl::handshakeComplete, this,
-                                                                    boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    secureSocketImpl()->secureStream()->async_handshake(
+        boost::asio::ssl::stream_base::server, _httpMessage->buffer().data(),
+        [this](const boost::system::error_code& error, size_t bytesUsed) {
+            this->handshakeComplete(error, bytesUsed);
+        }
+    );
     return true;
 }
 
@@ -69,9 +73,12 @@ void B1HttpsServerReadWriteImpl::readAfterHandshake()
 {
     boost::beast::get_lowest_layer(*secureSocketImpl()->secureStream()).expires_after(std::chrono::seconds(30));
     _httpMessage->clearRequest();   // Make the request empty before reading, otherwise the operation behavior is undefined.
-    boost::beast::http::async_read(*secureSocketImpl()->secureStream(), _httpMessage->buffer(), _httpMessage->request(),
-                                   boost::bind(&B1HttpsServerReadWriteImpl::readComplete, this,
-                                               boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    boost::beast::http::async_read(
+        *secureSocketImpl()->secureStream(), _httpMessage->buffer(), _httpMessage->request(),
+        [this](const boost::system::error_code& error, size_t receivedBytes) {
+            this->readComplete(error, receivedBytes);
+        }
+    );
 }
 
 auto B1HttpsServerReadWriteImpl::secureSocketImpl() const -> B1SecureSocketImpl*
