@@ -45,47 +45,58 @@ void B1RedisDirectClientWriteSession::implProcessConnected(bool firstConnectedPr
     B1RedisDirectClientSession::implProcessConnected(firstConnectedProcess);
     if (firstConnectedProcess) {
         if (_startWriting) {
-            sendEssentialPackets();
+            sendEssentialPackets();     //  after "SELECT db".
         }
         if (auto listener = owner()->listener()) {
             listener->onRedisDirectWriterConnected();
         }
+    }
+    else if (_startWriting) {
+        sendEssentialPackets();         //  packets queued while the first connected process.
     }
 }
 
 void B1RedisDirectClientWriteSession::sendEssentialPackets()
 {
     B1AutoLock al(*_essentialPacketLock);
-    for (const auto& essentialPacket : _essentialPackets) {
-        if (writeData(essentialPacket) != true) {
-            std::vector<char> buffer(essentialPacket.begin(), essentialPacket.end());
-            buffer.push_back(0);
-            B1LOG("sendData failed:[%s]", &buffer[0]);
+    sendEssentialPacketsWithoutLock();
+}
+
+void B1RedisDirectClientWriteSession::sendEssentialPacketsWithoutLock()
+{
+    while (_essentialPackets.empty() != true) {
+        if (writeData(_essentialPackets.front()) != true) {
+            B1LOG("send essential_packets failed -> keep remains: count[%u]", static_cast<uint32>(_essentialPackets.size()));
+            break;
         }
+        _essentialPackets.pop_front();
     }
-    _essentialPackets.clear();
 }
 
 bool B1RedisDirectClientWriteSession::isWritingAvailable() const
 {
-    return _startWriting && isConnected();
+    return _startWriting && isRedisDirectSessionConnected();
 }
 
 bool B1RedisDirectClientWriteSession::trySendData(const std::vector<uint8>& data, bool isEssential)
 {
+    B1AutoLock al(*_essentialPacketLock);
     if (isWritingAvailable()) {
-        return writeData(data);
-    }
-    else {
-        if (isEssential) {
-            B1AutoLock al(*_essentialPacketLock);
-            if (_essentialPackets.size() > CONSTS_MAX_ESSENTIAL_PACKET_COUNT) {
-                _essentialPackets.pop_front();
+        sendEssentialPacketsWithoutLock();  //  send queued packets first to keep the order.
+        if (_essentialPackets.empty() || isEssential != true) {
+            if (writeData(data)) {
+                return true;
             }
-            _essentialPackets.push_back(data);
+            //  disconnected just now: essential data is queued below.
         }
-        return false;
     }
+    if (isEssential) {
+        if (_essentialPackets.size() > CONSTS_MAX_ESSENTIAL_PACKET_COUNT) {
+            _essentialPackets.pop_front();
+        }
+        _essentialPackets.push_back(data);
+    }
+    return false;
 }
 
 void B1RedisDirectClientWriteSession::startWriting()
@@ -94,9 +105,9 @@ void B1RedisDirectClientWriteSession::startWriting()
         return;
     }
     _startWriting = true;
-    sendEssentialPackets();
-    B1Thread::sleep(10); //  타이밍 이슈 방지를 위해.
-    sendEssentialPackets();
+    if (isRedisDirectSessionConnected()) {
+        sendEssentialPackets();
+    }   //  else: sent in implProcessConnected() after "SELECT db".
 }
 
 bool B1RedisDirectClientWriteSession::publish(const B1String& channel, const B1String& message, bool isEssential)

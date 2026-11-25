@@ -88,10 +88,12 @@ bool B1MariaDBClient::executeBatch(B1MariaDBHandle*handle, const B1String& sql, 
     catch (const boost::mysql::error_with_diagnostics& err) {
         B1LOG("boost_my_sql_execute_batch error: code[%d], server_msg[%s], client_msg[%s], what[%s], sql[%s]",
               err.code().value(), std::string(err.get_diagnostics().server_message()).c_str(), std::string(err.get_diagnostics().client_message()).c_str(), err.what(), sql.cString());
+        handle->finalize();
         return false;
     }
     catch (...) {
         B1LOG("unknown execute_batch error in boost_my_sql: sql[%s]", sql.cString());
+        handle->finalize();
         return false;
     }
     return true;
@@ -130,10 +132,12 @@ bool B1MariaDBClient::executePrepared(B1MariaDBHandle* handle, const B1String& s
     catch (const boost::mysql::error_with_diagnostics& err) {
         B1LOG("boost_my_sql_execute_prepared_statement error: code[%d], server_msg[%s], client_msg[%s], what[%s], stmt[%s]",
               err.code().value(), std::string(err.get_diagnostics().server_message()).c_str(), std::string(err.get_diagnostics().client_message()).c_str(), err.what(), stmt.cString());
+        handle->finalize();
         return false;
     }
     catch (...) {
         B1LOG("unknown execute prepared statement error in boost_my_sql: stmt[%s]", stmt.cString());
+        handle->finalize();
         return false;
     }
     return true;

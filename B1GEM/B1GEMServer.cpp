@@ -82,7 +82,7 @@ B1GEMServerSessionManager* B1GEMServer::sessionManager() const
 
 void B1GEMServer::setCommStateEnable(bool flag)
 {
-    bool disconnectAll = false;
+    COMM_STATE changedState = COMM_STATE_DISABLED;
     B1String log;
     {
         B1AutoLock al(_commState._dataLock);
@@ -91,7 +91,7 @@ void B1GEMServer::setCommStateEnable(bool flag)
                 return;
             }
             _commState._data = COMM_STATE_ENABLED;
-            onCommStateChanged(COMM_STATE_NOT_COMMUNICATING);
+            changedState = COMM_STATE_NOT_COMMUNICATING;
             log = "Communications State is set to ENABLED";
         }
         else {
@@ -99,15 +99,13 @@ void B1GEMServer::setCommStateEnable(bool flag)
                 return;
             }
             _commState._data = COMM_STATE_DISABLED;
-            onCommStateChanged(COMM_STATE_DISABLED);
+            changedState = COMM_STATE_DISABLED;
             log = "Communications State is set to DISABLED -> disconnectAll";
-            disconnectAll = true;
         }
     }
-    if (log.isEmpty() != true) {
-        B1LOG(log.cString());
-    }
-    if (disconnectAll) {
+    onCommStateChanged(changedState);
+    B1LOG(log.cString());
+    if (flag != true) {
         disconnectAllSessions();
     }
 }

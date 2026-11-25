@@ -39,6 +39,7 @@ namespace BnD {
         void implProcessConnected(bool firstConnectedProcess) final;
     protected:
         void sendEssentialPackets();
+        void sendEssentialPacketsWithoutLock();     //  _essentialPacketLock must be locked by caller.
         bool isWritingAvailable() const;
         bool trySendData(const std::vector<uint8>& data, bool isEssential);
     public:

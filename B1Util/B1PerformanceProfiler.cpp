@@ -108,7 +108,7 @@ float64 B1PerformanceProfiler::getUsageCPU()
         float64 total = (cpuTotalUser - _cpuLastTotalUser) + (cpuTotalUserLow - _cpuLastTotalUserLow) + (cpuTotalSys - _cpuLastTotalSys);
         float64 percent = total;
         total += (cpuTotalIdle - _cpuLastTotalIdle);
-        result = percent / total * 100;
+        result = (total > 0) ? percent / total * 100 : _cpu._usage;   //  no tick elapsed(called too often). Just skip this value.
     }
     _cpuLastTotalUser = cpuTotalUser;
     _cpuLastTotalUserLow = cpuTotalUserLow;

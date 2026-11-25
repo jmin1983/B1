@@ -39,7 +39,16 @@ auto B1ArrayBufferReadWriteImpl::asioSocketImpl() const -> B1ASIOSocketImpl*
 
 bool B1ArrayBufferReadWriteImpl::implRead()
 {
-    asioSocketImpl()->getASIOSocket()->async_read_some(
+    auto socketImpl = asioSocketImpl();
+    if (NULL == socketImpl) {
+        return false;
+    }
+    B1AutoLock al(*socketImpl->closeLock());
+    auto asioSocket = socketImpl->getASIOSocket();
+    if (NULL == asioSocket) {   //  cleaned up.
+        return false;
+    }
+    asioSocket->async_read_some(
         boost::asio::buffer(_recvBuffer),
         [this](const boost::system::error_code& error, std::size_t receivedBytes) {
             this->readComplete(error, receivedBytes);
@@ -96,16 +105,24 @@ auto B1ArrayBufferReadWriteImpl::listener() const -> B1ArrayBufferReadWriteImplL
 
 void B1ArrayBufferReadWriteImpl::writeData(std::vector<uint8>&& data)
 {
-    if (asioSocketImpl()->getASIOSocket()->is_open() != true) {
-        B1LOG("socket is not opened!");
-    }
-    _sendBuffer = std::move(data);
-    boost::asio::async_write(
-        *asioSocketImpl()->getASIOSocket(), boost::asio::buffer(_sendBuffer),
-        [this](const boost::system::error_code& ec, std::size_t bytes_transferred) {
-            this->writeComplete(ec, bytes_transferred);
+    if (auto socketImpl = asioSocketImpl()) {
+        B1AutoLock al(*socketImpl->closeLock());   //  socket can not be cleaned up while writing.
+        if (auto asioSocket = socketImpl->getASIOSocket()) {
+            if (asioSocket->is_open() != true) {
+                B1LOG("socket is not opened!");
+            }
+            _sendBuffer = std::move(data);
+            boost::asio::async_write(
+                *asioSocket, boost::asio::buffer(_sendBuffer),
+                [this](const boost::system::error_code& ec, std::size_t bytes_transferred) {
+                    this->writeComplete(ec, bytes_transferred);
+                }
+            );
+            return;
         }
-    );
+    }
+    B1LOG("socket already cleaned up -> ignore writing: size[%u]", static_cast<uint32>(data.size()));
+    implOnWriteFailed(boost::asio::error::bad_descriptor);  //  reset writing state.
 }
 
 void B1ArrayBufferReadWriteImpl::requestWriteData(const uint8* data, size_t size)

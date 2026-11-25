@@ -76,6 +76,8 @@ bool B1BaseServer::implStartup()
 void B1BaseServer::implShutdown()
 {
     if (_ioLooper) {
+        _ioLooper->pause();     //  wait for running io handler and stop io.
+        sessionManager()->cleanupReservedRemoveSessions();
         _ioLooper->shutdown();
         _ioLooper.reset();
     }

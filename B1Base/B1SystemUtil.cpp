@@ -102,6 +102,9 @@ bool B1SystemUtil::isProcessRunning(int pid)
 
 bool B1SystemUtil::createDirectory(const B1String& path)
 {
+    if (path.isEmpty()) {
+        return false;
+    }
 #if defined(_WIN32)
     B1String opath = path.copy();
     int32 len = opath.length();
@@ -406,7 +409,7 @@ B1String B1SystemUtil::getModuleFileName()
     return B1String(buffer);
 #else
     int32 bytes = -1;
-    if ((bytes = readlink("/proc/self/exe", buffer, 1024)) < 0) {
+    if ((bytes = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1)) < 0) {
         return B1String("");
     }
     buffer[bytes] = '\0';
@@ -515,8 +518,8 @@ int B1SystemUtil::getProcessID(const B1String& processName)
                 }
             }
         }
+        closedir(dp);
     }
-    closedir(dp);
     return pid;
 #endif
 }

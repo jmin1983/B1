@@ -90,6 +90,9 @@ bool B1Encryptor::encryptAES256(const B1String& key, const B1String& source, std
 
 bool B1Encryptor::decryptAES256(const B1String& key, const std::vector<uint8>& source, B1String* result)
 {
+    if (source.empty() || source.size() % CONSTS_GAP_SIZE != 0) {
+        return false;
+    }
     OPENSSL_CTX ctx;
     if (EVP_DecryptInit_ex2(ctx._ctx, EVP_aes_256_cbc(), (const unsigned char*)key.cString(), (const unsigned char*)_iv.cString(), NULL) != 1) {
         return false;
@@ -116,7 +119,7 @@ bool B1Encryptor::decryptAES256(const B1String& key, const std::vector<uint8>& s
             --count;
         }
     }
-    if (0 == count) {
+    if (0 == count && pkcs <= lengthTotal) {
         lengthTotal -= pkcs;
     }
     if (16 == lengthTotal) {    //  check if result string was empty string. 16 filled with '16' if result string was empty string.

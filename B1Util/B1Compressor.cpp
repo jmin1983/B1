@@ -38,6 +38,7 @@ auto B1Compressor::compress(const std::vector<uint8>& data, const size_t bufferS
     do {
         if (dataPos >= data.size()) {
             assert(false);
+            (void)deflateEnd(&zStream);
             return std::vector<uint8>();
         }
         size_t reamins = data.size() - dataPos;
@@ -54,6 +55,7 @@ auto B1Compressor::compress(const std::vector<uint8>& data, const size_t bufferS
             size_t writtenSize = bufferSize - zStream.avail_out;
             if (buffer.size() < writtenSize) {
                 assert(false);
+                (void)deflateEnd(&zStream);
                 return std::vector<uint8>();
             }
             packed.insert(packed.end(), buffer.begin(), buffer.begin() + writtenSize);
@@ -86,8 +88,9 @@ auto B1Compressor::decompress(const std::vector<uint8>& data, const size_t buffe
     size_t dataPos = 0;
     std::vector<uint8> unpacked;
     do {
-        if (dataPos >= data.size()) {
-            assert(false);
+        if (dataPos >= data.size()) {   //  all input consumed but stream not ended: incomplete(truncated) data.
+            b1log("decompress failed: incomplete data: size[%u]", static_cast<uint32>(data.size()));
+            (void)inflateEnd(&zStream);
             return std::vector<uint8>();
         }
         size_t reamins = data.size() - dataPos;
@@ -112,6 +115,7 @@ auto B1Compressor::decompress(const std::vector<uint8>& data, const size_t buffe
             size_t writtenSize = bufferSize - zStream.avail_out;
             if (buffer.size() < writtenSize) {
                 assert(false);
+                (void)inflateEnd(&zStream);
                 return std::vector<uint8>();
             }
             unpacked.insert(unpacked.end(), buffer.begin(), buffer.begin() + writtenSize);

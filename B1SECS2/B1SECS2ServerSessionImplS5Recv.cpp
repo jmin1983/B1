@@ -28,8 +28,7 @@ void B1SECS2ServerSession::recvMessageS5F2(uint16 sessionID, bool wait, const st
 {
     B1SECS2MessageS5F2Readable messageS5F2(wait, data, dataLength, serverSecs2DataManager());
     if (messageS5F2.readData() != true) {
-        writeLog("sendMessageS5F0");
-        sendMessageS5F0(sessionID, systemBytes);
+        writeLog("read S5F2 failed");   //  secondary message: no reply.
         return;
     }
     onRecvMessageS5F2(sessionID, systemBytes, messageS5F2.ackc5());

@@ -27,7 +27,9 @@ B1MariaDBConnectionPool::B1MariaDBConnectionPool()
     , _password()
     , _port(0)
     , _useSSL(false)
-    , _lock()
+    , _connectionCount(0)
+    , _lock(std::make_shared<B1Lock>())
+    , _initialized(false)
     , _handles()
 {
 }
@@ -78,23 +80,27 @@ bool B1MariaDBConnectionPool::initialize(B1String&& address, uint16 port, B1Stri
         B1LOG("too many connection requested: count[%u], max[%u]", connectionCount, CONSTS_MAX_CONNECTIONS);
         return false;
     }
-    if (_lock) {
-        return false;
+    {
+        B1AutoLock al(*_lock);
+        if (_initialized) {
+            return false;
+        }
+        _address = std::move(address);
+        _port = port;
+        _dbName = std::move(dbName);
+        _user = std::move(user);
+        _password = std::move(password);
+        _useSSL = useSSL;
+        _connectionCount = connectionCount;
+        _initialized = true;    //  set before creating connections and kept even if failed(caller calls finalize()).
     }
-    _address = std::move(address);
-    _port = port;
-    _dbName = std::move(dbName);
-    _user = std::move(user);
-    _password = std::move(password);
-    _useSSL = useSSL;
-    _lock = std::make_shared<B1Lock>();
-
     for (uint32 i = 0; i < connectionCount; ++i) {
         auto newHandle = createNewHandle();
         if (newHandle == NULL) {
             B1LOG("unable to create new handle: index[%u], total[%u]", i, connectionCount);
             return false;
         }
+        B1AutoLock al(*_lock);
         _handles.insert(std::make_pair(newHandle, false));
     }
     return true;
@@ -102,55 +108,61 @@ bool B1MariaDBConnectionPool::initialize(B1String&& address, uint16 port, B1Stri
 
 void B1MariaDBConnectionPool::finalize()
 {
-    if (_lock) {
-        B1LOG("waiting connections being released");
-        const int32 sleepTime = 1000;   //  millisecond.
-        const int32 trys = 60;          //  1 min.
-        for (int32 i = 0; i < trys; ++i) {
-            {
-                B1AutoLock al(*_lock);
-                SAFE_CONTAINER_FOREACH(_handles, itr) {
-                    if (itr->second != true) {
-                        itr->first->finalize();
-                        _handles.erase(itr);
-                    }
-                }
-                if (_handles.empty()) {
-                    break;
+    {
+        B1AutoLock al(*_lock);
+        _initialized = false;   //  stop getHandle() and checkConnections() first.
+    }
+    B1LOG("waiting connections being released");
+    const int32 sleepTime = 1000;   //  millisecond.
+    const int32 trys = 60;          //  1 min.
+    for (int32 i = 0; i < trys; ++i) {
+        {
+            B1AutoLock al(*_lock);
+            SAFE_CONTAINER_FOREACH(_handles, itr) {
+                if (itr->second != true) {
+                    itr->first->finalize();
+                    _handles.erase(itr);
                 }
             }
-            B1Thread::sleep(sleepTime);
+            if (_handles.empty()) {
+                break;
+            }
         }
-        B1LOG("all connection released");
-        _lock.reset();
+        B1Thread::sleep(sleepTime);
     }
+    B1LOG("all connection released");
 }
 
 void B1MariaDBConnectionPool::checkConnections()
 {
-    int32 deadHandleCount = 0;
+    size_t missingCount = 0;
     {
         B1AutoLock al(*_lock);
+        if (_initialized != true) {
+            return;
+        }
         SAFE_CONTAINER_FOREACH(_handles, itr) {
             if (itr->second != true) {
                 if (itr->first->isOpened() != true) {
-                    ++deadHandleCount;
                     itr->first->finalize();
                     _handles.erase(itr);
                 }
             }
         }
+        missingCount = _connectionCount > _handles.size() ? _connectionCount - _handles.size() : 0;   //  keep target count(even if re-creation failed before).
     }
-    if (deadHandleCount > 0) {
-        B1AutoLock al(*_lock);
-        for (int32 i = 0; i < deadHandleCount; ++i) {
-            auto newHandle = createNewHandle();
-            if (newHandle == NULL) {
-                B1LOG("unable to re-create new handle: index[%d], total[%d]", i, deadHandleCount);
-                return;
-            }
-            _handles.insert(std::make_pair(newHandle, false));
+    for (size_t i = 0; i < missingCount; ++i) {
+        auto newHandle = createNewHandle();     //  out of lock: connecting may take long time.
+        if (newHandle == NULL) {
+            B1LOG("unable to re-create new handle: index[%u], total[%u]", static_cast<uint32>(i), static_cast<uint32>(missingCount));
+            return;                             //  retry at next checkConnections().
         }
+        B1AutoLock al(*_lock);
+        if (_initialized != true || _handles.size() >= _connectionCount) {  //  finalized or already filled while connecting.
+            newHandle->finalize();
+            return;
+        }
+        _handles.insert(std::make_pair(newHandle, false));
     }
 }
 
@@ -176,6 +188,9 @@ auto B1MariaDBConnectionPool::getHandle(int32 trys) -> std::shared_ptr<B1MariaDB
     for (int32 i = 0; i < trys; ++i) {
         {
             B1AutoLock al(*_lock);
+            if (_initialized != true) {
+                return std::shared_ptr<B1MariaDBHandle>();
+            }
             for (auto& handlePair : _handles) {
                 if (handlePair.second != true && handlePair.first->isOpened()) {
                     handlePair.second = true;
@@ -192,11 +207,12 @@ void B1MariaDBConnectionPool::releaseHandle(std::shared_ptr<B1MariaDBHandle> han
 {
     B1AutoLock al(*_lock);
     auto itr = _handles.find(handle);
-    if (itr != _handles.end()) {
+    if (itr != _handles.end() && _initialized) {
         itr->second = false;
+        return;
     }
-    else {
-        handle->finalize();
+    if (itr != _handles.end()) {
+        _handles.erase(itr);    //  finalizing.
     }
-    handle.reset();
+    handle->finalize();
 }

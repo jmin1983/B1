@@ -43,29 +43,29 @@ bool B1BasePacketAnalyzer::analyzeData(const uint8* data, size_t size)
         assert(false);
         return false;
     }
-    size_t pos = 0;
-    auto result = implAnalyzeData((uint8*)data, size, &pos);
-    if (ANALYZE_RESULT_FAIL == result) {
-        B1LOG("analyze data failed: size[%d], pos[%d]", size, pos);
-        return false;
-    }
-    if (ANALYZE_RESULT_SUCCESS == result) {
-        if (pos == size) {
-            _recvdBuffer.clear();
+    size_t pos = 0;     //  analyzed size of data.
+    while (pos < size) {
+        size_t packetPos = 0;
+        auto result = implAnalyzeData((uint8*)data + pos, size - pos, &packetPos);
+        if (ANALYZE_RESULT_FAIL == result) {
+            B1LOG("analyze data failed: size[%u], pos[%u]", size, pos + packetPos);
+            return false;
         }
-        else {
-            if (size < pos) {
-                B1LOG("invalid packet recved: size[%d], pos[%d]", size, pos);
-                assert(false);
-                return false;
-            }
-            std::vector<uint8> newBuffer((uint8*)data + pos, (uint8*)data + size);
-            _recvdBuffer.swap(newBuffer);
-            analyzeData(NULL, 0);
+        if (ANALYZE_RESULT_NOT_ENOUTH_DATA == result) {
+            break;
         }
+        if (packetPos < 1 || size - pos < packetPos) {
+            B1LOG("invalid packet recved: size[%u], pos[%u], packet_pos[%u]", size, pos, packetPos);
+            assert(false);
+            return false;
+        }
+        pos += packetPos;
     }
-    else if (ANALYZE_RESULT_NOT_ENOUTH_DATA == result) {
-        std::vector<uint8> newBuffer((uint8*)data, (uint8*)data + size);
+    if (pos == size) {
+        _recvdBuffer.clear();
+    }
+    else {
+        std::vector<uint8> newBuffer((uint8*)data + pos, (uint8*)data + size);   //  data may point to _recvdBuffer.
         _recvdBuffer.swap(newBuffer);
     }
     return true;

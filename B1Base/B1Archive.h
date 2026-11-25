@@ -75,7 +75,7 @@ namespace BnD {
     public:
         void addArchive(const B1Archive& archive);
         void pushArchive(const B1Archive& archive); //  push_back
-        bool popArchive(B1Archive* archive) const;  //  pop_front
+        bool popArchive(B1Archive* archive) const;  //  pop_back
         void addSubArchive(const B1String& key, const B1Archive& archive);
         bool getSubArchive(const B1String& key, B1Archive* archive) const;
         void getFrontArchive(B1Archive* archive) const;

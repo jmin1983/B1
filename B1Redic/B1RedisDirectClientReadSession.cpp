@@ -133,6 +133,13 @@ void B1RedisDirectClientReadSession::implOnRecvRedisArrays(const std::list<B1Str
     _wait->signal();
 }
 
+void B1RedisDirectClientReadSession::implOnConnect()
+{
+    _recvedBuffer.clear();
+    _wait->reset();
+    B1RedisDirectClientSession::implOnConnect();
+}
+
 void B1RedisDirectClientReadSession::implOnDisconnected(int32 reason)
 {
     _inited = false;
@@ -207,10 +214,13 @@ bool B1RedisDirectClientReadSession::waitData(std::list<B1String>* data)
     if (data) {
         data->swap(_recvedBuffer);
     }
+    else {
+        _recvedBuffer.clear();
+    }
     return true;
 }
 
-bool B1RedisDirectClientReadSession::scan(const B1String& cursor, const B1String& pattern, std::set<B1String>* out, int32 count)
+bool B1RedisDirectClientReadSession::scan(B1String* cursor, const B1String& pattern, std::set<B1String>* out, int32 count)
 {
     _lock->lock();
     if (setWaitData() != true) {
@@ -219,7 +229,7 @@ bool B1RedisDirectClientReadSession::scan(const B1String& cursor, const B1String
         return false;
     }
     {
-        auto data = packetMaker()->makeDataScan(cursor, pattern, count);
+        auto data = packetMaker()->makeDataScan(*cursor, pattern, count);
         if (writeData(data) != true) {
             _lock->unlock();
             disconnect();
@@ -235,21 +245,22 @@ bool B1RedisDirectClientReadSession::scan(const B1String& cursor, const B1String
         }
         _lock->unlock();
         if (data.empty()) {
-            assert(false);
-            return true;
+            B1LOG("scan failed: no data");
+            return false;
         }
         if (data.size() > 1) {
             out->insert(++data.begin(), data.end());
         }
-        if (data.front() != "0") {
-            scan(data.front(), pattern, out, count);
-        }
+        *cursor = std::move(data.front());
     }
     return true;
 }
 
 bool B1RedisDirectClientReadSession::exists(const B1String& key)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     _lock->lock();
     if (setWaitData() != true) {
         _lock->unlock();
@@ -285,6 +296,9 @@ bool B1RedisDirectClientReadSession::exists(const B1String& key)
 
 bool B1RedisDirectClientReadSession::hmget(const B1String& key, const std::vector<B1String>& fields, std::vector<B1String>* out)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     out->resize(fields.size());
     _lock->lock();
     if (setWaitData() != true) {
@@ -332,6 +346,9 @@ B1String B1RedisDirectClientReadSession::hmget(const B1String& key, const B1Stri
 
 bool B1RedisDirectClientReadSession::hgetall(const B1String& key, std::map<B1String, B1String>* out)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     _lock->lock();
     if (setWaitData() != true) {
         _lock->unlock();
@@ -364,12 +381,24 @@ bool B1RedisDirectClientReadSession::hgetall(const B1String& key, std::map<B1Str
 
 bool B1RedisDirectClientReadSession::scan(const B1String& pattern, std::set<B1String>* out, int32 count)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     out->clear();
-    return scan("0", pattern, out, count);
+    B1String cursor("0");
+    do {
+        if (scan(&cursor, pattern, out, count) != true) {
+            return false;
+        }
+    } while (cursor != "0");
+    return true;
 }
 
 bool B1RedisDirectClientReadSession::smembers(const B1String& key, std::list<B1String>* out)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     _lock->lock();
     if (setWaitData() != true) {
         _lock->unlock();
@@ -399,6 +428,9 @@ bool B1RedisDirectClientReadSession::smembers(const B1String& key, std::list<B1S
 
 bool B1RedisDirectClientReadSession::incr(const B1String& key, int64* result)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     _lock->lock();
     if (setWaitData() != true) {
         _lock->unlock();
@@ -436,6 +468,9 @@ bool B1RedisDirectClientReadSession::incr(const B1String& key, int64* result)
 
 bool B1RedisDirectClientReadSession::time(uint64* seconds, uint32* microseconds, bool ignoreAdjustSecond)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     _lock->lock();
     if (setWaitData() != true) {
         _lock->unlock();
@@ -486,6 +521,9 @@ bool B1RedisDirectClientReadSession::time(uint64* seconds, uint32* microseconds,
 
 bool B1RedisDirectClientReadSession::shutdownRemoteRedis()
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     std::vector<B1String> args(1);
     args[0] = "SHUTDOWN";
     _lock->lock();
@@ -501,6 +539,9 @@ bool B1RedisDirectClientReadSession::shutdownRemoteRedis()
 
 bool B1RedisDirectClientReadSession::blockedCommand(const std::vector<B1String>& args, std::list<B1String>* out)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     //  DO NOT USE "SHUTDOWN" command. see shutdownRemoteRedis()
     _lock->lock();
     if (setWaitData() != true) {
@@ -533,6 +574,9 @@ bool B1RedisDirectClientReadSession::blockedCommand(const std::vector<B1String>&
 
 void B1RedisDirectClientReadSession::blockedCommand(const std::vector<std::vector<B1String> >& cmds)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return;
+    }
     _lock->lock();
     for (const auto& args : cmds) {
         if (setWaitData() != true) {

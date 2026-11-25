@@ -24,14 +24,18 @@ B1RedisDirectPacketMaker::~B1RedisDirectPacketMaker()
 
 void B1RedisDirectPacketMaker::setBulkStringCommand(const B1String& command, size_t argSize, std::vector<uint8>* data)
 {
-    B1String temp(B1String::formatAs("*%d\r\n$%d\r\n%s\r\n", argSize + 1, command.length(), command.cString()));
-    data->insert(data->end(), temp.cString(), temp.cString() + temp.length());
+    B1String header(B1String::formatAs("*%u\r\n", static_cast<uint32>(argSize + 1)));
+    data->insert(data->end(), header.cString(), header.cString() + header.length());
+    appendBulkStringCommand(command, data);
 }
 
 void B1RedisDirectPacketMaker::appendBulkStringCommand(const B1String& arg, std::vector<uint8>* data)
 {
-    B1String temp(B1String::formatAs("$%d\r\n%s\r\n", arg.length(), arg.cString()));
-    data->insert(data->end(), temp.cString(), temp.cString() + temp.length());
+    B1String header(B1String::formatAs("$%u\r\n", arg.length()));   //  length by bytes: arg may contain NUL.
+    data->insert(data->end(), header.cString(), header.cString() + header.length());
+    data->insert(data->end(), arg.cString(), arg.cString() + arg.length());
+    data->push_back('\r');
+    data->push_back('\n');
 }
 
 std::vector<uint8> B1RedisDirectPacketMaker::makeSimpleStringCommand(const B1String& command)

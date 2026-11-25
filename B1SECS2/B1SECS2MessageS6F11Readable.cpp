@@ -102,7 +102,9 @@ bool B1SECS2MessageS6F11Readable::implReadData()
             }
             if (data->isFormatList()) {
                 B1SECS2DataV v(data);
-                readSECS2DataList(std::dynamic_pointer_cast<B1SECS2DataLIST>(data), &v._list);
+                if (readSECS2DataList(std::dynamic_pointer_cast<B1SECS2DataLIST>(data), &v._list) != true) {
+                    return false;
+                }
                 vs.push_back(v);
             }
             else {

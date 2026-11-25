@@ -13,6 +13,7 @@
 #include "B1BaseSessionManager.h"
 #include "B1BaseSession.h"
 #include "B1BaseSocket.h"
+#include "B1ServerSocket.h"
 
 using namespace BnD;
 
@@ -21,6 +22,7 @@ B1BaseSessionManager::B1BaseSessionManager(uint32 workingInerval)
     , _sessionsLock()
     , _sessions()
     , _reservedRemoveSessions()
+    , _releaseWaitingSessions()
 {
 }
 
@@ -50,13 +52,38 @@ void B1BaseSessionManager::implLooperFunc()
     }
     for (const auto& removeSession : removeSessions) {
         int32 handleID = removeSession._handleID;
-        removeSession._session->cleanupSession();
+        auto asioSocket = removeSession._baseSocket->asioSocket();
+        if (asioSocket && dynamic_cast<B1ServerSocket*>(removeSession._baseSocket.get())) {
+            //  server session: io handlers of this session may still be queued(io thread is shared by all sessions).
+            //  cleanup and destroy on io thread.
+            auto executor = asioSocket->get_executor();
+            boost::asio::post(executor, [removeSession, executor]() {
+                removeSession._session->cleanupSession();               //  no more async operation after cleanup.
+                boost::asio::post(executor, [removeSession]() {});      //  destroyed after handlers of operations started before cleanup.
+            });
+        }
+        else {
+            //  client session: destroy on this thread when no other reference remains.
+            //  (if the last reference is released on its own io thread, ~B1ClientSocket() joins itself)
+            removeSession._session->cleanupSession();
+            _releaseWaitingSessions.push_back(removeSession);
+        }
         onSessionRemoved(handleID);
     }
     {
         B1AutoLock al(_sessionsLock);
         for (const auto& removeSession : removeSessions) {
             _handleIDMap.erase(removeSession._handleID);
+        }
+    }
+    sessions.clear();
+    removeSessions.clear();
+    for (auto itr = _releaseWaitingSessions.begin(); itr != _releaseWaitingSessions.end();) {
+        if (itr->_session.use_count() < 2 && itr->_baseSocket.use_count() < 2) {
+            itr = _releaseWaitingSessions.erase(itr);
+        }
+        else {
+            ++itr;
         }
     }
     B1Thread::sleep(_workingInerval);
@@ -152,8 +179,7 @@ void B1BaseSessionManager::shutdown()
                     itr->second._session->setDisconnectedIfSessionClosed();
                 }
                 else if (itr->second._session->isDisconnected()) {
-                    _handleIDMap.erase(itr->second._handleID);
-                    itr->second._session->cleanupSession();
+                    _reservedRemoveSessions.push_back(itr->second); //  cleanupReservedRemoveSessions() after io stopped.
                     itr = _sessions.erase(itr);
                 }
                 else {
@@ -169,12 +195,32 @@ void B1BaseSessionManager::shutdown()
         B1Thread::sleep(sleepTime);
     }
     if (timedout) {
-        B1LOG("session Disconnect timed out!");
+        B1LOG("session Disconnect timed out! -> remaining sessions are reserved to remove: count[%u]", static_cast<uint32>(_sessions.size()));
         assert(false);
-        _handleIDMap.clear();
+        B1AutoLock al(_sessionsLock);
+        for (const auto& sessionsPair : _sessions) {    //  io handlers may still be running. cleanupReservedRemoveSessions() after io stopped.
+            _reservedRemoveSessions.push_back(sessionsPair.second);
+        }
         _sessions.clear();
     }
     onShuttingDown();
+}
+
+void B1BaseSessionManager::cleanupReservedRemoveSessions()
+{
+    std::list<SessionData> removeSessions;
+    std::list<SessionData> releaseWaitingSessions;
+    {
+        B1AutoLock al(_sessionsLock);
+        removeSessions.swap(_reservedRemoveSessions);
+        releaseWaitingSessions.swap(_releaseWaitingSessions);
+        for (const auto& removeSession : removeSessions) {
+            _handleIDMap.erase(removeSession._handleID);
+        }
+    }
+    for (const auto& removeSession : removeSessions) {
+        removeSession._session->cleanupSession();
+    }
 }
 
 void B1BaseSessionManager::disconnectAllSessions()

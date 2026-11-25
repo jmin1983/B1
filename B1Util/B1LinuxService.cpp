@@ -38,13 +38,11 @@ bool B1LinuxService::startService(const B1String& serviceName)
 {
     {
         bool alreadyActive = false;
-        if (getServiceActive(serviceName, &alreadyActive) != true) {
-            return false;
-        }
-        if (alreadyActive) {
+        if (getServiceActive(serviceName, &alreadyActive) && alreadyActive) {
             b1log("already started: serviceName[%s]", serviceName.cString());
             return true;
         }
+        //  inactive, failed, activating, ... or unable to get state: try StartUnit.
     }
     sd_bus_data bus_data;
 
@@ -108,24 +106,22 @@ bool B1LinuxService::getServiceActive(const B1String& serviceName, bool* isActiv
         return false;
     }
 
-    std::vector<B1String> split;
-    serviceName.toknize(".", std::back_inserter(split));
-    B1String path;
-    for (const auto& s : split) {
-        if (path.isEmpty() != true) {
-            path.append("_2e");
-        }
-        path += s;
+    char* unitPath = NULL;  //  every byte except [A-Za-z0-9] is escaped as "_xx". (ex: "my-app.service" -> "my_2dapp_2eservice")
+    r = sd_bus_path_encode("/org/freedesktop/systemd1/unit", serviceName.cString(), &unitPath);
+    if (r < 0) {
+        b1log("unable to get_service_active[%s]. failed to encode unit path: %s", serviceName.cString(), strerror(-r));
+        return false;
     }
     char* msg = 0;
     r = sd_bus_get_property_string(
         bus_data._bus,
         "org.freedesktop.systemd1",
-        ("/org/freedesktop/systemd1/unit/" + path).cString(),
+        unitPath,
         "org.freedesktop.systemd1.Unit",
         "ActiveState",
         &bus_data._error,
         &msg);
+    free(unitPath);
     B1String result(msg);
     free(msg);
     if (r < 0) {

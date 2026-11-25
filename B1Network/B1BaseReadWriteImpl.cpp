@@ -49,6 +49,9 @@ void B1BaseReadWriteImpl::readComplete(const boost::system::error_code& error, s
         }
     }
     else {
+        //  implOnReadComplete() may destroy this object before it returns false.
+        //  (e.g. B1HttpServer upgrades the http session to a websocket session)
+        //  do not access any member after it returns false.
         if (implOnReadComplete(receivedBytes)) {
             read(); //  continue reading.
         }
@@ -58,7 +61,7 @@ void B1BaseReadWriteImpl::readComplete(const boost::system::error_code& error, s
 void B1BaseReadWriteImpl::writeComplete(const boost::system::error_code& error, size_t transferredBytes)
 {
     if (error) {
-        B1LOG("write failed: reason[%d], transferredBytes:[%d], message[%s]", error.value(), transferredBytes, error.message().c_str());
+        B1LOG("write failed: reason[%d], transferredBytes:[%u], message[%s]", error.value(), transferredBytes, error.message().c_str());
         if (baseSocketImpl()->isOpen()) {
             B1LOG("write failed but socket still opened -> close: peerAddress[%s], peerPort[%d], localPort[%d]",
                 baseSocketImpl()->peerAddress().cString(), baseSocketImpl()->peerPort(), baseSocketImpl()->localPort());

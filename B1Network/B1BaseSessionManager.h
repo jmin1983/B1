@@ -47,6 +47,7 @@ namespace BnD {
         std::map<B1BaseSocket*, SessionData> _sessions; //  map<handle, session_data>.
         std::map<int32, B1BaseSocket*> _handleIDMap;    //  map<handle_id, handle>.
         std::list<SessionData> _reservedRemoveSessions;
+        std::list<SessionData> _releaseWaitingSessions;    //  cleaned up client sessions waiting for other references to be released.
     protected:
         virtual void onShuttingDown() {}
         virtual void onSessionAdded(int32 handleID, std::shared_ptr<B1BaseSession> session) {}
@@ -62,6 +63,7 @@ namespace BnD {
         bool startup();
         void shutdown();
         void disconnectAllSessions();
+        void cleanupReservedRemoveSessions();   //  call only when no io handler can run.
         int32 getHandleID(B1BaseSocket* baseSocket) const;
         uint32 sessionCount() const;
         std::map<B1BaseSocket*, SessionData> getAllSessions() const;

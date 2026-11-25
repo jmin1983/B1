@@ -56,7 +56,8 @@ bool B1MariaDBResult::getSingleRowResult(const boost::mysql::rows_view& rows, st
         if (expectedSize > 0 && expectedSize != size) {
             return false;
         }
-        items->resize(size);
+        items->clear();
+        items->reserve(size);
         for (size_t i = 0; i < size; ++i) {
             try {
                 items->push_back(toString(rows.front().at(i)));
@@ -150,11 +151,15 @@ bool B1MariaDBResult::getResult(const boost::mysql::rows_view& rows,
                                 std::vector<std::vector<uint8> >* col2) const
 {
     col0->clear();
-    col1->clear();
-    col2->clear();
     col0->reserve(rows.size());
-    col1->reserve(rows.size());
-    col2->reserve(rows.size());
+    if (col1) {
+        col1->clear();
+        col1->reserve(rows.size());
+    }
+    if (col2) {
+        col2->clear();
+        col2->reserve(rows.size());
+    }
     for (auto row : rows) {
         try {
             {

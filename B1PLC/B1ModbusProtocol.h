@@ -35,7 +35,7 @@ namespace BnD {
             FUNCTION_CODE_ERROR_ADD_VALUE =             0x80,
             FUNCTION_CODE_ERROR_ILLEGAL_FUNCTION =      1,  //  not supported function code.
             FUNCTION_CODE_ERROR_ILLEGAL_DATA_ADDRESS =  2,  //  requested data address overflowed.
-            FUNCTION_CODE_ERROR_ILLEGAL_DATA_VALUE =    3,  //  requested data quantity exceeded(참고: ILLEGAL_DATA_ADDRESS 보다 ILLEGAL_DATA_VALUE 의 처리 우선순위가 높다).
+            FUNCTION_CODE_ERROR_ILLEGAL_DATA_VALUE =    3,  //  requested data quantity exceeded(note: ILLEGAL_DATA_VALUE has higher priority than ILLEGAL_DATA_ADDRESS).
             FUNCTION_CODE_ERROR_OPERATION_FAILED =      4,  //  unrecoverable error occured.
 
             FUNCTION_CODE_READ_MAX_QTY_OF_COILS =       0x7D0,
@@ -51,6 +51,7 @@ namespace BnD {
             uint16 _length;         //  number of remaining bytes in this frame.
             uint8 _unitID;          //  slave address(255 if not used).
         };
+#pragma pack()  //  only MBAP is read from network bytes directly. PDU and Frame have std::vector: keep natural alignment.
         struct PDU {    //  ProtocolDataUnit.
             PDU() : _functionCode(0), _data() {}
             uint8 _functionCode;    //  function codes as in other variants.
@@ -60,7 +61,6 @@ namespace BnD {
             MBAP _header;
             PDU _pdu;
         };
-#pragma pack()
     };
 }   //  !BnD
 

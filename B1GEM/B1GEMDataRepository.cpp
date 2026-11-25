@@ -80,10 +80,11 @@ void B1GEMDataRepository::deleteAllReports()
 
 B1GEMEventRepository::RESULT B1GEMDataRepository::changeEquipmentConstants(const std::map<B1SECS2DataECID, B1SECS2DataECV>& ecs)
 {
-    bool result = false;
+    bool result = ecs.empty() != true;
     for (const auto& ecsPair : ecs) {
-        if (auto ec = _variableRepository->findEquipmentConstant(ecsPair.first)) {
-            result = ec->modifyValue(ecsPair.second.data());
+        auto ec = _variableRepository->findEquipmentConstant(ecsPair.first);
+        if (ec == NULL || ec->modifyValue(ecsPair.second.data()) != true) {
+            result = false;     //  fail if at least one ECID does not exist or failed.
         }
     }
 
@@ -202,7 +203,7 @@ bool B1GEMDataRepository::getEventReportData(const B1SECS2DataCEID& ceID, const 
                     vs.push_back(*secs2DataV);
                 }
                 else {
-                    B1LOG("get v value failed. maybe no need to send event: CEID[%s], V[%s], condition:s",
+                    B1LOG("get v value failed. maybe no need to send event: CEID[%s], V[%s], condition[%s]",
                           ceID->toString().cString(), v->label().cString(), gemCondition.toString().cString());
                     return false;   //  no need to send event.
                 }

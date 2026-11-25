@@ -11,6 +11,7 @@
 
 #include "B1Redic.h"
 #include "B1RedisDirectClient.h"
+#include "B1RedisDirectClientMessageListener.h"
 #include "B1RedisDirectClientPollingSession.h"
 #include "B1RedisDirectClientReadSession.h"
 #include "B1RedisDirectClientSubscribeSession.h"
@@ -28,6 +29,8 @@ B1RedisDirectClient::B1RedisDirectClient(B1RedisDirectClientMessageListener* mes
     , _maxAliveCount(maxAliveCount)
     , _aliveInterval(aliveInterval)
     , _listener(listener)
+    , _publishMessageLock()
+    , _pollingMessageLock()
     , _messageListener(messageListener)
     , _packetMaker(std::make_shared<B1RedisDirectPacketMaker>())
     , _startWritingNow(false)
@@ -251,7 +254,32 @@ void B1RedisDirectClient::closeSubscribeSession()
 {
     if (_subscribeSession) {
         _subscribeSession->closeSession();
+        _subscribeSession = NULL;   //  closed session is released by session manager. do not use it after close.
     }
+}
+
+void B1RedisDirectClient::onRecvMessagePublish(const B1String& channel, const B1String& message)
+{
+    B1AutoLock al(_publishMessageLock);
+    if (_messageListener) {
+        _messageListener->onRecvMessagePublish(channel, message);
+    }
+}
+
+bool B1RedisDirectClient::onRecvMessagePolling(const B1String& key, const B1String& message)
+{
+    B1AutoLock al(_pollingMessageLock);
+    if (NULL == _messageListener) {
+        return false;   //  not processed: the message is kept in redis.
+    }
+    return _messageListener->onRecvMessagePolling(key, message);
+}
+
+void B1RedisDirectClient::resetMessageListener()
+{
+    B1AutoLock alPublish(_publishMessageLock);  //  wait for running callbacks.
+    B1AutoLock alPolling(_pollingMessageLock);
+    _messageListener = NULL;
 }
 
 bool B1RedisDirectClient::hmget(const B1String& key, const std::vector<B1String>& fields, std::vector<B1String>* out)

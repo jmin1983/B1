@@ -72,7 +72,7 @@ bool B1HttpServerReadWriteImpl::implOnReadComplete(size_t receivedBytes)
 {
     boost::ignore_unused(receivedBytes);
     if (auto l = listener()) {
-        l->onReadComplete(*_httpMessage);
+        l->onReadComplete(*_httpMessage);   //  this object may be destroyed in this call(websocket upgrade). do not access any member after this call.
     }
     return false;   //  stop reading.
 }

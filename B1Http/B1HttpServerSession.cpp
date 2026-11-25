@@ -33,6 +33,7 @@ B1HttpServerSession::~B1HttpServerSession()
 void B1HttpServerSession::onReadComplete(const B1HttpServerMessage& httpMessage)
 {
     if (boost::beast::websocket::is_upgrade(httpMessage.request())) {
+        //  this session and its readWriteImpl are destroyed in this call. do not access any member after this call.
         _httpServerSessionListener->onHttpServerSessionUpgradeRequested(serverSocket(), httpMessage);
     }
     else {
@@ -45,9 +46,12 @@ void B1HttpServerSession::onWriteComplete(bool keepAlive, size_t dataSize)
 {
     if (keepAlive != true) {
         disconnect();
+        setSessionStatusDisconnecting();    //  no pending read/write -> no failed callback.
     }
-    else {
-        B1BaseSession::beginRead();
+    else if (B1BaseSession::beginRead() != true) {
+        B1LOG("begin read failed -> disconnect: peerAddress[%s], localPort:[%d]", peerAddress().cString(), localPort());
+        disconnect();
+        setSessionStatusDisconnecting();
     }
 }
 

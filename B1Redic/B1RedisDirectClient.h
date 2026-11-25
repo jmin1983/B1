@@ -16,6 +16,7 @@
 #pragma once
 #endif
 
+#include <B1Base/B1Lock.h>
 #include <B1Network/B1BaseClient.h>
 
 #include <list>
@@ -52,6 +53,8 @@ namespace BnD {
         const int32 _maxAliveCount;
         const int32 _aliveInterval;
         B1RedisDirectClientListener* _listener;
+        B1RecursiveLock _publishMessageLock;    //  _messageListener is called in this lock by subscribe session. see resetMessageListener().
+        B1RecursiveLock _pollingMessageLock;    //  _messageListener is called in this lock by polling session. see resetMessageListener().
         B1RedisDirectClientMessageListener* _messageListener;
         std::shared_ptr<B1RedisDirectPacketMaker> _packetMaker;
         bool _startWritingNow;
@@ -86,6 +89,9 @@ namespace BnD {
         bool exists(const B1String& key);
         bool subscribe(std::set<B1String>&& channels);
         void closeSubscribeSession();
+        void onRecvMessagePublish(const B1String& channel, const B1String& message);    //  called by subscribe session. ignored after resetMessageListener().
+        bool onRecvMessagePolling(const B1String& key, const B1String& message);        //  called by polling session. return false(not processed, kept in redis) after resetMessageListener().
+        void resetMessageListener();    //  waits running message callback. no message callback is called after this returns.
         bool hmget(const B1String& key, const std::vector<B1String>& fields, std::vector<B1String>* out);
         B1String hmget(const B1String& key, const B1String& field);
         bool hgetall(const B1String& key, std::map<B1String, B1String>* out);

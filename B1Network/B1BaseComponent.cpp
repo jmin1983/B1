@@ -43,4 +43,7 @@ void B1BaseComponent::shutdown()
         _sessionManager->shutdown();
     }
     implShutdown();
+    if (_sessionManager) {
+        _sessionManager->cleanupReservedRemoveSessions();
+    }
 }

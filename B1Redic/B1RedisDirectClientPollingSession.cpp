@@ -12,7 +12,6 @@
 #include "B1Redic.h"
 #include "B1RedisDirectClientPollingSession.h"
 #include "B1RedisDirectClient.h"
-#include "B1RedisDirectClientMessageListener.h"
 #include "B1RedisDirectPacketMaker.h"
 
 #include <B1Base/B1Thread.h>
@@ -46,7 +45,7 @@ void B1RedisDirectClientPollingSession::implProcessConnected(bool firstConnected
         if (message.isEmpty()) {
             break;
         }
-        if (owner()->messageListener()->onRecvMessagePolling(owner()->pollingKey(), message) != true) {
+        if (owner()->onRecvMessagePolling(owner()->pollingKey(), message) != true) {
             break;
         }
         if (lpop(owner()->pollingKey()) != true) {
@@ -59,6 +58,9 @@ void B1RedisDirectClientPollingSession::implProcessConnected(bool firstConnected
 
 bool B1RedisDirectClientPollingSession::lindex(const B1String& key, int32 index, B1String* out)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     _lock->lock();
     if (setWaitData() != true) {
         _lock->unlock();
@@ -87,6 +89,9 @@ bool B1RedisDirectClientPollingSession::lindex(const B1String& key, int32 index,
 
 bool B1RedisDirectClientPollingSession::lpop(const B1String& key)
 {
+    if (isRedisDirectSessionConnected() != true) {
+        return false;
+    }
     _lock->lock();
     if (setWaitData() != true) {
         _lock->unlock();

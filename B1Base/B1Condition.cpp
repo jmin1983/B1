@@ -47,15 +47,11 @@ B1Condition::~B1Condition()
 
 bool B1Condition::wait(uint32 timeoutMillisec)
 {
-    bool signaled = false;
-    _lock.lock();
-    if (isSignaled()) {
-        _lock.unlock();
-        signaled = true;
-    }
-    else {
 #if defined(_WIN32)
-        _lock.unlock();
+    _lock.lock();
+    bool signaled = _signaled;
+    _lock.unlock();
+    if (signaled != true) {
         MSG msg;
         DWORD ret;
         DWORD waiting = (0 == timeoutMillisec) ? INFINITE : timeoutMillisec;
@@ -66,27 +62,39 @@ bool B1Condition::wait(uint32 timeoutMillisec)
             }
             ret = ::MsgWaitForMultipleObjects(1, &_handle, FALSE, waiting, QS_ALLINPUT);
         } while (ret != WAIT_OBJECT_0 && ret != WAIT_TIMEOUT);
-        signaled = (ret == WAIT_OBJECT_0);
+    }
+    _lock.lock();
+    signaled = _signaled;   //  includes a signal arrived while waiting(or at the time of timed_out).
+    _signaled = false;
+    ::ResetEvent(_handle);
+    _lock.unlock();
+    return signaled;
 #else
-        int32 ret = 0;
+    _lock.lock();
+    if (_signaled != true) {
         if (0 < timeoutMillisec) {
             struct timespec timeout;
             ::clock_gettime(CLOCK_MONOTONIC, &timeout);
             uint64 nsec = timeout.tv_nsec + static_cast<uint64>(timeout.tv_sec) * 1000000000 + static_cast<uint64>(timeoutMillisec) * 1000000;
             timeout.tv_sec = nsec / 1000000000;
             timeout.tv_nsec = nsec % 1000000000;
-            ret = ::pthread_cond_timedwait(&_handle, &_lock.mutex(), &timeout);
+            while (_signaled != true) {
+                if (::pthread_cond_timedwait(&_handle, &_lock.mutex(), &timeout) == ETIMEDOUT) {
+                    break;
+                }
+            }
         }
         else {
-            ret = ::pthread_cond_wait(&_handle, &_lock.mutex());
+            while (_signaled != true) {
+                ::pthread_cond_wait(&_handle, &_lock.mutex());
+            }
         }
-        _lock.unlock();
-        signaled = (ret == 0);
-#endif
     }
-
-    reset();
+    const bool signaled = _signaled;    //  check and consume in the same lock. (spurious wakeup is ignored)
+    _signaled = false;
+    _lock.unlock();
     return signaled;
+#endif
 }
 
 void B1Condition::signal()

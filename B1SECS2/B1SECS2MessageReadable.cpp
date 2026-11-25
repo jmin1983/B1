@@ -57,16 +57,21 @@ bool B1SECS2MessageReadable::readSECS2Data(B1SECS2DataBase* data)
 
 bool B1SECS2MessageReadable::readSECS2DataList(std::shared_ptr<B1SECS2DataLIST> list, std::list<SPB1SECS2Data>* result)
 {
-    for (uint32 i = 0; i < list->count(); ++i) {
+    //  read nested list without recursion(nesting depth is decided by received data). result order is same as recursive reading.
+    std::vector<uint32> remains(1, list->count());  //  remaining item count of each nested list level.
+    while (remains.empty() != true) {
+        if (remains.back() < 1) {
+            remains.pop_back();                     //  this level is done -> back to parent level.
+            continue;
+        }
+        --remains.back();
         auto data = readUnknownSECS2Data();
         if (data == NULL) {
             return false;
         }
         result->push_back(data);
         if (data->isFormatList()) {
-            if (readSECS2DataList(std::dynamic_pointer_cast<B1SECS2DataLIST>(data), result) != true) {
-                return false;
-            }
+            remains.push_back(std::dynamic_pointer_cast<B1SECS2DataLIST>(data)->count());  //  go into child level.
         }
     }
     return true;

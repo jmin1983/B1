@@ -36,7 +36,7 @@ void B1SECS2ClientSession::recvMessageS10F4(const std::vector<uint8>& systemByte
 {
     B1SECS2MessageS10F4Readable messageS10F4(data, dataLength, clientSecs2DataManager());
     if (messageS10F4.readData() != true) {
-        sendMessageS10F0(systemBytes);
+        B1LOG("read S10F4 failed");     //  secondary message: no reply.
         return;
     }
     onRecvMessageS10F4(systemBytes, messageS10F4.ackc10());
@@ -46,7 +46,7 @@ void B1SECS2ClientSession::recvMessageS10F6(const std::vector<uint8>& systemByte
 {
     B1SECS2MessageS10F6Readable messageS10F6(data, dataLength, clientSecs2DataManager());
     if (messageS10F6.readData() != true) {
-        sendMessageS10F0(systemBytes);
+        B1LOG("read S10F6 failed");     //  secondary message: no reply.
         return;
     }
     onRecvMessageS10F6(systemBytes, messageS10F6.ackc10());

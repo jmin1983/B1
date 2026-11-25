@@ -50,7 +50,10 @@ B1SECS2ServerSession::~B1SECS2ServerSession()
 
 void B1SECS2ServerSession::recvHSMSMessage(const std::vector<uint8>& data)
 {
-    _t8Checker.stop();
+    {
+        B1AutoLock al(_t3CheckerLock);  //  _t8Checker is accessed by io thread and session manager thread.
+        _t8Checker.stop();
+    }
     resetLastLinkTestTick();
     const size_t headerSize = 10;
     if (data.size() < headerSize) {
@@ -97,6 +100,10 @@ void B1SECS2ServerSession::recvHSMSControl(uint16 sessionID, const std::vector<u
         onSelectCompleted(sessionID, systemBytes);
         return;
     }
+    if (CONTROL_MESSAGE_LINK_TEST_REQ == controlMessage) {  //  allowed in NOT SELECTED state too(E37).
+        sendControlMessage(sessionID, systemBytes, CONTROL_MESSAGE_LINK_TEST_RSP);
+        return;
+    }
     if (_selected != true) {
         writeLog("not selected: request[%d]", controlMessage);
         disconnect();
@@ -113,9 +120,6 @@ void B1SECS2ServerSession::recvHSMSControl(uint16 sessionID, const std::vector<u
             }
             sendControlMessage(sessionID, systemBytes, CONTROL_MESSAGE_DESELECT_RSP);
             onDeselectCompleted();
-            break;
-        case CONTROL_MESSAGE_LINK_TEST_REQ:
-            sendControlMessage(sessionID, systemBytes, CONTROL_MESSAGE_LINK_TEST_RSP);
             break;
         case CONTROL_MESSAGE_REJECT_REQ:
             break;
@@ -575,70 +579,40 @@ void B1SECS2ServerSession::implOnConnect()
         }
     }
     {
+        B1AutoLock al(_t3CheckerLock);
         const auto timeoutT8 = _timeoutT8;
         if (timeoutT8 > 0) {
             _t8Checker.start(timeoutT8);
         }
+        _t8Checker.stop();
     }
-    _t8Checker.stop();
     resetLastLinkTestTick();
 }
 
 void B1SECS2ServerSession::onReadComplete(uint8* data, size_t dataSize)
 {
-    if (0 == _lastMessage._recved) {
-        _t8Checker.reset();
-        const size_t messageLengthSize = 4;
-        if (dataSize < messageLengthSize) {
-            writeLog("[HSMS]message length is too short:[%s]", peerAddress().cString());
-            return;
+    const size_t messageLengthSize = 4;
+    auto& buffer = _lastMessage._data;
+    buffer.insert(buffer.end(), data, data + dataSize);
+    size_t pos = 0;
+    while (buffer.size() - pos >= messageLengthSize) {
+        uint32 length = 0;
+        memcpy(&length, &buffer[pos], messageLengthSize);
+        length = TO_UINT32_FOR_NETWORK(length);
+        if (buffer.size() - pos - messageLengthSize < length) {
+            break;  //  not enough data.
         }
-        memcpy(&_lastMessage._length, data, messageLengthSize);
-        _lastMessage._length = TO_UINT32_FOR_NETWORK(_lastMessage._length);
-        std::vector<uint8> buffer(dataSize - messageLengthSize, 0);
-        memcpy(&buffer[0], (uint8*)data + messageLengthSize, dataSize - messageLengthSize);
-        if (_lastMessage._length == buffer.size()) {
-            recvHSMSMessage(buffer);
-            _lastMessage.reset();
-            return;
-        }
-        else if (_lastMessage._length > buffer.size()) {
-            _lastMessage._data.insert(_lastMessage._data.end(), buffer.begin(), buffer.end());
-            _lastMessage._recved += static_cast<uint32>(dataSize);
-            return;
-        }
-        else if (_lastMessage._length < buffer.size()) {
-            std::vector<uint8> temp(_lastMessage._length, 0);
-            memcpy(&temp[0], &buffer[0], _lastMessage._length);
-            recvHSMSMessage(temp);
-            uint32 remainIndex = _lastMessage._length;
-            _lastMessage.reset();
-            onReadComplete(&buffer[remainIndex], buffer.size() - remainIndex);
-            return;
-        }
+        std::vector<uint8> message(buffer.begin() + pos + messageLengthSize, buffer.begin() + pos + messageLengthSize + length);
+        pos += messageLengthSize + length;
+        recvHSMSMessage(message);
     }
-    else {
-        _lastMessage._data.insert(_lastMessage._data.end(), data, data + dataSize);
-        if (_lastMessage._length == _lastMessage._data.size()) {
-            recvHSMSMessage(_lastMessage._data);
-            _lastMessage.reset();
-            return;
-        }
-        else if (_lastMessage._length > _lastMessage._data.size()) {
-            _lastMessage._recved += static_cast<uint32>(dataSize);
-            return;
-        }
-        else if (_lastMessage._length < _lastMessage._data.size()) {
-            std::vector<uint8> temp;
-            temp.reserve(_lastMessage._length);
-            temp.insert(temp.end(), _lastMessage._data.begin(), _lastMessage._data.begin() + _lastMessage._length);
-            recvHSMSMessage(temp);
-            temp.clear();
-            temp.insert(temp.end(), _lastMessage._data.begin() + _lastMessage._length, _lastMessage._data.end());
-            _lastMessage.reset();
-            onReadComplete(&temp[0], temp.size());
-            return;
-        }
+    buffer.erase(buffer.begin(), buffer.begin() + pos);
+    B1AutoLock al(_t3CheckerLock);
+    if (buffer.empty()) {
+        _t8Checker.stop();
+    }
+    else if (_timeoutT8 > 0) {
+        _t8Checker.restart();   //  T8(intercharacter timeout): a message is being received.
     }
 }
 
@@ -676,7 +650,12 @@ void B1SECS2ServerSession::implProcessConnected(bool firstConnectedProcess)
         disconnect();
         return;
     }
-    if (_t8Checker.isTimeover(false)) {
+    bool t8Timedout = false;
+    {
+        B1AutoLock al(_t3CheckerLock);
+        t8Timedout = _t8Checker.isTimeover(false);
+    }
+    if (t8Timedout) {
         writeLog("T8 Timed out");
         disconnect();
         return;
@@ -709,6 +688,7 @@ void B1SECS2ServerSession::setHSMSTimeoutValue(uint32 timeoutT3, uint32 timeoutT
         _timeoutT6 = timeoutT6;
     }
     if (timeoutT8 != _timeoutT8) {
+        B1AutoLock al(_t3CheckerLock);
         _t8Checker.stop();
         if (timeoutT8 > 0) {
             _t8Checker.start(timeoutT8);

@@ -12,7 +12,6 @@
 #include "B1Redic.h"
 #include "B1RedisDirectClientSubscribeSession.h"
 #include "B1RedisDirectClient.h"
-#include "B1RedisDirectClientMessageListener.h"
 #include "B1RedisDirectPacketMaker.h"
 
 using namespace BnD;
@@ -32,7 +31,7 @@ void B1RedisDirectClientSubscribeSession::implOnRecvRedisArrays(const std::list<
         auto itr = strings.begin();
         const B1String& channel = *(++itr);
         const B1String& message = *(++itr);
-        owner()->messageListener()->onRecvMessagePublish(channel, message);
+        owner()->onRecvMessagePublish(channel, message);
     }
     else {
         B1RedisDirectClientSession::implOnRecvRedisArrays(strings);

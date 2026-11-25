@@ -38,6 +38,10 @@ void B1HttpServer::onHttpServerSessionUpgradeRequested(B1ServerSocket* serverSoc
     auto baseSocket = B1NetworkTypeConverter::toBaseSocket(serverSocket);
     auto baseSession = sessionManager()->getBaseSession(baseSocket);
 
+    //  called in the read handler of the http session(io thread).
+    //  finalizeSession() destroys the readWriteImpl of the http session, and releasing baseSession at the end of this function destroys the http session itself.
+    //  callers(B1HttpServerSession::onReadComplete(), B1HttpServerReadWriteImpl::implOnReadComplete(), B1BaseReadWriteImpl::readComplete()) must not access their members after this returns.
+    //  httpMessage refers to the member of the readWriteImpl. copy it before finalizeSession().
     auto httpMessageMoved = std::move(httpMessage);
     baseSession->finalizeSession();
 
@@ -68,7 +72,7 @@ B1BaseServerSession* B1HttpServer::createSession(B1ServerSocket* serverSocket)
 
 bool B1HttpServer::implInitialize(int32 port)
 {
-    if (port < 1 || port - 1 > UINT16_MAX) {
+    if (port < 1 || port > UINT16_MAX) {
         return false;
     }
     if (startup() != true) {

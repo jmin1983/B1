@@ -50,6 +50,7 @@ namespace BnD {
         void implOnRecvRedisBulkStrings(const B1String& string) final;
         void implOnRecvRedisArrays(const std::list<B1String>& strings) final;
     protected:
+        virtual void implOnConnect() override;
         void implOnDisconnected(int32 reason) final;
         virtual void implProcessConnected(bool firstConnectedProcess) override;
     protected:
@@ -57,7 +58,7 @@ namespace BnD {
     protected:    //  locked functions.
         bool setWaitData();                                 //  return false if already_waiting.
         bool waitData(std::list<B1String>* data = NULL);    //  return false if timed_out.
-        bool scan(const B1String& cursor, const B1String& pattern, std::set<B1String>* out, int32 count);
+        bool scan(B1String* cursor, const B1String& pattern, std::set<B1String>* out, int32 count);  //  one step: cursor is updated to the next cursor("0" if finished).
     public:
         bool exists(const B1String& key);
         bool hmget(const B1String& key, const std::vector<B1String>& fields, std::vector<B1String>* out);

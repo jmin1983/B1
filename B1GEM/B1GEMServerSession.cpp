@@ -117,6 +117,10 @@ void B1GEMServerSession::onRecvMessageS1F13(uint16 sessionID, bool wait, const s
 void B1GEMServerSession::onRecvMessageS1F14(uint16 sessionID, const std::vector<uint8>& systemBytes, const B1SECS2DataCOMMACK& commack)
 {
     std::shared_ptr<B1SECS2DataBIN> bin(static_cast<B1SECS2DataBIN*>(commack.get()->clone()));
+    if (bin->data().empty()) {
+        writeLog("invalid COMMACK: empty");
+        return;
+    }
     if (bin->data()[0] == 1) {
         disconnect();
     }

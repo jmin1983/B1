@@ -35,8 +35,10 @@ namespace BnD {
         B1String _password;
         uint16 _port;
         bool _useSSL;
+        uint32 _connectionCount;    //  target count of connections. checkConnections() keeps this count.
     protected:
         std::shared_ptr<class B1Lock> _lock;
+        bool _initialized;			//  true: initialize() called and finalize() not yet started. guarded by _lock.
         std::map<std::shared_ptr<B1MariaDBHandle>, bool> _handles;  //  map<handle, now_using>
     protected:
         auto createNewHandle() const -> std::shared_ptr<B1MariaDBHandle>;

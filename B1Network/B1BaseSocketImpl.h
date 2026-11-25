@@ -23,7 +23,7 @@ namespace BnD {
         B1BaseSocketImpl();
         virtual ~B1BaseSocketImpl() {}
     private:
-        std::shared_ptr<B1Lock> _closeLock;
+        std::shared_ptr<B1Lock> _closeLock;     //  guards socket: close(), rollbackSocket()(cleanup) and socket access.
     protected:
         virtual void implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) = 0;
         virtual auto implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> = 0;
@@ -35,13 +35,14 @@ namespace BnD {
         virtual boost::asio::ip::tcp::socket* implGetASIOSocket() const = 0;
     public:
         void updateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket) { implUpdateSocket(pAsioSocket); }
-        auto rollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket> { return implRollbackSocket(); }
+        auto rollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket>;
         void close();
-        B1String peerAddress() const { return implPeerAddress(); }
-        uint16 peerPort() const { return implPeerPort(); }
-        uint16 localPort() const { return implLocalPort(); }
-        bool isOpen() const { return implIsOpen(); }
-        boost::asio::ip::tcp::socket* getASIOSocket() const { return implGetASIOSocket(); }
+        B1String peerAddress() const;
+        uint16 peerPort() const;
+        uint16 localPort() const;
+        bool isOpen() const;
+        boost::asio::ip::tcp::socket* getASIOSocket() const { return implGetASIOSocket(); }   //  lock closeLock() while using returned socket. NULL if cleaned up.
+        B1Lock* closeLock() const { return _closeLock.get(); }
     };
 
     class B1ASIOSocketImpl : public B1BaseSocketImpl {

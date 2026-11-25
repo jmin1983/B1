@@ -51,6 +51,10 @@ auto B1ModbusPacketAnalyzer::implAnalyzeData(uint8* data, size_t size, size_t* p
     memcpy(&mbap, data, headerSize);
     mbap._transactionID = TO_UINT16_FOR_NETWORK(mbap._transactionID);
     mbap._length = TO_UINT16_FOR_NETWORK(mbap._length);
+    if (mbap._length < 2) {     //  UnitID + FunctionCode
+        B1LOG("invalid mbap length: length[%u]", mbap._length);
+        return ANALYZE_RESULT_FAIL;
+    }
     size_t remainSize = size - headerSize;
     if (remainSize + 1 < mbap._length) {
         return ANALYZE_RESULT_NOT_ENOUTH_DATA;

@@ -48,9 +48,13 @@ void B1GEMEventRepository::finalize()
 void B1GEMEventRepository::deleteAllReports()
 {
     B1AutoLock al(_lock);
+    std::map<const B1SECS2DataCEID, SPGEMEvent> events;
     for (const auto& eventsPair : _events) {
-        eventsPair.second->reportIDs().clear();
+        SPGEMEvent evt(eventsPair.second->clone());
+        evt->reportIDs().clear();
+        events.insert(std::make_pair(eventsPair.first, evt));
     }
+    events.swap(_events);
 }
 
 auto B1GEMEventRepository::linkReport(const std::map<B1SECS2DataCEID, std::list<std::shared_ptr<B1SECS2DataRPTID> > >& linkData) -> RESULT

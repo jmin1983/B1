@@ -51,7 +51,7 @@ int8 B1SECS2Data::getDataBodyLengthSize(uint32 dataLength) const
         return 1;
     else if (dataLength < 65536)
         return 2;
-    else if (dataLength < 16777215)
+    else if (dataLength <= 0xFFFFFF)
         return 3;
     else {
         B1LOG("body length too long");
@@ -78,13 +78,17 @@ bool B1SECS2Data::setMessageDataBodyLength(uint32 dataLength, std::vector<uint8>
     }
     else if (dataBodyLengthSize == 3) {
         uint32 temp = TO_UINT32_FOR_NETWORK(dataLength);
-        result->insert(result->end(), (uint8*)&temp + 0, (uint8*)&temp + 4);
+        result->insert(result->end(), (uint8*)&temp + 1, (uint8*)&temp + 4);
     }
     return true;
 }
 
 bool B1SECS2Data::readDataOnly(const uint8* data, uint32 dataLength, uint32 bodyLength, uint32* pos)
 {
+    if (*pos + bodyLength > dataLength) {
+        B1LOG("bodyLength over dataLength: pos_need[%u], dataLength[%u]", *pos + bodyLength, dataLength);
+        return false;
+    }
     if (implReadData(data, dataLength, bodyLength, pos) != true)
         return false;
     return true;
@@ -95,13 +99,7 @@ bool B1SECS2Data::readFrom(const uint8* data, uint32 dataLength, uint32* pos)
     uint32 bodyLength = 0;
     if (readBodyFormatExpected(data, dataLength, pos, &bodyLength) != true)
         return false;
-    if (*pos + bodyLength > dataLength) {
-        B1LOG("bodyLength over dataLength: pos_need[%u], dataLength[%u]", *pos + bodyLength, dataLength);
-        return false;
-    }
-    if (implReadData(data, dataLength, bodyLength, pos) != true)
-        return false;
-    return true;
+    return readDataOnly(data, dataLength, bodyLength, pos);
 }
 
 bool B1SECS2Data::writeTo(std::vector<uint8>* result) const
@@ -139,7 +137,7 @@ bool B1SECS2Data::readBodyFormat(const uint8* data, uint32 dataLength, uint32* p
     }
     else if (bodyLengthSize == 3) {
         uint32 temp = 0;
-        memcpy(&temp, &data[*pos], bodyLengthSize);
+        memcpy((uint8*)&temp + 1, &data[*pos], bodyLengthSize);
         temp = TO_UINT32_FOR_NETWORK(temp);
         *bodyLength = temp;
     }
@@ -297,7 +295,8 @@ B1SECS2DataBOOL::B1SECS2DataBOOL(bool data, B1String&& label)
 
 bool B1SECS2DataBOOL::implReadData(const uint8* data, uint32 dataLength, uint32 bodyLength, uint32* pos)
 {
-    _data = data[*pos];
+    //  BOOL can be an array(bodyLength 0 ~ n): use the first value, false if empty.
+    _data = bodyLength > 0 ? data[*pos] != 0 : false;
     *pos += bodyLength;
     return true;
 }

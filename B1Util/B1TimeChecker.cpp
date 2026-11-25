@@ -70,5 +70,5 @@ uint64 B1TimeChecker::elapsed() const
     if (_started != true) {
         return 0;
     }
-    return B1TickUtil::currentTick() - _lastTick;
+    return B1TickUtil::diffTick(_lastTick, B1TickUtil::currentTick());
 }

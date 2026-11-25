@@ -22,10 +22,40 @@ B1BaseSocketImpl::B1BaseSocketImpl()
 {
 }
 
+auto B1BaseSocketImpl::rollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket>
+{
+    B1AutoLock al(*_closeLock);
+    return implRollbackSocket();
+}
+
 void B1BaseSocketImpl::close()
 {
     B1AutoLock al(*_closeLock);
     implClose();
+}
+
+B1String B1BaseSocketImpl::peerAddress() const
+{
+    B1AutoLock al(*_closeLock);
+    return implPeerAddress();
+}
+
+uint16 B1BaseSocketImpl::peerPort() const
+{
+    B1AutoLock al(*_closeLock);
+    return implPeerPort();
+}
+
+uint16 B1BaseSocketImpl::localPort() const
+{
+    B1AutoLock al(*_closeLock);
+    return implLocalPort();
+}
+
+bool B1BaseSocketImpl::isOpen() const
+{
+    B1AutoLock al(*_closeLock);
+    return implIsOpen();
 }
 
 B1ASIOSocketImpl::B1ASIOSocketImpl()

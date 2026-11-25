@@ -83,8 +83,7 @@ void B1SECS2ServerSession::recvMessageS1F14(uint16 sessionID, bool wait, const s
 {
     B1SECS2MessageS1F14Readable messageS1F14(wait, data, dataLength, serverSecs2DataManager());
     if (messageS1F14.readData() != true) {
-        writeLog("sendMessageS1F0");
-        sendMessageS1F0(sessionID, systemBytes);
+        writeLog("read S1F14 failed");  //  secondary message: no reply.
         return;
     }
 

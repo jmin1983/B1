@@ -35,7 +35,7 @@ void B1PathGraph::getAllPathsRecursive(const Item& current, int32 idTo, uint32 p
         for (const auto& adjacencyItemsPair : current._adjacencyItems) {
             for (const auto& edge : adjacencyItemsPair.second) {
                 if (visited->at(adjacencyItemsPair.first->_id) != true) {
-                    getAllPathsRecursive(*adjacencyItemsPair.first, idTo, edge._cost + current._additionalCost, visited, path, result);
+                    getAllPathsRecursive(*adjacencyItemsPair.first, idTo, edge._cost + edge._additionalCost + adjacencyItemsPair.first->_additionalCost, visited, path, result);   //  same as getShortestPath() except discrimination.
                 }
             }
         }

@@ -16,6 +16,8 @@
 #pragma once
 #endif
 
+#include <B1Base/B1Lock.h>
+
 namespace boost {
     namespace system {
         class error_code;
@@ -27,7 +29,7 @@ namespace BnD {
     class B1BaseSocket;
     class B1IOContext;
     class B1ServerSocket;
-    class B1Acceptor {
+    class B1Acceptor : public std::enable_shared_from_this<B1Acceptor> {   //  an accept handler can outlive finalize(). see accept().
     public:
         B1Acceptor(const B1IOContext* context);
         virtual ~B1Acceptor();
@@ -36,6 +38,7 @@ namespace BnD {
     protected:
         std::shared_ptr<boost::asio::ip::tcp::acceptor> _acceptor;
         bool _closed;
+        B1RecursiveLock _listenerLock;     //  recursive: finalize() can be called in a listener callback(io thread).
         B1AcceptorListener* _listener;
     private:
         void acceptComplete(std::shared_ptr<B1ServerSocket> serverSocket, const boost::system::error_code& error);

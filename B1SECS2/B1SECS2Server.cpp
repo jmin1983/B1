@@ -45,7 +45,7 @@ bool B1SECS2Server::implInitialize(int32 port)
     if (_serverSecs2DataManager->initialize() != true) {
         return false;
     }
-    if (port < 1 || port - 1 > UINT16_MAX) {
+    if (port < 1 || port > UINT16_MAX) {
         return false;
     }
     if (startup() != true) {

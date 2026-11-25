@@ -14,6 +14,8 @@
 #include "B1SecureWebSocketImpl.h"
 #include "B1WebSocketMessage.h"
 
+#include <B1Base/B1Lock.h>
+
 using namespace BnD;
 
 B1SecureWebSocketReadWriteImpl::B1SecureWebSocketReadWriteImpl(const B1SSLContext& sslContext, B1WebSocketReadWriteImplListener* listener)
@@ -28,28 +30,64 @@ B1SecureWebSocketReadWriteImpl::~B1SecureWebSocketReadWriteImpl()
 
 void B1SecureWebSocketReadWriteImpl::implWriteBinary(std::vector<uint8>&& data)
 {
-    secureWebSocketImpl()->secureWebSocketStream()->binary(true);
-
     auto temp = std::make_shared<std::vector<uint8> >(std::move(data));
-    secureWebSocketImpl()->secureWebSocketStream()->async_write(
-        boost::beast::net::buffer(*temp),
-        [this, temp](const boost::system::error_code& error, size_t transferredBytes) {
-            this->writeBinaryComplete(temp, error, transferredBytes);
+    if (auto socketImpl = secureWebSocketImpl()) {
+        B1AutoLock al(*socketImpl->closeLock());   //  stream can not be cleaned up while using.
+        if (auto stream = socketImpl->secureWebSocketStream()) {
+            //  beast stream is not thread-safe: start async_write in the io thread(same thread as async_read).
+            boost::asio::post(stream->get_executor(), [this, temp]() {
+                if (auto socketImplInIO = secureWebSocketImpl()) {
+                    B1AutoLock alInIO(*socketImplInIO->closeLock());
+                    if (auto streamInIO = socketImplInIO->secureWebSocketStream()) {
+                        streamInIO->binary(true);
+                        streamInIO->async_write(
+                            boost::beast::net::buffer(*temp),
+                            [this, temp](const boost::system::error_code& error, size_t transferredBytes) {
+                                this->writeBinaryComplete(temp, error, transferredBytes);
+                            }
+                        );
+                        return;
+                    }
+                }
+                this->writeBinaryComplete(temp, boost::asio::error::operation_aborted, 0);  //  cleaned up while posting(call after unlock).
+            });
+            return;
         }
-    );
+    }
+    //  cleaned up(called in the writer thread). do not notify the listener: the session may be being destroyed.
+    B1LOG("socket already cleaned up -> ignore writing: size[%u]", static_cast<uint32>(temp->size()));
+    _writer.writeComplete();
 }
 
 void B1SecureWebSocketReadWriteImpl::implWriteText(B1String&& data)
 {
-    secureWebSocketImpl()->secureWebSocketStream()->text(true);
-
     auto temp = std::make_shared<std::string>(std::move(const_cast<std::string&>(data.to_string())));
-    secureWebSocketImpl()->secureWebSocketStream()->async_write(
-        boost::beast::net::buffer(*temp),
-        [this, temp](const boost::system::error_code& error, size_t transferredBytes) {
-            this->writeTextComplete(temp, error, transferredBytes);
+    if (auto socketImpl = secureWebSocketImpl()) {
+        B1AutoLock al(*socketImpl->closeLock());   //  stream can not be cleaned up while using.
+        if (auto stream = socketImpl->secureWebSocketStream()) {
+            //  beast stream is not thread-safe: start async_write in the io thread(same thread as async_read).
+            boost::asio::post(stream->get_executor(), [this, temp]() {
+                if (auto socketImplInIO = secureWebSocketImpl()) {
+                    B1AutoLock alInIO(*socketImplInIO->closeLock());
+                    if (auto streamInIO = socketImplInIO->secureWebSocketStream()) {
+                        streamInIO->text(true);
+                        streamInIO->async_write(
+                            boost::beast::net::buffer(*temp),
+                            [this, temp](const boost::system::error_code& error, size_t transferredBytes) {
+                                this->writeTextComplete(temp, error, transferredBytes);
+                            }
+                        );
+                        return;
+                    }
+                }
+                this->writeTextComplete(temp, boost::asio::error::operation_aborted, 0);  //  cleaned up while posting(call after unlock).
+            });
+            return;
         }
-    );
+    }
+    //  cleaned up(called in the writer thread). do not notify the listener: the session may be being destroyed.
+    B1LOG("socket already cleaned up -> ignore writing: size[%u]", static_cast<uint32>(temp->size()));
+    _writer.writeComplete();
 }
 
 B1BaseSocketImpl* B1SecureWebSocketReadWriteImpl::createBaseSocketImpl()

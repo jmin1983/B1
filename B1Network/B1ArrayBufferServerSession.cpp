@@ -46,6 +46,9 @@ B1ArrayBufferReadWriteImpl* B1ArrayBufferServerSession::readWriteImpl() const
 
 void B1ArrayBufferServerSession::writeData(const uint8* data, size_t size) const
 {
+    if (isDisconnecting() || isDisconnected()) {
+        return;
+    }
     readWriteImpl()->requestWriteData(data, size);
 }
 
@@ -55,6 +58,9 @@ bool B1ArrayBufferServerSession::writeData(const std::vector<uint8>& data) const
     if (dataSize < 1) {
         return false;
     }
-    writeData(&data[0], dataSize);
+    if (isDisconnecting() || isDisconnected()) {
+        return false;
+    }
+    readWriteImpl()->requestWriteData(&data[0], dataSize);
     return true;
 }
