@@ -98,7 +98,7 @@ void B1StringUtil::hexaStringToBinary(const B1String& source, std::vector<uint8>
     for (uint32 i = 0; i < sourceLength; i += 2) {
         auto upper = source.substring(i, 1);
         auto lower = source.substring(i + 1, 1);
-        result->at(index++) = static_cast<uint8>((strtol(upper.cString(), NULL, 16) << 4) + strtol(lower.cString(), NULL, 16));
+        result->at(index++) = static_cast<uint8>((strtol(upper.cString(), nullptr, 16) << 4) + strtol(lower.cString(), nullptr, 16));
     }
 }
 

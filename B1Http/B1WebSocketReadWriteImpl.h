@@ -20,6 +20,7 @@
 #include <B1Base/B1Lock.h>
 #include <B1Network/B1BaseReadWriteImpl.h>
 
+#include <atomic>
 #include <list>
 
 namespace boost {
@@ -49,6 +50,7 @@ namespace BnD {
             enum CONSTS {
                 CONSTS_DEFAULT_TEXT_BUNCH_HINT = 1024 * 512,
                 CONSTS_DEFAULT_MAX_DATA_SIZE = 100000,
+                CONSTS_WRITE_COMPLETE_WAIT_TIMEOUT = 100,   //  millisecond.
             };
         protected:
             struct Data {
@@ -71,7 +73,8 @@ namespace BnD {
             };
         protected:
             B1WebSocketReadWriteImpl* _owner;
-            bool _readyToWrite;
+            std::atomic<bool> _readyToWrite;
+            B1Condition _writeCompleteEvent;   //  signaled by writeComplete() and quit().
             uint32 _textBunchHint;
             uint32 _maxDataSize;
             mutable B1Lock _lock;
@@ -85,7 +88,8 @@ namespace BnD {
             void setMaxDataSize(uint32 value) { _maxDataSize = value; }
             void addWriteBinary(std::vector<uint8>&& data);
             void addWriteText(B1String&& text);
-            void writeComplete() { _readyToWrite = true; }
+            void writeComplete() { _readyToWrite = true; _writeCompleteEvent.signal(); }
+            void quit() { B1Looper::quit(); _writeCompleteEvent.signal(); }    //  wake up the writer waiting write complete.
         } _writer;
     protected:
         std::shared_ptr<B1WebSocketMessage> _webSocketMessage;

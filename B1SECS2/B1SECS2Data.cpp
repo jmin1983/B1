@@ -153,9 +153,10 @@ B1SECS2Data* B1SECS2Data::createFromUnknownFormat(const uint8* data, uint32 data
 {
     DATA_FORMAT format;
     uint32 bodyLength = 0;
-    if (B1SECS2Data::readBodyFormat(data, dataLength, pos, &format, &bodyLength) != true)
-        return NULL;
-    B1SECS2Data* secs2Data = NULL;
+    if (B1SECS2Data::readBodyFormat(data, dataLength, pos, &format, &bodyLength) != true) {
+        return nullptr;
+    }
+    B1SECS2Data* secs2Data = nullptr;
     switch (format) {
         case DATA_FORMAT_LIST:
             secs2Data = new B1SECS2DataLIST();
@@ -179,11 +180,11 @@ B1SECS2Data* B1SECS2Data::createFromUnknownFormat(const uint8* data, uint32 data
             secs2Data = new B1SECS2DataUINT32();
             break;
         default:
-            return NULL;
+            return nullptr;
     }
     if (secs2Data->readDataOnly(data, dataLength, bodyLength, pos) != true) {
         delete secs2Data;
-        return NULL;
+        return nullptr;
     }
     return secs2Data;
 }

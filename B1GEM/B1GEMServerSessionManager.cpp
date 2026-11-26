@@ -17,7 +17,7 @@ using namespace BnD;
 
 B1GEMServerSessionManager::B1GEMServerSessionManager()
     : B1BaseSessionManager()
-    , _gemSession(NULL)
+    , _gemSession(nullptr)
     , _gemSessionLock()
 {
 }
@@ -29,7 +29,7 @@ B1GEMServerSessionManager::~B1GEMServerSessionManager()
 bool B1GEMServerSessionManager::setGemSession(void* gemSession)
 {
     B1AutoLock al(_gemSessionLock);
-    if (_gemSession != NULL) {
+    if (_gemSession != nullptr) {
         return false;
     }
     _gemSession = (B1BaseSocket*)gemSession;
@@ -42,7 +42,7 @@ bool B1GEMServerSessionManager::clearGemSession(void* gemSession)
     if (_gemSession != gemSession) {
         return false;
     }
-    _gemSession = NULL;
+    _gemSession = nullptr;
     return true;
 }
 

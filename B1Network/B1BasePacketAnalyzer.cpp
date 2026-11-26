@@ -33,7 +33,7 @@ bool B1BasePacketAnalyzer::analyzeData(const uint8* data, size_t size)
         data = &_recvdBuffer[0];
         size = _recvdBuffer.size();
     }
-    if (size < 1 || NULL == data) {
+    if (size < 1 || nullptr == data) {
         B1LOG("invalid data size or empty data: size[%d]", size);
         assert(false);
         return false;

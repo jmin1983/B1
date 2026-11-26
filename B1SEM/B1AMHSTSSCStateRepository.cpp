@@ -20,7 +20,7 @@ using namespace BnD;
 using namespace B1AMHSSEM;
 
 B1AMHSTSSCStateRepository::B1AMHSTSSCStateRepository()
-    : _listener(NULL)
+    : _listener(nullptr)
     , _lock(new B1Lock())
     , _systemState(SYSTEM_STATE::NONE)
     , _systemAvailState(SYSTEM_AVAIL_STATE::NONE)
@@ -132,7 +132,7 @@ bool B1AMHSTSSCStateRepository::initialize(B1AMHSTSSCStateRepositoryListener* li
 
 void B1AMHSTSSCStateRepository::finalize()
 {
-    _listener = NULL;
+    _listener = nullptr;
     _systemState = SYSTEM_STATE::NONE;
     _systemAvailState = SYSTEM_AVAIL_STATE::NONE;
 }

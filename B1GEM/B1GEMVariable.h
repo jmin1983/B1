@@ -37,7 +37,7 @@ namespace BnD {
     public:
         const B1String& label() const { return _label; }
         const B1SECS2DataVID& vID() const { return *_vID; }
-        std::shared_ptr<B1SECS2DataV> getValue(const B1GEMDataValueCondition& gemCondition) const;    //  return NULL if no value
+        std::shared_ptr<B1SECS2DataV> getValue(const B1GEMDataValueCondition& gemCondition) const;    //  return nullptr if no value
     };
 
     class B1GEMVariableSetter : public B1GEMVariable {

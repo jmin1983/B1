@@ -36,9 +36,9 @@ B1RedisDirectClient::B1RedisDirectClient(B1RedisDirectClientMessageListener* mes
     , _startWritingNow(false)
     , _db(0)
     , _pollingKey("")
-    , _readSession(NULL)
-    , _subscribeSession(NULL)
-    , _writeSession(NULL)
+    , _readSession(nullptr)
+    , _subscribeSession(nullptr)
+    , _writeSession(nullptr)
 {
 }
 
@@ -53,23 +53,23 @@ auto B1RedisDirectClient::createSessionManager() -> std::shared_ptr<B1BaseSessio
 
 B1BaseClientSession* B1RedisDirectClient::createSession(B1ClientSocket* clientSocket, void* param)
 {
-    B1BaseClientSession* newSession = NULL;
+    B1BaseClientSession* newSession = nullptr;
     switch (static_cast<int32>((intptr_t)param)) {
         default:
             assert(false);
             break;
         case SESSION_TYPE_WRITE:
-            assert(_writeSession == NULL);
+            assert(_writeSession == nullptr);
             _writeSession = new B1RedisDirectClientWriteSession(clientSocket, this, this, _startWritingNow);
             newSession = _writeSession;
             break;
         case SESSION_TYPE_READ:
-            assert(_readSession == NULL);
+            assert(_readSession == nullptr);
             _readSession = _pollingKey.isEmpty() ? new B1RedisDirectClientReadSession(clientSocket, this, this) : new B1RedisDirectClientPollingSession(clientSocket, this, this);
             newSession = _readSession;
             break;
         case SESSION_TYPE_SUBSCRIBE:
-            assert(_subscribeSession == NULL);
+            assert(_subscribeSession == nullptr);
             _subscribeSession = new B1RedisDirectClientSubscribeSession(clientSocket, this, this);
             newSession = _subscribeSession;
             break;
@@ -80,7 +80,7 @@ B1BaseClientSession* B1RedisDirectClient::createSession(B1ClientSocket* clientSo
 bool B1RedisDirectClient::initialize(const B1String& address, uint16 port, int32 db,
                                      bool useSubscribe, B1String&& pollingKey, bool startWritingNow, const uint32 connectTimeout)
 {
-    if (_readSession != NULL || _subscribeSession != NULL || _writeSession != NULL) {
+    if (_readSession != nullptr || _subscribeSession != nullptr || _writeSession != nullptr) {
         assert(false);
         return false;
     }
@@ -91,31 +91,31 @@ bool B1RedisDirectClient::initialize(const B1String& address, uint16 port, int32
     _db = db;
     _pollingKey = std::move(pollingKey);
     auto writeContext = B1BaseClient::connect(address.copy(), port, (void*)static_cast<intptr_t>(SESSION_TYPE_WRITE));
-    if (NULL == writeContext) {
-        _readSession = NULL;
-        _subscribeSession = NULL;
-        _writeSession = NULL;
+    if (nullptr == writeContext) {
+        _readSession = nullptr;
+        _subscribeSession = nullptr;
+        _writeSession = nullptr;
         shutdown();
         return false;
     }
     auto readContext = B1BaseClient::connect(address.copy(), port, (void*)static_cast<intptr_t>(SESSION_TYPE_READ));
-    if (NULL == readContext) {
+    if (nullptr == readContext) {
         disconnect(writeContext);
-        _readSession = NULL;
-        _subscribeSession = NULL;
-        _writeSession = NULL;
+        _readSession = nullptr;
+        _subscribeSession = nullptr;
+        _writeSession = nullptr;
         shutdown();
         return false;
     }
-    B1ClientSocket* subscribeContext = NULL;
+    B1ClientSocket* subscribeContext = nullptr;
     if (useSubscribe) {
         subscribeContext = B1BaseClient::connect(address.copy(), port, (void*)static_cast<intptr_t>(SESSION_TYPE_SUBSCRIBE));
-        if (subscribeContext == NULL) {
+        if (subscribeContext == nullptr) {
             disconnect(readContext);
             disconnect(writeContext);
-            _readSession = NULL;
-            _subscribeSession = NULL;
-            _writeSession = NULL;
+            _readSession = nullptr;
+            _subscribeSession = nullptr;
+            _writeSession = nullptr;
             shutdown();
             return false;
         }
@@ -132,9 +132,9 @@ bool B1RedisDirectClient::initialize(const B1String& address, uint16 port, int32
             if (subscribeContext) {
                 disconnect(subscribeContext);
             }
-            _readSession = NULL;
-            _subscribeSession = NULL;
-            _writeSession = NULL;
+            _readSession = nullptr;
+            _subscribeSession = nullptr;
+            _writeSession = nullptr;
             shutdown();
             return false;
         }
@@ -145,7 +145,7 @@ bool B1RedisDirectClient::initialize(const B1String& address, uint16 port, int32
 
 bool B1RedisDirectClient::initializeReadOnly(const B1String& address, uint16 port, int32 db, const uint32 connectTimeout)
 {
-    if (_readSession != NULL || _subscribeSession != NULL || _writeSession != NULL) {
+    if (_readSession != nullptr || _subscribeSession != nullptr || _writeSession != nullptr) {
         assert(false);
         return false;
     }
@@ -154,10 +154,10 @@ bool B1RedisDirectClient::initializeReadOnly(const B1String& address, uint16 por
     }
     _db = db;
     auto readContext = B1BaseClient::connect(address.copy(), port, (void*)static_cast<intptr_t>(SESSION_TYPE_READ));
-    if (NULL == readContext) {
-        _readSession = NULL;
-        _subscribeSession = NULL;
-        _writeSession = NULL;
+    if (nullptr == readContext) {
+        _readSession = nullptr;
+        _subscribeSession = nullptr;
+        _writeSession = nullptr;
         shutdown();
         return false;
     }
@@ -169,9 +169,9 @@ bool B1RedisDirectClient::initializeReadOnly(const B1String& address, uint16 por
         }
         if (B1TickUtil::diffTick(connectTimeoutTickBegin, B1TickUtil::currentTick()) > connectTimeout) {
             disconnect(readContext);
-            _readSession = NULL;
-            _subscribeSession = NULL;
-            _writeSession = NULL;
+            _readSession = nullptr;
+            _subscribeSession = nullptr;
+            _writeSession = nullptr;
             shutdown();
             return false;
         }
@@ -182,9 +182,9 @@ bool B1RedisDirectClient::initializeReadOnly(const B1String& address, uint16 por
 
 void B1RedisDirectClient::finalize()
 {
-    _readSession = NULL;
-    _subscribeSession = NULL;
-    _writeSession = NULL;
+    _readSession = nullptr;
+    _subscribeSession = nullptr;
+    _writeSession = nullptr;
     _db = 0;
     shutdown();
 }
@@ -243,7 +243,7 @@ bool B1RedisDirectClient::exists(const B1String& key)
 
 bool B1RedisDirectClient::subscribe(std::set<B1String>&& channels)
 {
-    if (NULL == _subscribeSession) {
+    if (nullptr == _subscribeSession) {
         B1LOG("subscribe disabled in this client");
         return false;
     }
@@ -254,7 +254,7 @@ void B1RedisDirectClient::closeSubscribeSession()
 {
     if (_subscribeSession) {
         _subscribeSession->closeSession();
-        _subscribeSession = NULL;   //  closed session is released by session manager. do not use it after close.
+        _subscribeSession = nullptr;   //  closed session is released by session manager. do not use it after close.
     }
 }
 
@@ -269,7 +269,7 @@ void B1RedisDirectClient::onRecvMessagePublish(const B1String& channel, const B1
 bool B1RedisDirectClient::onRecvMessagePolling(const B1String& key, const B1String& message)
 {
     B1AutoLock al(_pollingMessageLock);
-    if (NULL == _messageListener) {
+    if (nullptr == _messageListener) {
         return false;   //  not processed: the message is kept in redis.
     }
     return _messageListener->onRecvMessagePolling(key, message);
@@ -279,7 +279,7 @@ void B1RedisDirectClient::resetMessageListener()
 {
     B1AutoLock alPublish(_publishMessageLock);  //  wait for running callbacks.
     B1AutoLock alPolling(_pollingMessageLock);
-    _messageListener = NULL;
+    _messageListener = nullptr;
 }
 
 bool B1RedisDirectClient::hmget(const B1String& key, const std::vector<B1String>& fields, std::vector<B1String>* out)

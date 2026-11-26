@@ -21,7 +21,7 @@ using namespace BnD;
 using namespace B1AMHSSEM;
 
 B1AMHSCarrierTransferStateRepository::B1AMHSCarrierTransferStateRepository()
-    : _listener(NULL)
+    : _listener(nullptr)
     , _lock(new B1RecursiveLock())
     , _data()
 {
@@ -378,7 +378,7 @@ void B1AMHSCarrierTransferStateRepository::finalize()
 {
     implFinalize();
     _data.clear();
-    _listener = NULL;
+    _listener = nullptr;
 }
 
 bool B1AMHSCarrierTransferStateRepository::setCarrierStateWaitIn(int64 id)

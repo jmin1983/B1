@@ -58,7 +58,7 @@ bool B1SECS2MessageS6F20Readable::implReadData()
     _vs.clear();
     for (uint32 i = 0; i < list.count(); ++i) {
         auto data = readUnknownSECS2Data();
-        if (data == NULL) {
+        if (data == nullptr) {
             return false;
         }
         if (data->isFormatList()) {
@@ -78,7 +78,7 @@ bool B1SECS2MessageS6F20Readable::implReadData()
 void B1SECS2MessageS6F20Readable::appendListToString(std::vector<B1SECS2DataV>::const_iterator* itrList, int32 depth, B1String* string) const
 {
     auto list = dynamic_cast<const B1SECS2DataLIST*>((*itrList)->get());
-    if (list == NULL) {
+    if (list == nullptr) {
         assert(false);
         B1LOG("invalid list type detected");
         return;

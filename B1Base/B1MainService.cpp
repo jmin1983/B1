@@ -67,6 +67,7 @@ B1String B1MainService::getNetworkAddressesString() const
 bool B1MainService::start()
 {
     if (implStart() != true) {
+        implBeforeStop();
         implStop();
         return false;
     }
@@ -101,6 +102,7 @@ void B1MainService::wait()
             _mainServiceStatus = MAIN_SERVICE_STATUS_STOPPING;
         }
     }
+    implBeforeStop();
     implStop();
     _mainServiceStatus = MAIN_SERVICE_STATUS_STOPPED;
 }

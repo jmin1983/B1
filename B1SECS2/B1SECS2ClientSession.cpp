@@ -62,7 +62,7 @@ void B1SECS2ClientSession::recvHSMSMessage(const std::vector<uint8>& data)
                 recvHSMSData(stream, function, wait, systemBytes, &data[headerSize], static_cast<uint32>(data.size() - headerSize), messageHeader);
             }
             else {
-                recvHSMSData(stream, function, wait, systemBytes, NULL, 0, messageHeader);
+                recvHSMSData(stream, function, wait, systemBytes, nullptr, 0, messageHeader);
             }
         }
     }

@@ -20,7 +20,7 @@ using namespace BnD;
 using namespace B1AMHSSEM;
 
 B1AMHSStorageLocationStateRepository::B1AMHSStorageLocationStateRepository()
-    : _listener(NULL)
+    : _listener(nullptr)
     , _lock(new B1Lock())
     , _states()
 {
@@ -65,7 +65,7 @@ bool B1AMHSStorageLocationStateRepository::initialize(const std::map<int32, B1AM
 
 void B1AMHSStorageLocationStateRepository::finalize()
 {
-    _listener = NULL;
+    _listener = nullptr;
     _states.clear();
 }
 

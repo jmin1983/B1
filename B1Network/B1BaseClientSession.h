@@ -19,6 +19,8 @@
 #include <B1Network/B1BaseSession.h>
 #include <B1Network/B1ClientSocketListener.h>
 
+#include <atomic>
+
 namespace BnD {
     class B1BaseClientSessionListener;
     class B1ClientSocket;
@@ -28,7 +30,7 @@ namespace BnD {
         B1BaseClientSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener);
         virtual ~B1BaseClientSession();
     private:
-        bool _closeConnection;
+        std::atomic<bool> _closeConnection;
     protected:
         B1BaseClientSessionListener* _listener;
     protected:  //  B1ClientSocketListener

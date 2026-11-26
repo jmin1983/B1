@@ -65,7 +65,7 @@ bool B1SECS2MessageS2F15Readable::implReadData()
             return false;
         }
         auto ecv = readUnknownSECS2Data();
-        if (ecv == NULL) {
+        if (ecv == nullptr) {
             return false;
         }
         _ecvs.insert(std::make_pair(ecID, ecv));

@@ -39,7 +39,7 @@ B1BaseServerSession* B1SECS2Server::createSession(B1ServerSocket* serverSocket)
 bool B1SECS2Server::implInitialize(int32 port)
 {
     _serverSecs2DataManager = createServerSECS2DataManager();
-    if (_serverSecs2DataManager == NULL) {
+    if (_serverSecs2DataManager == nullptr) {
         return false;
     }
     if (_serverSecs2DataManager->initialize() != true) {

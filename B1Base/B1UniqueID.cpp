@@ -16,7 +16,7 @@
 using namespace BnD;
 
 B1UniqueID::B1UniqueID()
-    : _fp(NULL)
+    : _fp(nullptr)
     , _lock()
     , _lastID(-1)
     , _range()
@@ -30,7 +30,7 @@ B1UniqueID::~B1UniqueID()
 
 bool B1UniqueID::writeLastIDToFile()
 {
-    if (NULL == _fp) {
+    if (nullptr == _fp) {
         return false;
     }
     fseek(_fp, 0, SEEK_SET);
@@ -43,7 +43,7 @@ bool B1UniqueID::writeLastIDToFile()
 
 bool B1UniqueID::initialize(int64 begin, int64 end, const B1String& dirPath, const B1String& fileName)
 {
-    if (_fp != NULL) {
+    if (_fp != nullptr) {
         return false;
     }
     if (begin > end) {
@@ -54,7 +54,7 @@ bool B1UniqueID::initialize(int64 begin, int64 end, const B1String& dirPath, con
     const B1String fileFullPath = dirPath + "/" + fileName;
     if (B1SystemUtil::isFileExist(fileFullPath)) {
         FILE* fp = fopen(fileFullPath.cString(), "rb");
-        if (NULL == fp) {
+        if (nullptr == fp) {
             return false;
         }
         if (fread(&_lastID, sizeof(_lastID), 1, fp) == 0) {
@@ -66,7 +66,7 @@ bool B1UniqueID::initialize(int64 begin, int64 end, const B1String& dirPath, con
         B1SystemUtil::createDirectory(dirPath);
     }
     _fp = fopen(fileFullPath.cString(), "wb");
-    if (NULL == _fp) {
+    if (nullptr == _fp) {
         return false;
     }
     if (_lastID < begin || _lastID >= end) {
@@ -80,7 +80,7 @@ void B1UniqueID::finalize()
 {
     if (_fp) {
         fclose(_fp);
-        _fp = NULL;
+        _fp = nullptr;
     }
 }
 

@@ -62,7 +62,7 @@ bool B1Encryptor::encryptAES256(const B1String& key, const B1String& source, std
     }
     OPENSSL_CTX ctx;
 
-    if (EVP_EncryptInit_ex2(ctx._ctx, EVP_aes_256_cbc(), (const unsigned char*)key.cString(), (const unsigned char*)_iv.cString(), NULL) != 1) {
+    if (EVP_EncryptInit_ex2(ctx._ctx, EVP_aes_256_cbc(), (const unsigned char*)key.cString(), (const unsigned char*)_iv.cString(), nullptr) != 1) {
         return false;
     }
     {
@@ -94,7 +94,7 @@ bool B1Encryptor::decryptAES256(const B1String& key, const std::vector<uint8>& s
         return false;
     }
     OPENSSL_CTX ctx;
-    if (EVP_DecryptInit_ex2(ctx._ctx, EVP_aes_256_cbc(), (const unsigned char*)key.cString(), (const unsigned char*)_iv.cString(), NULL) != 1) {
+    if (EVP_DecryptInit_ex2(ctx._ctx, EVP_aes_256_cbc(), (const unsigned char*)key.cString(), (const unsigned char*)_iv.cString(), nullptr) != 1) {
         return false;
     }
     EVP_CIPHER_CTX_set_padding(ctx._ctx, 0);
@@ -291,11 +291,11 @@ bool B1Encryptor::decryptAES256Hex(const B1String& key, const B1String& source, 
 bool B1Encryptor::encryptSha256(const B1String& source, B1String* result)
 {
     const auto md = EVP_get_digestbyname("sha256");
-    if (NULL == md) {
+    if (nullptr == md) {
         return false;
     }
     auto mdCTX = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(mdCTX, md, NULL);
+    EVP_DigestInit_ex(mdCTX, md, nullptr);
     EVP_DigestUpdate(mdCTX, source.cString(), source.length());
 
     uint8 hash[CONSTS_MD_SIZE] = {0};

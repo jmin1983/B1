@@ -44,7 +44,7 @@ void B1SECS2MessageWritable::appendToLogString(const std::list<SPB1SECS2Data>& d
     int32 depth = 0;
     std::list<int32> remainDepths;
     for (auto d : data) {
-        if (d == NULL) {
+        if (d == nullptr) {
             assert(false);
             appendStringDepth(depth, "NULL", log);
             continue;

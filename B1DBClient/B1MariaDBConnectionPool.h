@@ -38,7 +38,7 @@ namespace BnD {
         uint32 _connectionCount;    //  target count of connections. checkConnections() keeps this count.
     protected:
         std::shared_ptr<class B1Lock> _lock;
-        bool _initialized;			//  true: initialize() called and finalize() not yet started. guarded by _lock.
+        bool _initialized;                      //  true: initialize() called and finalize() not yet started. guarded by _lock.
         std::map<std::shared_ptr<B1MariaDBHandle>, bool> _handles;  //  map<handle, now_using>
     protected:
         auto createNewHandle() const -> std::shared_ptr<B1MariaDBHandle>;
@@ -49,7 +49,7 @@ namespace BnD {
         int32 currentConnections() const;
         //bool increaseConnections(int32 count);
         //void decreaseConnections(int32 count);
-        auto getHandle(int32 trys = 30) -> std::shared_ptr<B1MariaDBHandle>;    //  try to get handle every second. wait if no handle available. return NULL if failed.
+        auto getHandle(int32 trys = 30) -> std::shared_ptr<B1MariaDBHandle>;    //  try to get handle every second. wait if no handle available. return nullptr if failed.
         void releaseHandle(std::shared_ptr<B1MariaDBHandle> handle);
     };
 }   //  !BnD

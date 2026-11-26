@@ -25,7 +25,7 @@ B1String B1MD5::getFileMD5(const std::vector<uint8>& data)
     }
     EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
 
-    EVP_DigestInit_ex(mdctx, EVP_md5(), NULL);
+    EVP_DigestInit_ex(mdctx, EVP_md5(), nullptr);
     EVP_DigestUpdate(mdctx, &data[0], data.size());
     unsigned int md5DigestLength = EVP_MD_size(EVP_md5());
     unsigned char* md5Digest = (unsigned char*)OPENSSL_malloc(md5DigestLength);

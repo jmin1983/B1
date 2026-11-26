@@ -40,12 +40,12 @@ auto B1ArrayBufferReadWriteImpl::asioSocketImpl() const -> B1ASIOSocketImpl*
 bool B1ArrayBufferReadWriteImpl::implRead()
 {
     auto socketImpl = asioSocketImpl();
-    if (NULL == socketImpl) {
+    if (nullptr == socketImpl) {
         return false;
     }
     B1AutoLock al(*socketImpl->closeLock());
     auto asioSocket = socketImpl->getASIOSocket();
-    if (NULL == asioSocket) {   //  cleaned up.
+    if (nullptr == asioSocket) {   //  cleaned up.
         return false;
     }
     asioSocket->async_read_some(

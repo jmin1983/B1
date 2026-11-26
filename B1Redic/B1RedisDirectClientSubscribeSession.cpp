@@ -18,6 +18,8 @@ using namespace BnD;
 
 B1RedisDirectClientSubscribeSession::B1RedisDirectClientSubscribeSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, B1RedisDirectClient* owner)
     : B1RedisDirectClientSession(clientSocket, listener, owner)
+    , _subscribeChannelsLock()
+    , _subscribeChannels()
 {
 }
 
@@ -42,8 +44,14 @@ void B1RedisDirectClientSubscribeSession::implProcessConnected(bool firstConnect
 {
     B1RedisDirectClientSession::implProcessConnected(firstConnectedProcess);
     if (firstConnectedProcess) {
-        if (_subscribeChannels.empty() != true) {
-            auto data = packetMaker()->makeDataSubscribe(_subscribeChannels);
+        std::vector<uint8> data;
+        {
+            B1AutoLock al(_subscribeChannelsLock);
+            if (_subscribeChannels.empty() != true) {
+                data = packetMaker()->makeDataSubscribe(_subscribeChannels);
+            }
+        }
+        if (data.empty() != true) {
             if (writeData(data) != true) {
                 disconnect();
                 return;
@@ -54,7 +62,11 @@ void B1RedisDirectClientSubscribeSession::implProcessConnected(bool firstConnect
 
 bool B1RedisDirectClientSubscribeSession::subscribe(std::set<B1String>&& channels)
 {
-    _subscribeChannels.swap(channels);
-    auto data = packetMaker()->makeDataSubscribe(_subscribeChannels);
+    std::vector<uint8> data;
+    {
+        B1AutoLock al(_subscribeChannelsLock);
+        _subscribeChannels.swap(channels);
+        data = packetMaker()->makeDataSubscribe(_subscribeChannels);
+    }
     return writeData(data);
 }

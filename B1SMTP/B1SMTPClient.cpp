@@ -38,7 +38,7 @@ bool B1SMTPClient::initialize(const B1String& address, uint16 port)
     if (startup() != true) {
         return false;
     }
-    if (B1BaseClient::connectSync(address.copy(), port) == NULL) {
+    if (B1BaseClient::connectSync(address.copy(), port) == nullptr) {
         return false;
     }
     return true;

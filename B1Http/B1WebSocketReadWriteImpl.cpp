@@ -37,8 +37,9 @@ B1WebSocketReadWriteImpl::~B1WebSocketReadWriteImpl()
 }
 
 B1WebSocketReadWriteImpl::Writer::Writer()
-    : _owner(NULL)
+    : _owner(nullptr)
     , _readyToWrite(true)
+    , _writeCompleteEvent()
     , _textBunchHint(CONSTS_DEFAULT_TEXT_BUNCH_HINT)
     , _maxDataSize(CONSTS_DEFAULT_MAX_DATA_SIZE)
 {
@@ -86,7 +87,7 @@ void B1WebSocketReadWriteImpl::Writer::implLooperFunc()
             if (isQuitRequested()) {
                 return;
             }
-            B1Thread::sleep(1);
+            _writeCompleteEvent.wait(CONSTS_WRITE_COMPLETE_WAIT_TIMEOUT);
         }
         if (_owner->isOpen()) {
             _readyToWrite = false;

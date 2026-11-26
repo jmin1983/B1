@@ -37,7 +37,7 @@ namespace BnD {
             ALIVE_DEFAULT_INTERVAL = 1000,
         };
     public:
-        B1RedisDirectClient(B1RedisDirectClientMessageListener* messageListener, B1RedisDirectClientListener* listener = NULL,
+        B1RedisDirectClient(B1RedisDirectClientMessageListener* messageListener, B1RedisDirectClientListener* listener = nullptr,
                             int32 maxAliveCount = ALIVE_DEFAULT_MAX_COUNT, int32 aliveInterval = ALIVE_DEFAULT_INTERVAL);
         virtual ~B1RedisDirectClient();
     protected:
@@ -100,7 +100,7 @@ namespace BnD {
         bool incr(const B1String& key, int64* result);
         bool time(uint64* seconds, uint32* microseconds, bool ignoreAdjustSecond = false);
         bool shutdownRemoteRedis();
-        bool blockedCommand(const std::vector<B1String>& args, std::list<B1String>* out = NULL);
+        bool blockedCommand(const std::vector<B1String>& args, std::list<B1String>* out = nullptr);
         void blockedCommand(const std::vector<std::vector<B1String> >& cmds);
         bool publish(const B1String& channel, const B1String& message, bool isEssential);
         bool hmset(const B1String& key, const B1String& field, const B1String& value, bool isEssential);

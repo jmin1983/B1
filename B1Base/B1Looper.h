@@ -19,6 +19,8 @@
 #include <B1Base/B1Condition.h>
 #include <B1Base/B1Thread.h>
 
+#include <atomic>
+
 namespace BnD {
     class B1Looper : public B1Thread {
     public:
@@ -27,7 +29,7 @@ namespace BnD {
     private:
         B1Condition _event;
         uint64 _resumeInterval;
-        bool _quitRequested;
+        std::atomic<bool> _quitRequested;
     protected:
         virtual void implThreadFunc() override;
         virtual void implThreadEnd() override;

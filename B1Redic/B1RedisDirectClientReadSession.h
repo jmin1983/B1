@@ -57,7 +57,7 @@ namespace BnD {
         void implCheckAlive() final;
     protected:    //  locked functions.
         bool setWaitData();                                 //  return false if already_waiting.
-        bool waitData(std::list<B1String>* data = NULL);    //  return false if timed_out.
+        bool waitData(std::list<B1String>* data = nullptr);    //  return false if timed_out.
         bool scan(B1String* cursor, const B1String& pattern, std::set<B1String>* out, int32 count);  //  one step: cursor is updated to the next cursor("0" if finished).
     public:
         bool exists(const B1String& key);
@@ -69,7 +69,7 @@ namespace BnD {
         bool incr(const B1String& key, int64* result);
         bool time(uint64* seconds, uint32* microseconds, bool ignoreAdjustSecond = false);
         bool shutdownRemoteRedis();
-        bool blockedCommand(const std::vector<B1String>& args, std::list<B1String>* out = NULL);
+        bool blockedCommand(const std::vector<B1String>& args, std::list<B1String>* out = nullptr);
         void blockedCommand(const std::vector<std::vector<B1String> >& cmds);
 
         void setAdjustSeconds(int32 seconds) { _adjustSeconds = seconds; }

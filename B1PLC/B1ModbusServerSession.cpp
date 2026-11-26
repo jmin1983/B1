@@ -23,7 +23,7 @@ B1ModbusServerSession::B1ModbusServerSession(B1ServerSocket* serverSocket, B1Bas
     , _memeryManager(memoryManager)
     , _packetMaker(new B1ModbusServerPacketMaker())
 {
-    assert(_memeryManager != NULL);
+    assert(_memeryManager != nullptr);
 }
 
 B1ModbusServerSession::~B1ModbusServerSession()

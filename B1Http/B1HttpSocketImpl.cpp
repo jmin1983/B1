@@ -27,7 +27,7 @@ B1HttpSocketImpl::~B1HttpSocketImpl()
 void B1HttpSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket)
 {
     auto asioSocket = pAsioSocket->get();
-    if (_stream != NULL || asioSocket == NULL) {
+    if (_stream != nullptr || asioSocket == nullptr) {
         assert(false);
         return;
     }
@@ -37,8 +37,8 @@ void B1HttpSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::so
 
 auto B1HttpSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket>
 {
-    if (_stream == NULL) {
-        return NULL;
+    if (_stream == nullptr) {
+        return nullptr;
     }
     auto asioSocket = std::make_shared<boost::asio::ip::tcp::socket>(std::move(_stream->socket()));
     _stream.reset();
@@ -104,5 +104,5 @@ bool B1HttpSocketImpl::implIsOpen() const
 
 boost::asio::ip::tcp::socket* B1HttpSocketImpl::implGetASIOSocket() const
 {
-    return _stream ? &_stream->socket() : NULL;
+    return _stream ? &_stream->socket() : nullptr;
 }

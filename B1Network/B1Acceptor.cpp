@@ -24,7 +24,7 @@ B1Acceptor::B1Acceptor(const B1IOContext* context)
     , _acceptor()
     , _closed(true)
     , _listenerLock()
-    , _listener(NULL)
+    , _listener(nullptr)
 {
 }
 
@@ -34,7 +34,7 @@ B1Acceptor::~B1Acceptor()
 
 void B1Acceptor::accept()
 {
-    if (_acceptor == NULL || _acceptor->is_open() != true) {
+    if (_acceptor == nullptr || _acceptor->is_open() != true) {
         _closed = true;
         return;
     }
@@ -52,7 +52,7 @@ void B1Acceptor::acceptComplete(std::shared_ptr<B1ServerSocket> serverSocket, co
 {
     {
         B1AutoLock al(_listenerLock);
-        if (NULL == _listener) {    //  finalized.
+        if (nullptr == _listener) {    //  finalized.
             _closed = true;
             return;
         }
@@ -68,7 +68,7 @@ void B1Acceptor::acceptComplete(std::shared_ptr<B1ServerSocket> serverSocket, co
 
 bool B1Acceptor::initialize(uint16 port, B1AcceptorListener* listener)
 {
-    if (_acceptor != NULL) {
+    if (_acceptor != nullptr) {
         return false;
     }
     _acceptor = std::make_shared<boost::asio::ip::tcp::acceptor>(*_context->nativeContext(), boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port));
@@ -100,7 +100,7 @@ void B1Acceptor::finalize()
     }
     {
         B1AutoLock al(_listenerLock);
-        _listener = NULL;
+        _listener = nullptr;
     }
     if (_closed) {
         B1LOG("acceptor closed");

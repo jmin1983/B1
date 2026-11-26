@@ -38,7 +38,7 @@ bool B1MariaDBHandle::initialize(bool useSSL)
 void B1MariaDBHandle::finalize()
 {
     if (_sslConnection) {
-        assert(_connection == NULL && _sslContext != NULL);
+        assert(_connection == nullptr && _sslContext != nullptr);
         try {
             _sslConnection->close();
         }
@@ -46,7 +46,7 @@ void B1MariaDBHandle::finalize()
         _sslConnection.reset();
     }
     if (_connection) {
-        assert(_sslConnection == NULL && _sslContext == NULL);
+        assert(_sslConnection == nullptr && _sslContext == nullptr);
         try {
             _connection->close();
         }

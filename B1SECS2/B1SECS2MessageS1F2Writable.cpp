@@ -16,8 +16,8 @@ using namespace BnD;
 
 B1SECS2MessageS1F2Writable::B1SECS2MessageS1F2Writable()
     : B1SECS2MessageWritable(false, 1, 2, "sendMessageS1F2")
-    , _mdln(NULL)
-    , _softRev(NULL)
+    , _mdln(nullptr)
+    , _softRev(nullptr)
 {
 }
 

@@ -44,16 +44,16 @@ B1ClientSocket* B1BaseClient::connect(B1String&& address, uint16 port, void* par
     if (session->initializeSession() != true) {
         B1LOG("initializeSession failed");
         assert(false);
-        return NULL;
+        return nullptr;
     }
     int32 handleID = sessionManager()->addSession(socket, session, requestedHandleID);
     if (handleID < 0) {
-        return NULL;
+        return nullptr;
     }
     session->setSessionHandleID(handleID);
     if (session->connect(std::move(address), port) != true) {
         sessionManager()->reserveRemoveSession(socket.get());
-        return NULL;
+        return nullptr;
     }
     return socket.get();
 }
@@ -62,15 +62,15 @@ B1ClientSocket* B1BaseClient::connectSync(B1String&& address, uint16 port, void*
 {
     _waiterForConnectSync = false;
     auto result = connect(std::move(address), port, param, requestedHandleID);
-    if (NULL == result) {
-        return NULL;
+    if (nullptr == result) {
+        return nullptr;
     }
     while (_waiterForConnectSync != true) {
         B1Thread::sleep(10);
     }
     if (result->isOpen() != true) {
         closeSession(result);
-        return NULL;
+        return nullptr;
     }
     return result;
 }

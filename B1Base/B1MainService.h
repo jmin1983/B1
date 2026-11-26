@@ -46,6 +46,7 @@ namespace BnD {
     protected:
         virtual bool implStart() { return true; }
         virtual bool implWorking() { return true; } //  return false to stop B1MainService
+        virtual void implBeforeStop() {}
         virtual void implStop() {}
         virtual std::map<B1String, B1String> makeVersionInfoMap() const;
         virtual B1String getNetworkAddressesString() const;

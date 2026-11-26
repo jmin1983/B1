@@ -26,7 +26,7 @@ namespace BnD {
         bool isProcessRunning(int pid);
         bool createDirectory(const B1String& path);
         bool deleteDirectory(const B1String& path);
-        uint32 findFiles(const B1String& directoryPath, const B1String& fileExt, std::list<B1String>* resultFilenames = NULL);
+        uint32 findFiles(const B1String& directoryPath, const B1String& fileExt, std::list<B1String>* resultFilenames = nullptr);
         bool copyFile(const B1String& dstPath, const B1String& srcPath, bool replaceIfExist = false);
         bool moveFile(const B1String& dstPath, const B1String& srcPath, bool replaceIfExist = false);
         bool deleteFile(const B1String& path);
@@ -41,9 +41,9 @@ namespace BnD {
         int getProcessID(const B1String& processName);
         uint32 getCurrentProcessID();
         uint32 getCurrentThreadID();
-        uint32 createProcess(const B1String& process, int* createdPid = NULL);
-        uint32 createProcessArg(const B1String& process, const B1String& arg, int* createdPid = NULL);
-        uint32 createProcessArgs(const B1String& process, const std::vector<B1String>& args, int* createdPid = NULL);   //  max args_size is 5.
+        uint32 createProcess(const B1String& process, int* createdPid = nullptr);
+        uint32 createProcessArg(const B1String& process, const B1String& arg, int* createdPid = nullptr);
+        uint32 createProcessArgs(const B1String& process, const std::vector<B1String>& args, int* createdPid = nullptr);   //  max args_size is 5.
         int terminateProcess(const B1String& processName);
         int terminateProcess(int pid);
         bool rebootSystem();

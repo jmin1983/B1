@@ -34,7 +34,7 @@ void B1BaseHttpClient::finalize()
 
 bool B1BaseHttpClient::connect(B1String&& address, uint16 port, int32 tagID)
 {
-    if (B1BaseClient::connect(std::move(address), port, NULL, tagID) == NULL) {
+    if (B1BaseClient::connect(std::move(address), port, nullptr, tagID) == nullptr) {
         return false;
     }
     return true;

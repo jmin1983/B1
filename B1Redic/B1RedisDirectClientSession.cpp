@@ -134,7 +134,7 @@ void B1RedisDirectClientSession::checkAliveString(const B1String& string)
 void B1RedisDirectClientSession::checkAliveCount()
 {
     if (++_aliveCheckCount > owner()->maxAliveCount()) {
-        B1LOG("alive check failed -> client force to disconnect: aliveCheckCount[%d], maxAliveCount[%d]", _aliveCheckCount, owner()->maxAliveCount());
+        B1LOG("alive check failed -> client force to disconnect: aliveCheckCount[%d], maxAliveCount[%d]", _aliveCheckCount.load(), owner()->maxAliveCount());
         disconnect();
     }
 }

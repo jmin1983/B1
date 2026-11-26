@@ -18,6 +18,8 @@
 
 #include <B1Base/B1Lock.h>
 
+#include <atomic>
+
 namespace boost {
     namespace system {
         class error_code;
@@ -37,7 +39,7 @@ namespace BnD {
         const B1IOContext* _context;
     protected:
         std::shared_ptr<boost::asio::ip::tcp::acceptor> _acceptor;
-        bool _closed;
+        std::atomic<bool> _closed;
         B1RecursiveLock _listenerLock;     //  recursive: finalize() can be called in a listener callback(io thread).
         B1AcceptorListener* _listener;
     private:

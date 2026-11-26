@@ -23,7 +23,7 @@ using namespace BnD;
 
 B1FileLog::B1FileLog()
     : B1Looper()
-    , _fp(NULL)
+    , _fp(nullptr)
     , _lastDay(-1)
     , _lastHour(-1)
     , _started(false)
@@ -62,7 +62,7 @@ void B1FileLog::writeLogToFile(const std::list<B1String>& logs)
         deleteDeprecatedFiles();
         _fp = fopen(filePath.cString(), "a");
     }
-    if (_fp == NULL) {
+    if (_fp == nullptr) {
         _lastDay = -1;
         _lastHour = -1;
         return;
@@ -150,7 +150,7 @@ void B1FileLog::stop()
     B1Looper::join();
     if (_fp) {
         fclose(_fp);
-        _fp = NULL;
+        _fp = nullptr;
     }
     _lastDay = -1;
     _lastHour = -1;
@@ -181,7 +181,7 @@ bool B1FileLog::testWriteLogFile()
                     _fileName.cString(),
                     current.year(), current.month(), currentDay, currentHour);
     FILE* fp = fopen(filePath.cString(), "a");
-    if (NULL == fp) {
+    if (nullptr == fp) {
         return false;
     }
     bool result = (fprintf(fp, "write file checked at:%s", current.toString().cString()) < 0) ? false : true;

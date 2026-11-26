@@ -21,7 +21,7 @@ using namespace BnD;
 
 void* B1LibraryLoader::getFunction(const B1String& name)
 {
-    assert(_handle != NULL);
+    assert(_handle != nullptr);
 #if defined(_WIN32)
     return GetProcAddress(_handle, name.cString());
 #else
@@ -30,7 +30,7 @@ void* B1LibraryLoader::getFunction(const B1String& name)
     const char* dlsymError = dlerror();
     if (dlsymError) {
         printf("getFunction failed: name[%s], msg[%s]\n", name.cString(), dlsymError);
-        return NULL;
+        return nullptr;
     }
     return func;
 #endif
@@ -43,7 +43,7 @@ bool B1LibraryLoader::load()
 #else
     _handle = dlopen(libraryPath().cString(), RTLD_LAZY);
 #endif
-    if (NULL == _handle) {
+    if (nullptr == _handle) {
         printf("load library failed: [%s]\n", libraryPath().cString());
         assert(false);
         return false;
@@ -64,6 +64,6 @@ void B1LibraryLoader::unload()
 #else
         dlclose(_handle);
 #endif
-        _handle = NULL;
+        _handle = nullptr;
     }
 }

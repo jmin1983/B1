@@ -96,7 +96,7 @@ bool B1MariaDBConnectionPool::initialize(B1String&& address, uint16 port, B1Stri
     }
     for (uint32 i = 0; i < connectionCount; ++i) {
         auto newHandle = createNewHandle();
-        if (newHandle == NULL) {
+        if (newHandle == nullptr) {
             B1LOG("unable to create new handle: index[%u], total[%u]", i, connectionCount);
             return false;
         }
@@ -153,7 +153,7 @@ void B1MariaDBConnectionPool::checkConnections()
     }
     for (size_t i = 0; i < missingCount; ++i) {
         auto newHandle = createNewHandle();     //  out of lock: connecting may take long time.
-        if (newHandle == NULL) {
+        if (newHandle == nullptr) {
             B1LOG("unable to re-create new handle: index[%u], total[%u]", static_cast<uint32>(i), static_cast<uint32>(missingCount));
             return;                             //  retry at next checkConnections().
         }

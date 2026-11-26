@@ -77,17 +77,17 @@ bool B1SECS2MessageS2F30Readable::implReadData()
             return false;
         }
         auto ecMin = readUnknownSECS2Data();
-        if (ecMin == NULL) {
+        if (ecMin == nullptr) {
             return false;
         }
         internalData._ecMin = std::make_shared<B1SECS2DataECMIN>(ecMin);
         auto ecMax = readUnknownSECS2Data();
-        if (ecMax == NULL) {
+        if (ecMax == nullptr) {
             return false;
         }
         internalData._ecMax = std::make_shared<B1SECS2DataECMAX>(ecMax);
         auto ecDef = readUnknownSECS2Data();
-        if (ecDef == NULL) {
+        if (ecDef == nullptr) {
             return false;
         }
         internalData._ecDef = std::make_shared<B1SECS2DataECDEF>(ecDef);

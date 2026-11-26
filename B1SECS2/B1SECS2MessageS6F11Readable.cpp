@@ -97,7 +97,7 @@ bool B1SECS2MessageS6F11Readable::implReadData()
         vs.reserve(vList.count());
         for (uint32 j = 0; j < vList.count(); ++j) {
             auto data = readUnknownSECS2Data();
-            if (data == NULL) {
+            if (data == nullptr) {
                 return false;
             }
             if (data->isFormatList()) {

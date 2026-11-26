@@ -25,8 +25,8 @@ namespace BnD {
         B1SECS2MessageS1F2Writable(const B1SECS2DataMDLN& mdln, const B1SECS2DataSOFTREV& softRev);   //  E->H
         virtual ~B1SECS2MessageS1F2Writable();
     protected:
-        const B1SECS2DataMDLN* _mdln;         //  NULL if H->E
-        const B1SECS2DataSOFTREV* _softRev;   //  NULL if H->E
+        const B1SECS2DataMDLN* _mdln;         //  nullptr if H->E
+        const B1SECS2DataSOFTREV* _softRev;   //  nullptr if H->E
     protected:
         virtual B1String fullName() override;
         virtual bool implWriteData(std::list<std::shared_ptr<B1SECS2Data> >* data) override;

@@ -45,7 +45,7 @@ void B1GEMServerSession::sendAlarm(const B1SECS2DataALID& alID, bool isSetAlarm,
         return;
     }
     auto alarm = owner()->dataRepository()->findAlarm(alID, isSetAlarm);
-    if (alarm == NULL) {
+    if (alarm == nullptr) {
         writeLog("sendAlarm failed. can not find alID: [%s]", alID->toString().cString());
         return;
     }

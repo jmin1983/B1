@@ -22,7 +22,7 @@
 using namespace BnD;
 
 struct sd_bus_data {
-    sd_bus_data() : _bus(NULL), _error(SD_BUS_ERROR_NULL), _reply(NULL) {}
+    sd_bus_data() : _bus(nullptr), _error(SD_BUS_ERROR_NULL), _reply(nullptr) {}
     ~sd_bus_data()
     {
         sd_bus_error_free(&_error);
@@ -106,7 +106,7 @@ bool B1LinuxService::getServiceActive(const B1String& serviceName, bool* isActiv
         return false;
     }
 
-    char* unitPath = NULL;  //  every byte except [A-Za-z0-9] is escaped as "_xx". (ex: "my-app.service" -> "my_2dapp_2eservice")
+    char* unitPath = nullptr;  //  every byte except [A-Za-z0-9] is escaped as "_xx". (ex: "my-app.service" -> "my_2dapp_2eservice")
     r = sd_bus_path_encode("/org/freedesktop/systemd1/unit", serviceName.cString(), &unitPath);
     if (r < 0) {
         b1log("unable to get_service_active[%s]. failed to encode unit path: %s", serviceName.cString(), strerror(-r));

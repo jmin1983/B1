@@ -23,7 +23,7 @@
 namespace BnD {
     class B1LibraryLoader {
     public:
-        B1LibraryLoader() : _handle(NULL) {}
+        B1LibraryLoader() : _handle(nullptr) {}
         virtual ~B1LibraryLoader() {}
     protected:
 #if defined(_WIN32)
@@ -40,7 +40,7 @@ namespace BnD {
     protected:
         void* getFunction(const B1String& name);
     public:
-        bool isValid() const { return _handle != NULL; }
+        bool isValid() const { return _handle != nullptr; }
         bool load();
         void unload();
     };

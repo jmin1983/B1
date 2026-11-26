@@ -19,6 +19,8 @@
 #include <B1Network/B1BaseComponent.h>
 #include <B1Network/B1BaseClientSessionListener.h>
 
+#include <atomic>
+
 namespace BnD {
     class B1BaseClientSession;
     class B1ClientSocket;
@@ -28,15 +30,15 @@ namespace BnD {
         B1BaseClient();
         virtual ~B1BaseClient();
     private:
-        bool _waiterForConnectSync;
+        std::atomic<bool> _waiterForConnectSync;
     protected:
         virtual B1BaseClientSession* createSession(B1ClientSocket* clientSocket, void* param) = 0;
     protected:  //  B1BaseClientSessionListener
         virtual void onClientSessionConnectResult(B1ClientSocket* clientSocket, bool isConnected, int32 reason) override;
         virtual void onClientSessionClosed(B1ClientSocket* clientSocket) override;
     public:
-        B1ClientSocket* connect(B1String&& address, uint16 port, void* param = NULL, int32 requestedHandleID = -1);        //  return NULL if failed.
-        B1ClientSocket* connectSync(B1String&& address, uint16 port, void* param = NULL, int32 requestedHandleID = -1);    //  return NULL if failed.
+        B1ClientSocket* connect(B1String&& address, uint16 port, void* param = nullptr, int32 requestedHandleID = -1);        //  return nullptr if failed.
+        B1ClientSocket* connectSync(B1String&& address, uint16 port, void* param = nullptr, int32 requestedHandleID = -1);    //  return nullptr if failed.
         void disconnect(B1ClientSocket* handle);
         void disconnectByHandleID(int32 handleID);
         void closeSession(B1ClientSocket* handle);

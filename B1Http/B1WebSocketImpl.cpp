@@ -27,7 +27,7 @@ B1WebSocketImpl::~B1WebSocketImpl()
 void B1WebSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket)
 {
     auto asioSocket = pAsioSocket->get();
-    if (_webSocketStream != NULL || asioSocket == NULL) {
+    if (_webSocketStream != nullptr || asioSocket == nullptr) {
         assert(false);
         return;
     }
@@ -37,8 +37,8 @@ void B1WebSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::soc
 
 auto B1WebSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket>
 {
-    if (_webSocketStream == NULL) {
-        return NULL;
+    if (_webSocketStream == nullptr) {
+        return nullptr;
     }
     auto asioSocket = std::make_shared<boost::asio::ip::tcp::socket>(std::move(boost::beast::get_lowest_layer(*_webSocketStream).socket()));
     _webSocketStream.reset();
@@ -105,5 +105,5 @@ bool B1WebSocketImpl::implIsOpen() const
 
 boost::asio::ip::tcp::socket* B1WebSocketImpl::implGetASIOSocket() const
 {
-    return _webSocketStream ? &boost::beast::get_lowest_layer(*_webSocketStream).socket() : NULL;
+    return _webSocketStream ? &boost::beast::get_lowest_layer(*_webSocketStream).socket() : nullptr;
 }

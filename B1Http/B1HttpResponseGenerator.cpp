@@ -115,7 +115,7 @@ BeastHttp::message_generator B1HttpResponseGenerator::makeResponseContents(const
 BeastHttp::message_generator B1HttpResponseGenerator::makeResponseAPI(const B1HttpServerMessage& message, const B1String& apiName)
 {
     auto apiGenerator = B1HttpResponseAPIGenerator::createAPIGenerator(apiName);
-    if (NULL == apiGenerator) {
+    if (nullptr == apiGenerator) {
         return makeResponseServerError(message, "No API name:" + apiName);
     }
     BeastHttp::response<BeastHttp::string_body> response(BeastHttp::status::ok, message.request().version());

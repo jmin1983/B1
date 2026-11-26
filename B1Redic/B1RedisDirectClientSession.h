@@ -19,6 +19,8 @@
 #include <B1Network/B1ArrayBufferClientSession.h>
 #include <B1Redic/B1RedisDirectPacketAnalyzer.h>
 
+#include <atomic>
+
 namespace BnD {
     class B1RedisDirectClient;
     class B1RedisDirectPacketMaker;
@@ -31,7 +33,7 @@ namespace BnD {
         uint64 _lastReconnectTick;
         uint64 _lastAliveCheckTick;
     protected:
-        int32 _aliveCheckCount;
+        std::atomic<int32> _aliveCheckCount;
         B1RedisDirectClient* _owner;
     protected:  //  B1RedisDirectPacketAnalyzer
         virtual void implOnRecvRedisSimpleStrings(const B1String& string) override;

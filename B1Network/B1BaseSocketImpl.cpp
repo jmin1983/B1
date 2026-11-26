@@ -60,7 +60,7 @@ bool B1BaseSocketImpl::isOpen() const
 
 B1ASIOSocketImpl::B1ASIOSocketImpl()
     : B1BaseSocketImpl()
-    , _asioSocket(NULL)
+    , _asioSocket(nullptr)
 {
 }
 
@@ -71,8 +71,8 @@ void B1ASIOSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::so
 
 auto B1ASIOSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket>
 {
-    _asioSocket = NULL;
-    return NULL;
+    _asioSocket = nullptr;
+    return nullptr;
 }
 
 void B1ASIOSocketImpl::implClose()

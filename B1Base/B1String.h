@@ -1,4 +1,4 @@
-﻿//
+//
 // B1String.h
 //
 // Library: B1Base
@@ -119,9 +119,9 @@ namespace BnD {
         std::vector<char> temp(_string.length() + 1, 0);
         memcpy(&temp[0], _string.c_str(), _string.length());
         char* tok = strtok(&temp[0], delimiter.cString());
-        while (tok != NULL) {
+        while (tok != nullptr) {
             *out++ = tok;
-            tok = strtok(NULL, delimiter.cString());
+            tok = strtok(nullptr, delimiter.cString());
         }
         return out;
     }

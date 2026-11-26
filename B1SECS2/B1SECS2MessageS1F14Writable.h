@@ -21,7 +21,7 @@
 namespace BnD {
     class B1SECS2MessageS1F14Writable : public B1SECS2MessageWritable {
     public:
-        B1SECS2MessageS1F14Writable(const B1SECS2DataCOMMACK& commAck, const B1SECS2DataMDLN* mdln = NULL, const B1SECS2DataSOFTREV* softRev = NULL);
+        B1SECS2MessageS1F14Writable(const B1SECS2DataCOMMACK& commAck, const B1SECS2DataMDLN* mdln = nullptr, const B1SECS2DataSOFTREV* softRev = nullptr);
         virtual ~B1SECS2MessageS1F14Writable();
     protected:
         const B1SECS2DataCOMMACK& _commAck;
@@ -31,7 +31,7 @@ namespace BnD {
         virtual B1String fullName() override;
         virtual bool implWriteData(std::list<std::shared_ptr<B1SECS2Data> >* data) override;
     protected:
-        bool isSentFromHost() const { return NULL == _mdln || NULL == _softRev; }
+        bool isSentFromHost() const { return nullptr == _mdln || nullptr == _softRev; }
     };
 }   //  !BnD
 

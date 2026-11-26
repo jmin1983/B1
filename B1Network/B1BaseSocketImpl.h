@@ -41,7 +41,7 @@ namespace BnD {
         uint16 peerPort() const;
         uint16 localPort() const;
         bool isOpen() const;
-        boost::asio::ip::tcp::socket* getASIOSocket() const { return implGetASIOSocket(); }   //  lock closeLock() while using returned socket. NULL if cleaned up.
+        boost::asio::ip::tcp::socket* getASIOSocket() const { return implGetASIOSocket(); }   //  lock closeLock() while using returned socket. nullptr if cleaned up.
         B1Lock* closeLock() const { return _closeLock.get(); }
     };
 

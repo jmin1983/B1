@@ -20,7 +20,7 @@ using namespace BnD;
 B1ClientSocket::B1ClientSocket()
     : B1BaseSocket()
     , _ioLooper(new B1IOLooper())
-    , _listener(NULL)
+    , _listener(nullptr)
     , _address()
     , _port(0)
 {

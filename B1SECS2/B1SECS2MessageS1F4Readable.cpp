@@ -59,7 +59,7 @@ bool B1SECS2MessageS1F4Readable::implReadData()
     _svs.clear();
     for (uint32 i = 0; i < list.count(); ++i) {
         auto data = readUnknownSECS2Data();
-        if (data == NULL) {
+        if (data == nullptr) {
             return false;
         }
         if (data->isFormatList()) {
@@ -85,7 +85,7 @@ void B1SECS2MessageS1F4Readable::appendListToString(const std::list<SPB1SECS2Dat
         count--;
         if (currentData->isFormatList()) {
             auto list = dynamic_cast<const B1SECS2DataLIST*>(currentData.get());
-            if (list == NULL) {
+            if (list == nullptr) {
                 assert(false);
                 B1LOG("invalid list type detected");
                 return;

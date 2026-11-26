@@ -91,13 +91,13 @@ namespace BnD {
         static int64 adjustSecondsForTimeZone(const B1String& timezone);
         static B1Time currentTime();
         static B1String currentTimeInSeconds(bool pretty = false);
-        static B1String currentTimeInMilliseconds(bool pretty = false, int64* currentSecond = NULL, int32* currentMicroSecond = NULL);
-        static B1String currentTimeInMicroseconds(int64* currentSecond = NULL, int32* currentMicroSecond = NULL);   //  pretty only.
+        static B1String currentTimeInMilliseconds(bool pretty = false, int64* currentSecond = nullptr, int32* currentMicroSecond = nullptr);
+        static B1String currentTimeInMicroseconds(int64* currentSecond = nullptr, int32* currentMicroSecond = nullptr);   //  pretty only.
         static B1String timeInMillisecond(int64 second, int32 microSecond, bool pretty = false);
         static B1String timeInMicrosecond(int64 second, int32 microSecond); //  pretty only.
         static B1String timeInSecond(int64 second, bool pretty = false);
-        static bool getCurrentTime(int64* second, int32* microSecond = NULL);
-        static void getSystemTime(int64* second, int32* microSecond = NULL);
+        static bool getCurrentTime(int64* second, int32* microSecond = nullptr);
+        static void getSystemTime(int64* second, int32* microSecond = nullptr);
         static void setAdjustCurrentTime(int64 targetSeconds, int32 targetMicroSeconds);
         static void setCurrentTimeZone(const B1String& timezone);
         static bool setCurrentTime(int64 seconds, int32 microSecond);   //  not supported in Windows.

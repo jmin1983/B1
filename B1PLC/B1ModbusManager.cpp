@@ -90,7 +90,7 @@ bool B1ModbusManager::sendWriteSingleCoil(const SendDataBool& data)
 
 bool B1ModbusManager::sendWriteMultipleCoils(const SendDataBools& data)
 {
-    if (_client == NULL) {
+    if (_client == nullptr) {
         return false;
     }
     const std::vector<bool>& coils = data._data;
@@ -235,7 +235,7 @@ void B1ModbusManager::onFunctionWriteMultipleRegisters(uint16 beginAddress, uint
 
 bool B1ModbusManager::implInitialize(const B1String& address, uint16 port)
 {
-    if (_client != NULL) {
+    if (_client != nullptr) {
         return false;
     }
     _client.reset(new B1ModbusClient(this));

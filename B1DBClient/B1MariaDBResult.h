@@ -43,8 +43,8 @@ namespace BnD {
         bool getResult(const boost::mysql::rows_view& rows, std::vector<std::tuple<B1String, B1String, std::vector<uint8>, std::vector<uint8>, std::vector<uint8> > >* items) const;
         bool getResult(const boost::mysql::rows_view& rows,
                        std::vector<std::vector<uint8> >* col0,
-                       std::vector<std::vector<uint8> >* col1 = NULL,
-                       std::vector<std::vector<uint8> >* col2 = NULL) const;
+                       std::vector<std::vector<uint8> >* col1 = nullptr,
+                       std::vector<std::vector<uint8> >* col2 = nullptr) const;
         bool getResult(const boost::mysql::rows_view& rows, std::vector<std::tuple<int64, int32, int32, int32, int32> >* items) const;
     public:
         bool readDBResult(const boost::mysql::rows_view& rows);

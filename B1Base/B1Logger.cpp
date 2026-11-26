@@ -45,9 +45,9 @@ BnD::B1String BnD::b1log_cl(const std::string& className, const char* format, ..
     return s;
 }
 
-BnD::b1log_callback_t g_callback = NULL;
-void* g_callbackParam = NULL;
-BnD::B1FileLog* g_fileLogger = NULL;
+BnD::b1log_callback_t g_callback = nullptr;
+void* g_callbackParam = nullptr;
+BnD::B1FileLog* g_fileLogger = nullptr;
 BnD::int32 g_serviceID = 0;
 const BnD::uint32 g_pid_for_file_logging = BnD::B1SystemUtil::getCurrentProcessID();
 
@@ -91,8 +91,8 @@ void BnD::setLoggerCallback(b1log_callback_t callback, void* param)
 
 void BnD::resetLogCallback()
 {
-    g_callback = NULL;
-    g_callbackParam = NULL;
+    g_callback = nullptr;
+    g_callbackParam = nullptr;
 }
 
 BnD::B1String BnD::loggerFileDirPath()

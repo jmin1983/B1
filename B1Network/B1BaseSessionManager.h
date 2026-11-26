@@ -79,7 +79,7 @@ namespace BnD {
         template <typename T>
         std::shared_ptr<T> getSessionByHandleID(int32 handleID) const
         {
-            B1BaseSocket* baseSocket = NULL;
+            B1BaseSocket* baseSocket = nullptr;
             B1AutoLock al(_sessionsLock);
             {
                 auto itr = _handleIDMap.find(handleID);
@@ -87,7 +87,7 @@ namespace BnD {
                     baseSocket = itr->second;
                 }
             }
-            if (NULL == baseSocket) {
+            if (nullptr == baseSocket) {
                 return std::shared_ptr<T>();
             }
             auto itr = _sessions.find(baseSocket);

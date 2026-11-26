@@ -85,7 +85,7 @@ void B1SECS2ServerSession::recvHSMSMessage(const std::vector<uint8>& data)
             if (data.size() > headerSize)
                 recvHSMSData(sessionID, stream, function, wait, systemBytes, &data[headerSize], static_cast<uint32>(data.size() - headerSize), messageHeader);
             else
-                recvHSMSData(sessionID, stream, function, wait, systemBytes, NULL, 0, messageHeader);
+                recvHSMSData(sessionID, stream, function, wait, systemBytes, nullptr, 0, messageHeader);
         }
     }
 }

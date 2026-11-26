@@ -66,7 +66,7 @@ bool B1SECS2MessageReadable::readSECS2DataList(std::shared_ptr<B1SECS2DataLIST> 
         }
         --remains.back();
         auto data = readUnknownSECS2Data();
-        if (data == NULL) {
+        if (data == nullptr) {
             return false;
         }
         result->push_back(data);
@@ -80,7 +80,7 @@ bool B1SECS2MessageReadable::readSECS2DataList(std::shared_ptr<B1SECS2DataLIST> 
 std::shared_ptr<B1SECS2Data> B1SECS2MessageReadable::readUnknownSECS2Data()
 {
     std::shared_ptr<B1SECS2Data> data(B1SECS2Data::createFromUnknownFormat(_data, _dataLength, &_dataPos));
-    if (data == NULL) {
+    if (data == nullptr) {
         B1LOG("%s read_unknown_data failed", _messageName.cString());
     }
     return data;

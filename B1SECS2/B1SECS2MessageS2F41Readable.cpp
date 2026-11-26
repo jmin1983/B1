@@ -78,7 +78,7 @@ bool B1SECS2MessageS2F41Readable::implReadData()
             return false;
         }
         auto cpVal = readUnknownSECS2Data();
-        if (cpVal == NULL) {
+        if (cpVal == nullptr) {
             return false;
         }
         _cps.emplace(cpName, cpVal);

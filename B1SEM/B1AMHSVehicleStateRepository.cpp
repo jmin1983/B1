@@ -20,7 +20,7 @@ using namespace BnD;
 using namespace B1AMHSSEM;
 
 B1AMHSVehicleStateRepository::B1AMHSVehicleStateRepository()
-    : _listener(NULL)
+    : _listener(nullptr)
     , _lock(new B1Lock())
     , _states()
 {
@@ -217,7 +217,7 @@ bool B1AMHSVehicleStateRepository::initialize(const std::map<int32, std::pair<B1
 
 void B1AMHSVehicleStateRepository::finalize()
 {
-    _listener = NULL;
+    _listener = nullptr;
     _states.clear();
 }
 

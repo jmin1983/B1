@@ -18,15 +18,17 @@
  
 #include <B1Redic/B1RedisDirectClientReadSession.h>
 
+#include <atomic>
+
 namespace BnD {
     class B1RedisDirectClientPollingSession : public B1RedisDirectClientReadSession {
     public:
         B1RedisDirectClientPollingSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, B1RedisDirectClient* owner);
         virtual ~B1RedisDirectClientPollingSession();
     private:
-        bool _polling;
+        std::atomic<bool> _polling;
     protected:
-        bool _startPolling;
+        std::atomic<bool> _startPolling;
     protected:
         void implProcessConnected(bool firstConnectedProcess) final;
     protected:

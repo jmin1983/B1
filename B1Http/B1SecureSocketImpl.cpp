@@ -30,7 +30,7 @@ B1SecureSocketImpl::~B1SecureSocketImpl()
 void B1SecureSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::socket>* pAsioSocket)
 {
     auto asioSocket = pAsioSocket->get();
-    if (_secureStream != NULL || asioSocket == NULL) {
+    if (_secureStream != nullptr || asioSocket == nullptr) {
         assert(false);
         return;
     }
@@ -40,7 +40,7 @@ void B1SecureSocketImpl::implUpdateSocket(std::shared_ptr<boost::asio::ip::tcp::
 
 auto B1SecureSocketImpl::implRollbackSocket() -> std::shared_ptr<boost::asio::ip::tcp::socket>
 {
-    if (_secureStream == NULL) {
+    if (_secureStream == nullptr) {
         return std::shared_ptr<boost::asio::ip::tcp::socket>();
     }
     auto asioSocket = std::make_shared<boost::asio::ip::tcp::socket>(std::move(boost::beast::get_lowest_layer(*_secureStream).socket()));
@@ -107,5 +107,5 @@ bool B1SecureSocketImpl::implIsOpen() const
 
 boost::asio::ip::tcp::socket* B1SecureSocketImpl::implGetASIOSocket() const
 {
-    return _secureStream ? &boost::beast::get_lowest_layer(*_secureStream).socket() : NULL;
+    return _secureStream ? &boost::beast::get_lowest_layer(*_secureStream).socket() : nullptr;
 }

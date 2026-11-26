@@ -91,7 +91,7 @@ void B1BaseSessionManager::implLooperFunc()
 
 int32 B1BaseSessionManager::addSession(std::shared_ptr<B1BaseSocket> baseSocket, std::shared_ptr<B1BaseSession> session, int32 requestedHandleID)
 {
-    if (NULL == session) {
+    if (nullptr == session) {
         assert(false);
         return -1;
     }
@@ -118,7 +118,7 @@ int32 B1BaseSessionManager::addSession(std::shared_ptr<B1BaseSocket> baseSocket,
 
 bool B1BaseSessionManager::modifySession(B1BaseSocket* baseSocket, std::shared_ptr<B1BaseSession> session)
 {
-    if (baseSocket == NULL || session == NULL) {
+    if (baseSocket == nullptr || session == nullptr) {
         assert(false);
         return false;
     }
@@ -259,7 +259,7 @@ auto B1BaseSessionManager::getBaseSession(B1BaseSocket* baseSocket) const -> std
 
 auto B1BaseSessionManager::getBaseSessionByHandleID(int32 handleID) const -> std::shared_ptr<B1BaseSession>
 {
-    B1BaseSocket* baseSocket = NULL;
+    B1BaseSocket* baseSocket = nullptr;
     B1AutoLock al(_sessionsLock);
     {
         auto itr = _handleIDMap.find(handleID);

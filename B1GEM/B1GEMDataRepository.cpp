@@ -83,7 +83,7 @@ B1GEMEventRepository::RESULT B1GEMDataRepository::changeEquipmentConstants(const
     bool result = ecs.empty() != true;
     for (const auto& ecsPair : ecs) {
         auto ec = _variableRepository->findEquipmentConstant(ecsPair.first);
-        if (ec == NULL || ec->modifyValue(ecsPair.second.data()) != true) {
+        if (ec == nullptr || ec->modifyValue(ecsPair.second.data()) != true) {
             result = false;     //  fail if at least one ECID does not exist or failed.
         }
     }
@@ -186,7 +186,7 @@ bool B1GEMDataRepository::getEventReportData(const B1SECS2DataCEID& ceID, const 
                                              std::map<B1SECS2DataRPTID, std::list<B1SECS2DataV> >* result)
 {
     auto evt = _eventRepository->findEvent(ceID);
-    if (evt == NULL) {
+    if (evt == nullptr) {
         B1LOG("find event failed: [%s]", ceID->toString().cString());
         //assert(false);
         return false;

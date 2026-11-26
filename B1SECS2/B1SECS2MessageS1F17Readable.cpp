@@ -15,7 +15,7 @@
 using namespace BnD;
 
 B1SECS2MessageS1F17Readable::B1SECS2MessageS1F17Readable(bool wait, const uint8* data, uint32 dataLength)
-    : B1SECS2MessageReadable(wait, 1, 17, "recvMessageS1F17", data, dataLength, NULL)
+    : B1SECS2MessageReadable(wait, 1, 17, "recvMessageS1F17", data, dataLength, nullptr)
 {
 }
 

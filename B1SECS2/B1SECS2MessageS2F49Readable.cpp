@@ -90,7 +90,7 @@ bool B1SECS2MessageS2F49Readable::implReadData()
             return false;
         }
         B1SECS2DataCEPVAL cepVal(readUnknownSECS2Data());
-        if (cepVal.data() == NULL) {
+        if (cepVal.data() == nullptr) {
             return false;
         }
         if (cepVal->isFormatList()) {

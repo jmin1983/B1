@@ -49,12 +49,12 @@ B1PerformanceProfiler::~B1PerformanceProfiler()
 int64 B1PerformanceProfiler::readCurrentSystemStatus(const char* filePath, const char* keyword) const
 {
     FILE* file = fopen(filePath, "r");
-    if (NULL == file) {
+    if (nullptr == file) {
         return 0;
     }
     int64 result = 0;
     char line[128] = {0};
-    while (fgets(line, 128, file) != NULL) {
+    while (fgets(line, 128, file) != nullptr) {
         if (strncmp(line, keyword, strlen(keyword)) == 0) {
             result = parseMemoryLineForLinux(line);
             break;
@@ -91,7 +91,7 @@ float64 B1PerformanceProfiler::getUsageCPU()
     uint64 cpuTotalUser(0), cpuTotalUserLow(0), cpuTotalSys(0), cpuTotalIdle(0);
     {
         FILE* file = fopen("/proc/stat", "r");
-        if (NULL == file) {
+        if (nullptr == file) {
             return -1;
         }
         if (0 == fscanf(file, "cpu %llu %llu %llu %llu", &cpuTotalUser, &cpuTotalUserLow, &cpuTotalSys, &cpuTotalIdle)) {
@@ -197,7 +197,7 @@ bool B1PerformanceProfiler::initialize()
 #else
     {
         FILE* file = fopen("/proc/stat", "r");
-        if (NULL == file) {
+        if (nullptr == file) {
             return false;
         }
         if (0 == fscanf(file, "cpu %llu %llu %llu %llu", &_cpuLastTotalUser, &_cpuLastTotalUserLow, &_cpuLastTotalSys, &_cpuLastTotalIdle)) {

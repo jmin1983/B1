@@ -16,6 +16,8 @@
 #pragma once
 #endif
 
+#include <atomic>
+
 namespace BnD {
     class B1BaseReadWriteImpl;
     class B1BaseSocket;
@@ -35,11 +37,11 @@ namespace BnD {
             STATUS_DISCONNECTING,
         };
     private:
-        bool _firstConnectedProcess;
+        std::atomic<bool> _firstConnectedProcess;
         B1BaseSocket* _baseSocket;
-        int32 _disconnectingReason;
-        bool _wasConnected;
-        STATUS _connectionStatus;
+        std::atomic<int32> _disconnectingReason;
+        std::atomic<bool> _wasConnected;
+        std::atomic<STATUS> _connectionStatus;
     protected:
         int32 _sessionHandleID;
         std::shared_ptr<B1BaseReadWriteImpl> _readWriteImpl;

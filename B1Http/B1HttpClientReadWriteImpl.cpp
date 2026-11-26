@@ -72,24 +72,24 @@ void B1HttpClientReadWriteImpl::writeRequest(const B1String& target)
 {
     auto requestTarget = std::make_shared<std::string>(target.to_string());
     auto socketImpl = httpSocketImpl();
-    if (NULL == socketImpl) {
+    if (nullptr == socketImpl) {
         return;
     }
     B1AutoLock al(*socketImpl->closeLock());   //  stream can not be cleaned up while using.
     auto stream = socketImpl->stream();
-    if (NULL == stream) {   //  cleaned up.
+    if (nullptr == stream) {   //  cleaned up.
         return;
     }
     //  beast stream is not thread-safe: start async_write in the io thread(same thread as async_read).
     boost::asio::post(stream->get_executor(), [this, requestTarget]() {
         auto socketImplInIO = httpSocketImpl();
-        if (NULL == socketImplInIO) {
+        if (nullptr == socketImplInIO) {
             return;
         }
         const B1String host = peerAddress();    //  before locking(peerAddress() also locks).
         B1AutoLock alInIO(*socketImplInIO->closeLock());
         auto streamInIO = socketImplInIO->stream();
-        if (NULL == streamInIO) {
+        if (nullptr == streamInIO) {
             return;
         }
         streamInIO->expires_after(std::chrono::seconds(10));

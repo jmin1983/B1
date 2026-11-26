@@ -53,7 +53,7 @@ bool B1SECS2MessageS2F14Readable::implReadData()
     _ecvs.reserve(list.count());
     for (uint32 i = 0; i < list.count(); ++i) {
         auto ecv = readUnknownSECS2Data();
-        if (ecv == NULL) {
+        if (ecv == nullptr) {
             return false;
         }
         _ecvs.push_back(ecv);

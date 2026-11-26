@@ -28,7 +28,7 @@ B1MailSender::~B1MailSender()
 
 bool B1MailSender::initialize(const B1String& serverAddress, uint16 serverPort)
 {
-    if (_smtpClient != NULL) {
+    if (_smtpClient != nullptr) {
         return false;
     }
     _smtpClient = std::make_shared<B1SMTPClient>();

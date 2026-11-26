@@ -196,7 +196,7 @@ bool B1SystemUtil::deleteDirectory(const B1String& path)
 #else
     struct dirent* result;
     DIR* dir = opendir(path.cString());
-    if (dir == NULL) {
+    if (dir == nullptr) {
         return false;
     }
     while (true) {
@@ -286,11 +286,11 @@ bool B1SystemUtil::copyFile(const B1String& dstPath, const B1String& srcPath, bo
     }
     char buf[1024];
     FILE* inF = fopen(srcPath.cString(), "rb");
-    if (inF == NULL) {
+    if (inF == nullptr) {
         return false;
     }
     FILE* outF = fopen(dstPath.cString(), "wb");
-    if (outF == NULL) {
+    if (outF == nullptr) {
         fclose(inF);
         return false;
     }
@@ -439,9 +439,9 @@ B1String B1SystemUtil::getSystemID()
     return B1String(info.szHwProfileGuid);
 #else
     FILE* file = fopen("/sys/class/dmi/id/product_uuid", "r");
-    if (NULL == file) {
+    if (nullptr == file) {
         file = fopen("/var/lib/dbus/machine-id", "r");
-        if (NULL == file) {
+        if (nullptr == file) {
             return "";
         }
     }
@@ -490,7 +490,7 @@ int B1SystemUtil::getProcessID(const B1String& processName)
 
     // Open the /proc directory
     DIR* dp = opendir("/proc");
-    if (dp != NULL) {
+    if (dp != nullptr) {
         // Enumerate all entries in directory until process found.
         struct dirent* dirp;
         while (pid < 0 && (dirp = readdir(dp))) {
@@ -802,7 +802,7 @@ bool B1SystemUtil::getLocalNetworkAddresses(std::list<B1String>* addresses)
     while (tmp != 0) {
         if (tmp->ifa_addr != 0 && tmp->ifa_addr->sa_family == AF_INET && (strcmp("lo", tmp->ifa_name) != 0 && (tmp->ifa_flags & (IFF_RUNNING)))) {
             char host[NI_MAXHOST];
-            if (getnameinfo(tmp->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == 0) {
+            if (getnameinfo(tmp->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, nullptr, 0, NI_NUMERICHOST) == 0) {
                 addresses->push_back(std::move(B1String(host)));
             }
         }

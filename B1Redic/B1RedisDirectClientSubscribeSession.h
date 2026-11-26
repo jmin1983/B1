@@ -16,6 +16,7 @@
 #pragma once
 #endif
  
+#include <B1Base/B1Lock.h>
 #include <B1Redic/B1RedisDirectClientSession.h>
 
 #include <set>
@@ -26,6 +27,7 @@ namespace BnD {
         B1RedisDirectClientSubscribeSession(B1ClientSocket* clientSocket, B1BaseClientSessionListener* listener, B1RedisDirectClient* owner);
         virtual ~B1RedisDirectClientSubscribeSession();
     protected:
+        B1Lock _subscribeChannelsLock;
         std::set<B1String> _subscribeChannels;
     protected:  //  B1RedisDirectClientSession
         void implOnRecvRedisArrays(const std::list<B1String>& strings) final;

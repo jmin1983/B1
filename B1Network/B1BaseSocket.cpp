@@ -17,7 +17,7 @@
 using namespace BnD;
 
 B1BaseSocket::B1BaseSocket()
-    : _impl(NULL)
+    : _impl(nullptr)
     , _asioSocket()
 {
 }
@@ -91,7 +91,7 @@ void B1BaseSocket::resetImpl()
         if (auto asioSocket = _impl->rollbackSocket()) {
             _asioSocket = asioSocket;
         }
-        _impl = NULL;
+        _impl = nullptr;
     }
 }
 
@@ -103,7 +103,7 @@ boost::asio::ip::tcp::socket* B1BaseSocket::asioSocket() const
     else if (_impl) {
         return _impl->getASIOSocket();
     }
-    return NULL;
+    return nullptr;
 }
 
 void B1BaseSocket::cleanUp()

@@ -19,7 +19,7 @@ using namespace B1SECS2Consts;
 
 B1SECS2DataBase::B1SECS2DataBase(INDEX index, const B1SECS2DataManager* manager) : _index(index), _data(manager->getNewData(index))
 {
-    assert(manager != NULL);
+    assert(manager != nullptr);
 }
 
 B1SECS2DataBase::B1SECS2DataBase(INDEX index, std::shared_ptr<B1SECS2Data> data) : _index(index), _data(data)

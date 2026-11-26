@@ -34,7 +34,7 @@ namespace BnD {
     bool testB1FileLog();
     void b1log(const B1String& string);
     void setLogger(B1FileLog* fileLogger, int32 serviceID);
-    void setLoggerCallback(b1log_callback_t callback, void* param = NULL);
+    void setLoggerCallback(b1log_callback_t callback, void* param = nullptr);
     void resetLogCallback();
     B1String loggerFileDirPath();
 }   //  !BnD

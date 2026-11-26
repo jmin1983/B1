@@ -20,7 +20,7 @@ using namespace BnD;
 using namespace B1AMHSSEM;
 
 B1AMHSPortStateRepository::B1AMHSPortStateRepository()
-    : _listener(NULL)
+    : _listener(nullptr)
     , _lock(new B1Lock())
     , _states()
 {
@@ -72,7 +72,7 @@ bool B1AMHSPortStateRepository::initialize(std::map<int32, B1AMHSSEM::PORT_STATE
 
 void B1AMHSPortStateRepository::finalize()
 {
-    _listener = NULL;
+    _listener = nullptr;
     _states.clear();
 }
 
